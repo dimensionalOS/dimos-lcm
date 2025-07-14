@@ -1,5 +1,5 @@
 """
-dimos_utils - Utility tools for dimensional robotics
+dimos-lcm - LCM messages for the dimensional operating system
 
 This package provides utility tools for dimensional robotics projects,
 including LCM-Foxglove bridge functionality and LCM message definitions.
