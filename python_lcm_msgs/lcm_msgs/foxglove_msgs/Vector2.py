@@ -9,7 +9,7 @@ import struct
 
 class Vector2(object):
 
-    msg_name = "foxglove_msgs.Vector2"
+    msg_name = "Vector2"
 
     __slots__ = ["x", "y"]
 

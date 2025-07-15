@@ -9,7 +9,7 @@ import struct
 
 class Int64(object):
 
-    msg_name = "std_msgs.Int64"
+    msg_name = "Int64"
 
     __slots__ = ["data"]
 

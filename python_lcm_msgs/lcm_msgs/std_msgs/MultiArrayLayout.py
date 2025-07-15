@@ -7,22 +7,22 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.std_msgs as std_msgs
-
+from . import *
+from .MultiArrayDimension import MultiArrayDimension
 class MultiArrayLayout(object):
 
-    msg_name = "std_msgs.MultiArrayLayout"
+    msg_name = "MultiArrayLayout"
 
     __slots__ = ["dim_length", "dim", "data_offset"]
 
-    __typenames__ = ["int32_t", "std_msgs.MultiArrayDimension", "int32_t"]
+    __typenames__ = ["int32_t", "MultiArrayDimension", "int32_t"]
 
     __dimensions__ = [None, ["dim_length"], None]
 
     def __init__(self, dim_length=0, dim=[], data_offset=0):
         # LCM Type: int32_t
         self.dim_length = dim_length
-        # LCM Type: std_msgs.MultiArrayDimension[dim_length]
+        # LCM Type: MultiArrayDimension[dim_length]
         self.dim = dim
         # LCM Type: int32_t
         self.data_offset = data_offset
@@ -36,7 +36,7 @@ class MultiArrayLayout(object):
     def _encode_one(self, buf):
         buf.write(struct.pack(">i", self.dim_length))
         for i0 in range(self.dim_length):
-            assert self.dim[i0]._get_packed_fingerprint() == std_msgs.MultiArrayDimension._get_packed_fingerprint()
+            assert self.dim[i0]._get_packed_fingerprint() == MultiArrayDimension._get_packed_fingerprint()
             self.dim[i0]._encode_one(buf)
         buf.write(struct.pack(">i", self.data_offset))
 
@@ -56,7 +56,7 @@ class MultiArrayLayout(object):
         self.dim_length = struct.unpack(">i", buf.read(4))[0]
         self.dim = []
         for i0 in range(self.dim_length):
-            self.dim.append(std_msgs.MultiArrayDimension._decode_one(buf))
+            self.dim.append(MultiArrayDimension._decode_one(buf))
         self.data_offset = struct.unpack(">i", buf.read(4))[0]
         return self
 
@@ -64,7 +64,7 @@ class MultiArrayLayout(object):
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0xbf4b5363481d321+ std_msgs.MultiArrayDimension._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0xbf4b5363481d321+ MultiArrayDimension._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

@@ -7,21 +7,20 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.geometry_msgs as geometry_msgs
-
-import lcm_msgs.foxglove_msgs as foxglove_msgs
-
+from lcm_msgs import geometry_msgs
+from . import *
+from .Color import Color
 class CylinderPrimitive(object):
 
-    msg_name = "foxglove_msgs.CylinderPrimitive"
+    msg_name = "CylinderPrimitive"
 
     __slots__ = ["pose", "size", "bottom_scale", "top_scale", "color"]
 
-    __typenames__ = ["geometry_msgs.Pose", "geometry_msgs.Vector3", "double", "double", "foxglove_msgs.Color"]
+    __typenames__ = ["geometry_msgs.Pose", "geometry_msgs.Vector3", "double", "double", "Color"]
 
     __dimensions__ = [None, None, None, None, None]
 
-    def __init__(self, pose=geometry_msgs.Pose(), size=geometry_msgs.Vector3(), bottom_scale=0.0, top_scale=0.0, color=foxglove_msgs.Color()):
+    def __init__(self, pose=geometry_msgs.Pose(), size=geometry_msgs.Vector3(), bottom_scale=0.0, top_scale=0.0, color=Color()):
         # LCM Type: geometry_msgs.Pose
         self.pose = pose
         # LCM Type: geometry_msgs.Vector3
@@ -30,7 +29,7 @@ class CylinderPrimitive(object):
         self.bottom_scale = bottom_scale
         # LCM Type: double
         self.top_scale = top_scale
-        # LCM Type: foxglove_msgs.Color
+        # LCM Type: Color
         self.color = color
 
     def encode(self):
@@ -45,7 +44,7 @@ class CylinderPrimitive(object):
         assert self.size._get_packed_fingerprint() == geometry_msgs.Vector3._get_packed_fingerprint()
         self.size._encode_one(buf)
         buf.write(struct.pack(">dd", self.bottom_scale, self.top_scale))
-        assert self.color._get_packed_fingerprint() == foxglove_msgs.Color._get_packed_fingerprint()
+        assert self.color._get_packed_fingerprint() == Color._get_packed_fingerprint()
         self.color._encode_one(buf)
 
     @classmethod
@@ -64,14 +63,14 @@ class CylinderPrimitive(object):
         self.pose = geometry_msgs.Pose._decode_one(buf)
         self.size = geometry_msgs.Vector3._decode_one(buf)
         self.bottom_scale, self.top_scale = struct.unpack(">dd", buf.read(16))
-        self.color = foxglove_msgs.Color._decode_one(buf)
+        self.color = Color._decode_one(buf)
         return self
 
     @classmethod
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0xa52103034bfe0bac+ geometry_msgs.Pose._get_hash_recursive(newparents)+ geometry_msgs.Vector3._get_hash_recursive(newparents)+ foxglove_msgs.Color._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0xa52103034bfe0bac+ geometry_msgs.Pose._get_hash_recursive(newparents)+ geometry_msgs.Vector3._get_hash_recursive(newparents)+ Color._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

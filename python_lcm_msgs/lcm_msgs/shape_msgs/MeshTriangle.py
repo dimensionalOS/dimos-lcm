@@ -9,7 +9,7 @@ import struct
 
 class MeshTriangle(object):
 
-    msg_name = "shape_msgs.MeshTriangle"
+    msg_name = "MeshTriangle"
 
     __slots__ = ["vertex_indices"]
 

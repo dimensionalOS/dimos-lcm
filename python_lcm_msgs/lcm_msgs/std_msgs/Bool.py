@@ -9,7 +9,7 @@ import struct
 
 class Bool(object):
 
-    msg_name = "std_msgs.Bool"
+    msg_name = "Bool"
 
     __slots__ = ["data"]
 

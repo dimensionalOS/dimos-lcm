@@ -7,20 +7,20 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.geometry_msgs as geometry_msgs
-
+from . import *
+from .Accel import Accel
 class AccelWithCovariance(object):
 
-    msg_name = "geometry_msgs.AccelWithCovariance"
+    msg_name = "AccelWithCovariance"
 
     __slots__ = ["accel", "covariance"]
 
-    __typenames__ = ["geometry_msgs.Accel", "double"]
+    __typenames__ = ["Accel", "double"]
 
     __dimensions__ = [None, [36]]
 
-    def __init__(self, accel=geometry_msgs.Accel(), covariance=[ 0.0 for dim0 in range(36) ]):
-        # LCM Type: geometry_msgs.Accel
+    def __init__(self, accel=Accel(), covariance=[ 0.0 for dim0 in range(36) ]):
+        # LCM Type: Accel
         self.accel = accel
         # LCM Type: double[36]
         self.covariance = covariance
@@ -32,7 +32,7 @@ class AccelWithCovariance(object):
         return buf.getvalue()
 
     def _encode_one(self, buf):
-        assert self.accel._get_packed_fingerprint() == geometry_msgs.Accel._get_packed_fingerprint()
+        assert self.accel._get_packed_fingerprint() == Accel._get_packed_fingerprint()
         self.accel._encode_one(buf)
         buf.write(struct.pack('>36d', *self.covariance[:36]))
 
@@ -49,7 +49,7 @@ class AccelWithCovariance(object):
     @classmethod
     def _decode_one(cls, buf):
         self = AccelWithCovariance()
-        self.accel = geometry_msgs.Accel._decode_one(buf)
+        self.accel = Accel._decode_one(buf)
         self.covariance = struct.unpack('>36d', buf.read(288))
         return self
 
@@ -57,7 +57,7 @@ class AccelWithCovariance(object):
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0x545f576dfe97951d+ geometry_msgs.Accel._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0x545f576dfe97951d+ Accel._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

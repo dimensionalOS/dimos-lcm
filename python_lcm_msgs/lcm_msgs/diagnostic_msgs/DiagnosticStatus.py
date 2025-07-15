@@ -7,15 +7,15 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.diagnostic_msgs as diagnostic_msgs
-
+from . import *
+from .KeyValue import KeyValue
 class DiagnosticStatus(object):
 
-    msg_name = "diagnostic_msgs.DiagnosticStatus"
+    msg_name = "DiagnosticStatus"
 
     __slots__ = ["values_length", "level", "name", "message", "hardware_id", "values"]
 
-    __typenames__ = ["int32_t", "int8_t", "string", "string", "string", "diagnostic_msgs.KeyValue"]
+    __typenames__ = ["int32_t", "int8_t", "string", "string", "string", "KeyValue"]
 
     __dimensions__ = [None, None, None, None, None, ["values_length"]]
 
@@ -35,7 +35,7 @@ class DiagnosticStatus(object):
         self.message = message
         # LCM Type: string
         self.hardware_id = hardware_id
-        # LCM Type: diagnostic_msgs.KeyValue[values_length]
+        # LCM Type: KeyValue[values_length]
         self.values = values
 
     def encode(self):
@@ -59,7 +59,7 @@ class DiagnosticStatus(object):
         buf.write(__hardware_id_encoded)
         buf.write(b"\0")
         for i0 in range(self.values_length):
-            assert self.values[i0]._get_packed_fingerprint() == diagnostic_msgs.KeyValue._get_packed_fingerprint()
+            assert self.values[i0]._get_packed_fingerprint() == KeyValue._get_packed_fingerprint()
             self.values[i0]._encode_one(buf)
 
     @classmethod
@@ -84,14 +84,14 @@ class DiagnosticStatus(object):
         self.hardware_id = buf.read(__hardware_id_len)[:-1].decode('utf-8', 'replace')
         self.values = []
         for i0 in range(self.values_length):
-            self.values.append(diagnostic_msgs.KeyValue._decode_one(buf))
+            self.values.append(KeyValue._decode_one(buf))
         return self
 
     @classmethod
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0x3e3fb00c69778dfb+ diagnostic_msgs.KeyValue._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0x3e3fb00c69778dfb+ KeyValue._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

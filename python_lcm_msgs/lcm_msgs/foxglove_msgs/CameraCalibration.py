@@ -7,11 +7,10 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.builtin_interfaces as builtin_interfaces
-
+from lcm_msgs import builtin_interfaces
 class CameraCalibration(object):
 
-    msg_name = "foxglove_msgs.CameraCalibration"
+    msg_name = "CameraCalibration"
 
     __slots__ = ["d_length", "timestamp", "frame_id", "width", "height", "distortion_model", "d", "k", "r", "p"]
 

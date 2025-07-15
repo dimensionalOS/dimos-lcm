@@ -9,7 +9,7 @@ import struct
 
 class Float64(object):
 
-    msg_name = "std_msgs.Float64"
+    msg_name = "Float64"
 
     __slots__ = ["data"]
 

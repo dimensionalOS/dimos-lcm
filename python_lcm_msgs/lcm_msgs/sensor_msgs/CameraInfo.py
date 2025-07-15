@@ -7,21 +7,20 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.std_msgs as std_msgs
-
-import lcm_msgs.sensor_msgs as sensor_msgs
-
+from lcm_msgs import std_msgs
+from . import *
+from .RegionOfInterest import RegionOfInterest
 class CameraInfo(object):
 
-    msg_name = "sensor_msgs.CameraInfo"
+    msg_name = "CameraInfo"
 
     __slots__ = ["D_length", "header", "height", "width", "distortion_model", "D", "K", "R", "P", "binning_x", "binning_y", "roi"]
 
-    __typenames__ = ["int32_t", "std_msgs.Header", "int32_t", "int32_t", "string", "double", "double", "double", "double", "int32_t", "int32_t", "sensor_msgs.RegionOfInterest"]
+    __typenames__ = ["int32_t", "std_msgs.Header", "int32_t", "int32_t", "string", "double", "double", "double", "double", "int32_t", "int32_t", "RegionOfInterest"]
 
     __dimensions__ = [None, None, None, None, None, ["D_length"], [9], [9], [12], None, None, None]
 
-    def __init__(self, D_length=0, header=std_msgs.Header(), height=0, width=0, distortion_model="", D=[], K=[ 0.0 for dim0 in range(9) ], R=[ 0.0 for dim0 in range(9) ], P=[ 0.0 for dim0 in range(12) ], binning_x=0, binning_y=0, roi=sensor_msgs.RegionOfInterest()):
+    def __init__(self, D_length=0, header=std_msgs.Header(), height=0, width=0, distortion_model="", D=[], K=[ 0.0 for dim0 in range(9) ], R=[ 0.0 for dim0 in range(9) ], P=[ 0.0 for dim0 in range(12) ], binning_x=0, binning_y=0, roi=RegionOfInterest()):
         # LCM Type: int32_t
         self.D_length = D_length
         # LCM Type: std_msgs.Header
@@ -44,7 +43,7 @@ class CameraInfo(object):
         self.binning_x = binning_x
         # LCM Type: int32_t
         self.binning_y = binning_y
-        # LCM Type: sensor_msgs.RegionOfInterest
+        # LCM Type: RegionOfInterest
         self.roi = roi
 
     def encode(self):
@@ -67,7 +66,7 @@ class CameraInfo(object):
         buf.write(struct.pack('>9d', *self.R[:9]))
         buf.write(struct.pack('>12d', *self.P[:12]))
         buf.write(struct.pack(">ii", self.binning_x, self.binning_y))
-        assert self.roi._get_packed_fingerprint() == sensor_msgs.RegionOfInterest._get_packed_fingerprint()
+        assert self.roi._get_packed_fingerprint() == RegionOfInterest._get_packed_fingerprint()
         self.roi._encode_one(buf)
 
     @classmethod
@@ -93,14 +92,14 @@ class CameraInfo(object):
         self.R = struct.unpack('>9d', buf.read(72))
         self.P = struct.unpack('>12d', buf.read(96))
         self.binning_x, self.binning_y = struct.unpack(">ii", buf.read(8))
-        self.roi = sensor_msgs.RegionOfInterest._decode_one(buf)
+        self.roi = RegionOfInterest._decode_one(buf)
         return self
 
     @classmethod
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0xb4ea6258bc6d0702+ std_msgs.Header._get_hash_recursive(newparents)+ sensor_msgs.RegionOfInterest._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0xb4ea6258bc6d0702+ std_msgs.Header._get_hash_recursive(newparents)+ RegionOfInterest._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

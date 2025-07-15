@@ -7,11 +7,10 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.geometry_msgs as geometry_msgs
-
+from lcm_msgs import geometry_msgs
 class TFMessage(object):
 
-    msg_name = "tf2_msgs.TFMessage"
+    msg_name = "TFMessage"
 
     __slots__ = ["transforms_length", "transforms"]
 

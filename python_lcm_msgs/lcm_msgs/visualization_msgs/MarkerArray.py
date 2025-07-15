@@ -7,22 +7,22 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.visualization_msgs as visualization_msgs
-
+from . import *
+from .Marker import Marker
 class MarkerArray(object):
 
-    msg_name = "visualization_msgs.MarkerArray"
+    msg_name = "MarkerArray"
 
     __slots__ = ["markers_length", "markers"]
 
-    __typenames__ = ["int32_t", "visualization_msgs.Marker"]
+    __typenames__ = ["int32_t", "Marker"]
 
     __dimensions__ = [None, ["markers_length"]]
 
     def __init__(self, markers_length=0, markers=[]):
         # LCM Type: int32_t
         self.markers_length = markers_length
-        # LCM Type: visualization_msgs.Marker[markers_length]
+        # LCM Type: Marker[markers_length]
         self.markers = markers
 
     def encode(self):
@@ -34,7 +34,7 @@ class MarkerArray(object):
     def _encode_one(self, buf):
         buf.write(struct.pack(">i", self.markers_length))
         for i0 in range(self.markers_length):
-            assert self.markers[i0]._get_packed_fingerprint() == visualization_msgs.Marker._get_packed_fingerprint()
+            assert self.markers[i0]._get_packed_fingerprint() == Marker._get_packed_fingerprint()
             self.markers[i0]._encode_one(buf)
 
     @classmethod
@@ -53,14 +53,14 @@ class MarkerArray(object):
         self.markers_length = struct.unpack(">i", buf.read(4))[0]
         self.markers = []
         for i0 in range(self.markers_length):
-            self.markers.append(visualization_msgs.Marker._decode_one(buf))
+            self.markers.append(Marker._decode_one(buf))
         return self
 
     @classmethod
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0xd9e3851dad1e0d9e+ visualization_msgs.Marker._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0xd9e3851dad1e0d9e+ Marker._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

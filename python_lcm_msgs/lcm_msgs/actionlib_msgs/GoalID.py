@@ -7,11 +7,10 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.std_msgs as std_msgs
-
+from lcm_msgs import std_msgs
 class GoalID(object):
 
-    msg_name = "actionlib_msgs.GoalID"
+    msg_name = "GoalID"
 
     __slots__ = ["stamp", "id"]
 

@@ -7,11 +7,10 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.builtin_interfaces as builtin_interfaces
-
+from lcm_msgs import builtin_interfaces
 class CompressedImage(object):
 
-    msg_name = "foxglove_msgs.CompressedImage"
+    msg_name = "CompressedImage"
 
     __slots__ = ["data_length", "timestamp", "frame_id", "data", "format"]
 

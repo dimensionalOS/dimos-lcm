@@ -7,13 +7,11 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.geometry_msgs as geometry_msgs
-
-import lcm_msgs.std_msgs as std_msgs
-
+from lcm_msgs import geometry_msgs
+from lcm_msgs import std_msgs
 class ImageMarker(object):
 
-    msg_name = "visualization_msgs.ImageMarker"
+    msg_name = "ImageMarker"
 
     __slots__ = ["points_length", "outline_colors_length", "header", "ns", "id", "type", "action", "position", "scale", "outline_color", "filled", "fill_color", "lifetime", "points", "outline_colors"]
 

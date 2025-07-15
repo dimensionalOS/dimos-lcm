@@ -9,7 +9,7 @@ import struct
 
 class Vector3(object):
 
-    msg_name = "geometry_msgs.Vector3"
+    msg_name = "Vector3"
 
     __slots__ = ["x", "y", "z"]
 

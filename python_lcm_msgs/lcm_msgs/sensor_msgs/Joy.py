@@ -7,11 +7,10 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.std_msgs as std_msgs
-
+from lcm_msgs import std_msgs
 class Joy(object):
 
-    msg_name = "sensor_msgs.Joy"
+    msg_name = "Joy"
 
     __slots__ = ["axes_length", "buttons_length", "header", "axes", "buttons"]
 

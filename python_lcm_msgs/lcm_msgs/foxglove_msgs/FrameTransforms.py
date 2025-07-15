@@ -7,22 +7,22 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.foxglove_msgs as foxglove_msgs
-
+from . import *
+from .FrameTransform import FrameTransform
 class FrameTransforms(object):
 
-    msg_name = "foxglove_msgs.FrameTransforms"
+    msg_name = "FrameTransforms"
 
     __slots__ = ["transforms_length", "transforms"]
 
-    __typenames__ = ["int32_t", "foxglove_msgs.FrameTransform"]
+    __typenames__ = ["int32_t", "FrameTransform"]
 
     __dimensions__ = [None, ["transforms_length"]]
 
     def __init__(self, transforms_length=0, transforms=[]):
         # LCM Type: int32_t
         self.transforms_length = transforms_length
-        # LCM Type: foxglove_msgs.FrameTransform[transforms_length]
+        # LCM Type: FrameTransform[transforms_length]
         self.transforms = transforms
 
     def encode(self):
@@ -34,7 +34,7 @@ class FrameTransforms(object):
     def _encode_one(self, buf):
         buf.write(struct.pack(">i", self.transforms_length))
         for i0 in range(self.transforms_length):
-            assert self.transforms[i0]._get_packed_fingerprint() == foxglove_msgs.FrameTransform._get_packed_fingerprint()
+            assert self.transforms[i0]._get_packed_fingerprint() == FrameTransform._get_packed_fingerprint()
             self.transforms[i0]._encode_one(buf)
 
     @classmethod
@@ -53,14 +53,14 @@ class FrameTransforms(object):
         self.transforms_length = struct.unpack(">i", buf.read(4))[0]
         self.transforms = []
         for i0 in range(self.transforms_length):
-            self.transforms.append(foxglove_msgs.FrameTransform._decode_one(buf))
+            self.transforms.append(FrameTransform._decode_one(buf))
         return self
 
     @classmethod
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0x37bc5cbce50a5ce2+ foxglove_msgs.FrameTransform._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0x37bc5cbce50a5ce2+ FrameTransform._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

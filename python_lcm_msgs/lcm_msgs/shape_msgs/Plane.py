@@ -9,7 +9,7 @@ import struct
 
 class Plane(object):
 
-    msg_name = "shape_msgs.Plane"
+    msg_name = "Plane"
 
     __slots__ = ["coef"]
 

@@ -7,19 +7,17 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.geometry_msgs as geometry_msgs
-
-import lcm_msgs.foxglove_msgs as foxglove_msgs
-
-import lcm_msgs.builtin_interfaces as builtin_interfaces
-
+from lcm_msgs import geometry_msgs
+from . import *
+from lcm_msgs import builtin_interfaces
+from .PackedElementField import PackedElementField
 class PointCloud(object):
 
-    msg_name = "foxglove_msgs.PointCloud"
+    msg_name = "PointCloud"
 
     __slots__ = ["fields_length", "data_length", "timestamp", "frame_id", "pose", "point_stride", "fields", "data"]
 
-    __typenames__ = ["int32_t", "int32_t", "builtin_interfaces.Time", "string", "geometry_msgs.Pose", "int32_t", "foxglove_msgs.PackedElementField", "byte"]
+    __typenames__ = ["int32_t", "int32_t", "builtin_interfaces.Time", "string", "geometry_msgs.Pose", "int32_t", "PackedElementField", "byte"]
 
     __dimensions__ = [None, None, None, None, None, None, ["fields_length"], ["data_length"]]
 
@@ -36,7 +34,7 @@ class PointCloud(object):
         self.pose = pose
         # LCM Type: int32_t
         self.point_stride = point_stride
-        # LCM Type: foxglove_msgs.PackedElementField[fields_length]
+        # LCM Type: PackedElementField[fields_length]
         self.fields = fields
         # LCM Type: byte[data_length]
         self.data = data
@@ -59,7 +57,7 @@ class PointCloud(object):
         self.pose._encode_one(buf)
         buf.write(struct.pack(">i", self.point_stride))
         for i0 in range(self.fields_length):
-            assert self.fields[i0]._get_packed_fingerprint() == foxglove_msgs.PackedElementField._get_packed_fingerprint()
+            assert self.fields[i0]._get_packed_fingerprint() == PackedElementField._get_packed_fingerprint()
             self.fields[i0]._encode_one(buf)
         buf.write(bytearray(self.data[:self.data_length]))
 
@@ -84,7 +82,7 @@ class PointCloud(object):
         self.point_stride = struct.unpack(">i", buf.read(4))[0]
         self.fields = []
         for i0 in range(self.fields_length):
-            self.fields.append(foxglove_msgs.PackedElementField._decode_one(buf))
+            self.fields.append(PackedElementField._decode_one(buf))
         self.data = buf.read(self.data_length)
         return self
 
@@ -92,7 +90,7 @@ class PointCloud(object):
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0x4f3713aa9b8dc878+ builtin_interfaces.Time._get_hash_recursive(newparents)+ geometry_msgs.Pose._get_hash_recursive(newparents)+ foxglove_msgs.PackedElementField._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0x4f3713aa9b8dc878+ builtin_interfaces.Time._get_hash_recursive(newparents)+ geometry_msgs.Pose._get_hash_recursive(newparents)+ PackedElementField._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

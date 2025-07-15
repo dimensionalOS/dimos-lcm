@@ -7,23 +7,22 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.geometry_msgs as geometry_msgs
-
-import lcm_msgs.foxglove_msgs as foxglove_msgs
-
-import lcm_msgs.builtin_interfaces as builtin_interfaces
-
+from lcm_msgs import geometry_msgs
+from . import *
+from lcm_msgs import builtin_interfaces
+from .Vector2 import Vector2
+from .PackedElementField import PackedElementField
 class Grid(object):
 
-    msg_name = "foxglove_msgs.Grid"
+    msg_name = "Grid"
 
     __slots__ = ["fields_length", "data_length", "timestamp", "frame_id", "pose", "column_count", "cell_size", "row_stride", "cell_stride", "fields", "data"]
 
-    __typenames__ = ["int32_t", "int32_t", "builtin_interfaces.Time", "string", "geometry_msgs.Pose", "int32_t", "foxglove_msgs.Vector2", "int32_t", "int32_t", "foxglove_msgs.PackedElementField", "byte"]
+    __typenames__ = ["int32_t", "int32_t", "builtin_interfaces.Time", "string", "geometry_msgs.Pose", "int32_t", "Vector2", "int32_t", "int32_t", "PackedElementField", "byte"]
 
     __dimensions__ = [None, None, None, None, None, None, None, None, None, ["fields_length"], ["data_length"]]
 
-    def __init__(self, fields_length=0, data_length=0, timestamp=builtin_interfaces.Time(), frame_id="", pose=geometry_msgs.Pose(), column_count=0, cell_size=foxglove_msgs.Vector2(), row_stride=0, cell_stride=0, fields=[], data=b""):
+    def __init__(self, fields_length=0, data_length=0, timestamp=builtin_interfaces.Time(), frame_id="", pose=geometry_msgs.Pose(), column_count=0, cell_size=Vector2(), row_stride=0, cell_stride=0, fields=[], data=b""):
         # LCM Type: int32_t
         self.fields_length = fields_length
         # LCM Type: int32_t
@@ -36,13 +35,13 @@ class Grid(object):
         self.pose = pose
         # LCM Type: int32_t
         self.column_count = column_count
-        # LCM Type: foxglove_msgs.Vector2
+        # LCM Type: Vector2
         self.cell_size = cell_size
         # LCM Type: int32_t
         self.row_stride = row_stride
         # LCM Type: int32_t
         self.cell_stride = cell_stride
-        # LCM Type: foxglove_msgs.PackedElementField[fields_length]
+        # LCM Type: PackedElementField[fields_length]
         self.fields = fields
         # LCM Type: byte[data_length]
         self.data = data
@@ -64,11 +63,11 @@ class Grid(object):
         assert self.pose._get_packed_fingerprint() == geometry_msgs.Pose._get_packed_fingerprint()
         self.pose._encode_one(buf)
         buf.write(struct.pack(">i", self.column_count))
-        assert self.cell_size._get_packed_fingerprint() == foxglove_msgs.Vector2._get_packed_fingerprint()
+        assert self.cell_size._get_packed_fingerprint() == Vector2._get_packed_fingerprint()
         self.cell_size._encode_one(buf)
         buf.write(struct.pack(">ii", self.row_stride, self.cell_stride))
         for i0 in range(self.fields_length):
-            assert self.fields[i0]._get_packed_fingerprint() == foxglove_msgs.PackedElementField._get_packed_fingerprint()
+            assert self.fields[i0]._get_packed_fingerprint() == PackedElementField._get_packed_fingerprint()
             self.fields[i0]._encode_one(buf)
         buf.write(bytearray(self.data[:self.data_length]))
 
@@ -91,11 +90,11 @@ class Grid(object):
         self.frame_id = buf.read(__frame_id_len)[:-1].decode('utf-8', 'replace')
         self.pose = geometry_msgs.Pose._decode_one(buf)
         self.column_count = struct.unpack(">i", buf.read(4))[0]
-        self.cell_size = foxglove_msgs.Vector2._decode_one(buf)
+        self.cell_size = Vector2._decode_one(buf)
         self.row_stride, self.cell_stride = struct.unpack(">ii", buf.read(8))
         self.fields = []
         for i0 in range(self.fields_length):
-            self.fields.append(foxglove_msgs.PackedElementField._decode_one(buf))
+            self.fields.append(PackedElementField._decode_one(buf))
         self.data = buf.read(self.data_length)
         return self
 
@@ -103,7 +102,7 @@ class Grid(object):
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0x91f7114ed51a5321+ builtin_interfaces.Time._get_hash_recursive(newparents)+ geometry_msgs.Pose._get_hash_recursive(newparents)+ foxglove_msgs.Vector2._get_hash_recursive(newparents)+ foxglove_msgs.PackedElementField._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0x91f7114ed51a5321+ builtin_interfaces.Time._get_hash_recursive(newparents)+ geometry_msgs.Pose._get_hash_recursive(newparents)+ Vector2._get_hash_recursive(newparents)+ PackedElementField._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

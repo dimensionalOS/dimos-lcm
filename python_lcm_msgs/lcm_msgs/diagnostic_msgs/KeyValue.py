@@ -9,7 +9,7 @@ import struct
 
 class KeyValue(object):
 
-    msg_name = "diagnostic_msgs.KeyValue"
+    msg_name = "KeyValue"
 
     __slots__ = ["key", "value"]
 

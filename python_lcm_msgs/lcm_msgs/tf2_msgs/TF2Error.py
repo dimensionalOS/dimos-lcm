@@ -9,7 +9,7 @@ import struct
 
 class TF2Error(object):
 
-    msg_name = "tf2_msgs.TF2Error"
+    msg_name = "TF2Error"
 
     __slots__ = ["error", "error_string"]
 

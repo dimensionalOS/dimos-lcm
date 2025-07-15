@@ -9,7 +9,7 @@ import struct
 
 class Float32(object):
 
-    msg_name = "std_msgs.Float32"
+    msg_name = "Float32"
 
     __slots__ = ["data"]
 

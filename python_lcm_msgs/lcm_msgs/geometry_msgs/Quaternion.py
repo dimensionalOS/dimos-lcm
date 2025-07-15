@@ -9,7 +9,7 @@ import struct
 
 class Quaternion(object):
 
-    msg_name = "geometry_msgs.Quaternion"
+    msg_name = "Quaternion"
 
     __slots__ = ["x", "y", "z", "w"]
 

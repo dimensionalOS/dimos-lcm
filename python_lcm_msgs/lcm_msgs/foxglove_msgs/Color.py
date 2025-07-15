@@ -9,7 +9,7 @@ import struct
 
 class Color(object):
 
-    msg_name = "foxglove_msgs.Color"
+    msg_name = "Color"
 
     __slots__ = ["r", "g", "b", "a"]
 

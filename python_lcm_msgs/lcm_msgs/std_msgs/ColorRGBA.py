@@ -9,7 +9,7 @@ import struct
 
 class ColorRGBA(object):
 
-    msg_name = "std_msgs.ColorRGBA"
+    msg_name = "ColorRGBA"
 
     __slots__ = ["r", "g", "b", "a"]
 

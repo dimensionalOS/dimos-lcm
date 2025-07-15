@@ -7,17 +7,16 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.actionlib_msgs as actionlib_msgs
-
-import lcm_msgs.std_msgs as std_msgs
-
+from . import *
+from lcm_msgs import std_msgs
+from .GoalStatus import GoalStatus
 class GoalStatusArray(object):
 
-    msg_name = "actionlib_msgs.GoalStatusArray"
+    msg_name = "GoalStatusArray"
 
     __slots__ = ["status_list_length", "header", "status_list"]
 
-    __typenames__ = ["int32_t", "std_msgs.Header", "actionlib_msgs.GoalStatus"]
+    __typenames__ = ["int32_t", "std_msgs.Header", "GoalStatus"]
 
     __dimensions__ = [None, None, ["status_list_length"]]
 
@@ -26,7 +25,7 @@ class GoalStatusArray(object):
         self.status_list_length = status_list_length
         # LCM Type: std_msgs.Header
         self.header = header
-        # LCM Type: actionlib_msgs.GoalStatus[status_list_length]
+        # LCM Type: GoalStatus[status_list_length]
         self.status_list = status_list
 
     def encode(self):
@@ -40,7 +39,7 @@ class GoalStatusArray(object):
         assert self.header._get_packed_fingerprint() == std_msgs.Header._get_packed_fingerprint()
         self.header._encode_one(buf)
         for i0 in range(self.status_list_length):
-            assert self.status_list[i0]._get_packed_fingerprint() == actionlib_msgs.GoalStatus._get_packed_fingerprint()
+            assert self.status_list[i0]._get_packed_fingerprint() == GoalStatus._get_packed_fingerprint()
             self.status_list[i0]._encode_one(buf)
 
     @classmethod
@@ -60,14 +59,14 @@ class GoalStatusArray(object):
         self.header = std_msgs.Header._decode_one(buf)
         self.status_list = []
         for i0 in range(self.status_list_length):
-            self.status_list.append(actionlib_msgs.GoalStatus._decode_one(buf))
+            self.status_list.append(GoalStatus._decode_one(buf))
         return self
 
     @classmethod
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0xf5c35b2e7eed0fa+ std_msgs.Header._get_hash_recursive(newparents)+ actionlib_msgs.GoalStatus._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0xf5c35b2e7eed0fa+ std_msgs.Header._get_hash_recursive(newparents)+ GoalStatus._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

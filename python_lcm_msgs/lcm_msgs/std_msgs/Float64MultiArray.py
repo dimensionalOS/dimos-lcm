@@ -7,22 +7,22 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.std_msgs as std_msgs
-
+from . import *
+from .MultiArrayLayout import MultiArrayLayout
 class Float64MultiArray(object):
 
-    msg_name = "std_msgs.Float64MultiArray"
+    msg_name = "Float64MultiArray"
 
     __slots__ = ["data_length", "layout", "data"]
 
-    __typenames__ = ["int32_t", "std_msgs.MultiArrayLayout", "double"]
+    __typenames__ = ["int32_t", "MultiArrayLayout", "double"]
 
     __dimensions__ = [None, None, ["data_length"]]
 
-    def __init__(self, data_length=0, layout=std_msgs.MultiArrayLayout(), data=[]):
+    def __init__(self, data_length=0, layout=MultiArrayLayout(), data=[]):
         # LCM Type: int32_t
         self.data_length = data_length
-        # LCM Type: std_msgs.MultiArrayLayout
+        # LCM Type: MultiArrayLayout
         self.layout = layout
         # LCM Type: double[data_length]
         self.data = data
@@ -35,7 +35,7 @@ class Float64MultiArray(object):
 
     def _encode_one(self, buf):
         buf.write(struct.pack(">i", self.data_length))
-        assert self.layout._get_packed_fingerprint() == std_msgs.MultiArrayLayout._get_packed_fingerprint()
+        assert self.layout._get_packed_fingerprint() == MultiArrayLayout._get_packed_fingerprint()
         self.layout._encode_one(buf)
         buf.write(struct.pack('>%dd' % self.data_length, *self.data[:self.data_length]))
 
@@ -53,7 +53,7 @@ class Float64MultiArray(object):
     def _decode_one(cls, buf):
         self = Float64MultiArray()
         self.data_length = struct.unpack(">i", buf.read(4))[0]
-        self.layout = std_msgs.MultiArrayLayout._decode_one(buf)
+        self.layout = MultiArrayLayout._decode_one(buf)
         self.data = struct.unpack('>%dd' % self.data_length, buf.read(self.data_length * 8))
         return self
 
@@ -61,7 +61,7 @@ class Float64MultiArray(object):
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0x45a3940b9d17e120+ std_msgs.MultiArrayLayout._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0x45a3940b9d17e120+ MultiArrayLayout._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

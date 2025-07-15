@@ -7,21 +7,20 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.geometry_msgs as geometry_msgs
-
-import lcm_msgs.foxglove_msgs as foxglove_msgs
-
+from lcm_msgs import geometry_msgs
+from . import *
+from .Color import Color
 class TextPrimitive(object):
 
-    msg_name = "foxglove_msgs.TextPrimitive"
+    msg_name = "TextPrimitive"
 
     __slots__ = ["pose", "billboard", "font_size", "scale_invariant", "color", "text"]
 
-    __typenames__ = ["geometry_msgs.Pose", "boolean", "double", "boolean", "foxglove_msgs.Color", "string"]
+    __typenames__ = ["geometry_msgs.Pose", "boolean", "double", "boolean", "Color", "string"]
 
     __dimensions__ = [None, None, None, None, None, None]
 
-    def __init__(self, pose=geometry_msgs.Pose(), billboard=False, font_size=0.0, scale_invariant=False, color=foxglove_msgs.Color(), text=""):
+    def __init__(self, pose=geometry_msgs.Pose(), billboard=False, font_size=0.0, scale_invariant=False, color=Color(), text=""):
         # LCM Type: geometry_msgs.Pose
         self.pose = pose
         # LCM Type: boolean
@@ -30,7 +29,7 @@ class TextPrimitive(object):
         self.font_size = font_size
         # LCM Type: boolean
         self.scale_invariant = scale_invariant
-        # LCM Type: foxglove_msgs.Color
+        # LCM Type: Color
         self.color = color
         # LCM Type: string
         self.text = text
@@ -45,7 +44,7 @@ class TextPrimitive(object):
         assert self.pose._get_packed_fingerprint() == geometry_msgs.Pose._get_packed_fingerprint()
         self.pose._encode_one(buf)
         buf.write(struct.pack(">bdb", self.billboard, self.font_size, self.scale_invariant))
-        assert self.color._get_packed_fingerprint() == foxglove_msgs.Color._get_packed_fingerprint()
+        assert self.color._get_packed_fingerprint() == Color._get_packed_fingerprint()
         self.color._encode_one(buf)
         __text_encoded = self.text.encode('utf-8')
         buf.write(struct.pack('>I', len(__text_encoded)+1))
@@ -69,7 +68,7 @@ class TextPrimitive(object):
         self.billboard = bool(struct.unpack('b', buf.read(1))[0])
         self.font_size = struct.unpack(">d", buf.read(8))[0]
         self.scale_invariant = bool(struct.unpack('b', buf.read(1))[0])
-        self.color = foxglove_msgs.Color._decode_one(buf)
+        self.color = Color._decode_one(buf)
         __text_len = struct.unpack('>I', buf.read(4))[0]
         self.text = buf.read(__text_len)[:-1].decode('utf-8', 'replace')
         return self
@@ -78,7 +77,7 @@ class TextPrimitive(object):
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0x3a761dcf4ac0e7c2+ geometry_msgs.Pose._get_hash_recursive(newparents)+ foxglove_msgs.Color._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0x3a761dcf4ac0e7c2+ geometry_msgs.Pose._get_hash_recursive(newparents)+ Color._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

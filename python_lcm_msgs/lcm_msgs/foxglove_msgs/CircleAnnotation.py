@@ -7,32 +7,32 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.foxglove_msgs as foxglove_msgs
-
-import lcm_msgs.builtin_interfaces as builtin_interfaces
-
+from . import *
+from lcm_msgs import builtin_interfaces
+from .Point2 import Point2
+from .Color import Color
 class CircleAnnotation(object):
 
-    msg_name = "foxglove_msgs.CircleAnnotation"
+    msg_name = "CircleAnnotation"
 
     __slots__ = ["timestamp", "position", "diameter", "thickness", "fill_color", "outline_color"]
 
-    __typenames__ = ["builtin_interfaces.Time", "foxglove_msgs.Point2", "double", "double", "foxglove_msgs.Color", "foxglove_msgs.Color"]
+    __typenames__ = ["builtin_interfaces.Time", "Point2", "double", "double", "Color", "Color"]
 
     __dimensions__ = [None, None, None, None, None, None]
 
-    def __init__(self, timestamp=builtin_interfaces.Time(), position=foxglove_msgs.Point2(), diameter=0.0, thickness=0.0, fill_color=foxglove_msgs.Color(), outline_color=foxglove_msgs.Color()):
+    def __init__(self, timestamp=builtin_interfaces.Time(), position=Point2(), diameter=0.0, thickness=0.0, fill_color=Color(), outline_color=Color()):
         # LCM Type: builtin_interfaces.Time
         self.timestamp = timestamp
-        # LCM Type: foxglove_msgs.Point2
+        # LCM Type: Point2
         self.position = position
         # LCM Type: double
         self.diameter = diameter
         # LCM Type: double
         self.thickness = thickness
-        # LCM Type: foxglove_msgs.Color
+        # LCM Type: Color
         self.fill_color = fill_color
-        # LCM Type: foxglove_msgs.Color
+        # LCM Type: Color
         self.outline_color = outline_color
 
     def encode(self):
@@ -44,12 +44,12 @@ class CircleAnnotation(object):
     def _encode_one(self, buf):
         assert self.timestamp._get_packed_fingerprint() == builtin_interfaces.Time._get_packed_fingerprint()
         self.timestamp._encode_one(buf)
-        assert self.position._get_packed_fingerprint() == foxglove_msgs.Point2._get_packed_fingerprint()
+        assert self.position._get_packed_fingerprint() == Point2._get_packed_fingerprint()
         self.position._encode_one(buf)
         buf.write(struct.pack(">dd", self.diameter, self.thickness))
-        assert self.fill_color._get_packed_fingerprint() == foxglove_msgs.Color._get_packed_fingerprint()
+        assert self.fill_color._get_packed_fingerprint() == Color._get_packed_fingerprint()
         self.fill_color._encode_one(buf)
-        assert self.outline_color._get_packed_fingerprint() == foxglove_msgs.Color._get_packed_fingerprint()
+        assert self.outline_color._get_packed_fingerprint() == Color._get_packed_fingerprint()
         self.outline_color._encode_one(buf)
 
     @classmethod
@@ -66,17 +66,17 @@ class CircleAnnotation(object):
     def _decode_one(cls, buf):
         self = CircleAnnotation()
         self.timestamp = builtin_interfaces.Time._decode_one(buf)
-        self.position = foxglove_msgs.Point2._decode_one(buf)
+        self.position = Point2._decode_one(buf)
         self.diameter, self.thickness = struct.unpack(">dd", buf.read(16))
-        self.fill_color = foxglove_msgs.Color._decode_one(buf)
-        self.outline_color = foxglove_msgs.Color._decode_one(buf)
+        self.fill_color = Color._decode_one(buf)
+        self.outline_color = Color._decode_one(buf)
         return self
 
     @classmethod
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0x5a3219098258887c+ builtin_interfaces.Time._get_hash_recursive(newparents)+ foxglove_msgs.Point2._get_hash_recursive(newparents)+ foxglove_msgs.Color._get_hash_recursive(newparents)+ foxglove_msgs.Color._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0x5a3219098258887c+ builtin_interfaces.Time._get_hash_recursive(newparents)+ Point2._get_hash_recursive(newparents)+ Color._get_hash_recursive(newparents)+ Color._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

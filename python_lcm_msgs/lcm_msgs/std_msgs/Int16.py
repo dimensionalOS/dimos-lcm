@@ -9,7 +9,7 @@ import struct
 
 class Int16(object):
 
-    msg_name = "std_msgs.Int16"
+    msg_name = "Int16"
 
     __slots__ = ["data"]
 

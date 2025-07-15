@@ -7,20 +7,20 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.geometry_msgs as geometry_msgs
-
+from . import *
+from .Pose import Pose
 class PoseWithCovariance(object):
 
-    msg_name = "geometry_msgs.PoseWithCovariance"
+    msg_name = "PoseWithCovariance"
 
     __slots__ = ["pose", "covariance"]
 
-    __typenames__ = ["geometry_msgs.Pose", "double"]
+    __typenames__ = ["Pose", "double"]
 
     __dimensions__ = [None, [36]]
 
-    def __init__(self, pose=geometry_msgs.Pose(), covariance=[ 0.0 for dim0 in range(36) ]):
-        # LCM Type: geometry_msgs.Pose
+    def __init__(self, pose=Pose(), covariance=[ 0.0 for dim0 in range(36) ]):
+        # LCM Type: Pose
         self.pose = pose
         # LCM Type: double[36]
         self.covariance = covariance
@@ -32,7 +32,7 @@ class PoseWithCovariance(object):
         return buf.getvalue()
 
     def _encode_one(self, buf):
-        assert self.pose._get_packed_fingerprint() == geometry_msgs.Pose._get_packed_fingerprint()
+        assert self.pose._get_packed_fingerprint() == Pose._get_packed_fingerprint()
         self.pose._encode_one(buf)
         buf.write(struct.pack('>36d', *self.covariance[:36]))
 
@@ -49,7 +49,7 @@ class PoseWithCovariance(object):
     @classmethod
     def _decode_one(cls, buf):
         self = PoseWithCovariance()
-        self.pose = geometry_msgs.Pose._decode_one(buf)
+        self.pose = Pose._decode_one(buf)
         self.covariance = struct.unpack('>36d', buf.read(288))
         return self
 
@@ -57,7 +57,7 @@ class PoseWithCovariance(object):
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0x42dbdfaa69371237+ geometry_msgs.Pose._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0x42dbdfaa69371237+ Pose._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

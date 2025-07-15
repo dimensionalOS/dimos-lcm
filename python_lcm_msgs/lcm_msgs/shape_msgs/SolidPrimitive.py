@@ -9,7 +9,7 @@ import struct
 
 class SolidPrimitive(object):
 
-    msg_name = "shape_msgs.SolidPrimitive"
+    msg_name = "SolidPrimitive"
 
     __slots__ = ["dimensions_length", "type", "dimensions"]
 

@@ -9,7 +9,7 @@ import struct
 
 class JoyFeedback(object):
 
-    msg_name = "sensor_msgs.JoyFeedback"
+    msg_name = "JoyFeedback"
 
     __slots__ = ["type", "id", "intensity"]
 

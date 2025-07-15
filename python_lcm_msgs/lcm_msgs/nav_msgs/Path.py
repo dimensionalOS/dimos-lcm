@@ -7,13 +7,11 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.geometry_msgs as geometry_msgs
-
-import lcm_msgs.std_msgs as std_msgs
-
+from lcm_msgs import geometry_msgs
+from lcm_msgs import std_msgs
 class Path(object):
 
-    msg_name = "nav_msgs.Path"
+    msg_name = "Path"
 
     __slots__ = ["poses_length", "header", "poses"]
 

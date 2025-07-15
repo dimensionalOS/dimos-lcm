@@ -7,17 +7,16 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.geometry_msgs as geometry_msgs
-
-import lcm_msgs.foxglove_msgs as foxglove_msgs
-
+from lcm_msgs import geometry_msgs
+from . import *
+from .Color import Color
 class LinePrimitive(object):
 
-    msg_name = "foxglove_msgs.LinePrimitive"
+    msg_name = "LinePrimitive"
 
     __slots__ = ["points_length", "colors_length", "indices_length", "type", "pose", "thickness", "scale_invariant", "points", "color", "colors", "indices"]
 
-    __typenames__ = ["int32_t", "int32_t", "int32_t", "byte", "geometry_msgs.Pose", "double", "boolean", "geometry_msgs.Point", "foxglove_msgs.Color", "foxglove_msgs.Color", "int32_t"]
+    __typenames__ = ["int32_t", "int32_t", "int32_t", "byte", "geometry_msgs.Pose", "double", "boolean", "geometry_msgs.Point", "Color", "Color", "int32_t"]
 
     __dimensions__ = [None, None, None, None, None, None, None, ["points_length"], None, ["colors_length"], ["indices_length"]]
 
@@ -25,7 +24,7 @@ class LinePrimitive(object):
     LINE_LOOP = 1
     LINE_LIST = 2
 
-    def __init__(self, points_length=0, colors_length=0, indices_length=0, type=0, pose=geometry_msgs.Pose(), thickness=0.0, scale_invariant=False, points=[], color=foxglove_msgs.Color(), colors=[], indices=[]):
+    def __init__(self, points_length=0, colors_length=0, indices_length=0, type=0, pose=geometry_msgs.Pose(), thickness=0.0, scale_invariant=False, points=[], color=Color(), colors=[], indices=[]):
         # LCM Type: int32_t
         self.points_length = points_length
         # LCM Type: int32_t
@@ -42,9 +41,9 @@ class LinePrimitive(object):
         self.scale_invariant = scale_invariant
         # LCM Type: geometry_msgs.Point[points_length]
         self.points = points
-        # LCM Type: foxglove_msgs.Color
+        # LCM Type: Color
         self.color = color
-        # LCM Type: foxglove_msgs.Color[colors_length]
+        # LCM Type: Color[colors_length]
         self.colors = colors
         # LCM Type: int32_t[indices_length]
         self.indices = indices
@@ -63,10 +62,10 @@ class LinePrimitive(object):
         for i0 in range(self.points_length):
             assert self.points[i0]._get_packed_fingerprint() == geometry_msgs.Point._get_packed_fingerprint()
             self.points[i0]._encode_one(buf)
-        assert self.color._get_packed_fingerprint() == foxglove_msgs.Color._get_packed_fingerprint()
+        assert self.color._get_packed_fingerprint() == Color._get_packed_fingerprint()
         self.color._encode_one(buf)
         for i0 in range(self.colors_length):
-            assert self.colors[i0]._get_packed_fingerprint() == foxglove_msgs.Color._get_packed_fingerprint()
+            assert self.colors[i0]._get_packed_fingerprint() == Color._get_packed_fingerprint()
             self.colors[i0]._encode_one(buf)
         buf.write(struct.pack('>%di' % self.indices_length, *self.indices[:self.indices_length]))
 
@@ -90,10 +89,10 @@ class LinePrimitive(object):
         self.points = []
         for i0 in range(self.points_length):
             self.points.append(geometry_msgs.Point._decode_one(buf))
-        self.color = foxglove_msgs.Color._decode_one(buf)
+        self.color = Color._decode_one(buf)
         self.colors = []
         for i0 in range(self.colors_length):
-            self.colors.append(foxglove_msgs.Color._decode_one(buf))
+            self.colors.append(Color._decode_one(buf))
         self.indices = struct.unpack('>%di' % self.indices_length, buf.read(self.indices_length * 4))
         return self
 
@@ -101,7 +100,7 @@ class LinePrimitive(object):
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0x3b39f8eb653b3cd3+ geometry_msgs.Pose._get_hash_recursive(newparents)+ geometry_msgs.Point._get_hash_recursive(newparents)+ foxglove_msgs.Color._get_hash_recursive(newparents)+ foxglove_msgs.Color._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0x3b39f8eb653b3cd3+ geometry_msgs.Pose._get_hash_recursive(newparents)+ geometry_msgs.Point._get_hash_recursive(newparents)+ Color._get_hash_recursive(newparents)+ Color._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

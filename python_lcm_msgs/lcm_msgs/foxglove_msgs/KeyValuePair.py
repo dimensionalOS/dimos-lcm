@@ -9,7 +9,7 @@ import struct
 
 class KeyValuePair(object):
 
-    msg_name = "foxglove_msgs.KeyValuePair"
+    msg_name = "KeyValuePair"
 
     __slots__ = ["key", "value"]
 

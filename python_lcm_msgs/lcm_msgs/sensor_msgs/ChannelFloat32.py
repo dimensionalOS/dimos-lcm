@@ -9,7 +9,7 @@ import struct
 
 class ChannelFloat32(object):
 
-    msg_name = "sensor_msgs.ChannelFloat32"
+    msg_name = "ChannelFloat32"
 
     __slots__ = ["values_length", "name", "values"]
 

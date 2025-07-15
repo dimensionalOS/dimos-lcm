@@ -7,13 +7,11 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.geometry_msgs as geometry_msgs
-
-import lcm_msgs.builtin_interfaces as builtin_interfaces
-
+from lcm_msgs import geometry_msgs
+from lcm_msgs import builtin_interfaces
 class LaserScan(object):
 
-    msg_name = "foxglove_msgs.LaserScan"
+    msg_name = "LaserScan"
 
     __slots__ = ["ranges_length", "intensities_length", "timestamp", "frame_id", "pose", "start_angle", "end_angle", "ranges", "intensities"]
 

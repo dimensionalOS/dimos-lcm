@@ -7,17 +7,16 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.shape_msgs as shape_msgs
-
-import lcm_msgs.geometry_msgs as geometry_msgs
-
+from . import *
+from lcm_msgs import geometry_msgs
+from .MeshTriangle import MeshTriangle
 class Mesh(object):
 
-    msg_name = "shape_msgs.Mesh"
+    msg_name = "Mesh"
 
     __slots__ = ["triangles_length", "vertices_length", "triangles", "vertices"]
 
-    __typenames__ = ["int32_t", "int32_t", "shape_msgs.MeshTriangle", "geometry_msgs.Point"]
+    __typenames__ = ["int32_t", "int32_t", "MeshTriangle", "geometry_msgs.Point"]
 
     __dimensions__ = [None, None, ["triangles_length"], ["vertices_length"]]
 
@@ -26,7 +25,7 @@ class Mesh(object):
         self.triangles_length = triangles_length
         # LCM Type: int32_t
         self.vertices_length = vertices_length
-        # LCM Type: shape_msgs.MeshTriangle[triangles_length]
+        # LCM Type: MeshTriangle[triangles_length]
         self.triangles = triangles
         # LCM Type: geometry_msgs.Point[vertices_length]
         self.vertices = vertices
@@ -40,7 +39,7 @@ class Mesh(object):
     def _encode_one(self, buf):
         buf.write(struct.pack(">ii", self.triangles_length, self.vertices_length))
         for i0 in range(self.triangles_length):
-            assert self.triangles[i0]._get_packed_fingerprint() == shape_msgs.MeshTriangle._get_packed_fingerprint()
+            assert self.triangles[i0]._get_packed_fingerprint() == MeshTriangle._get_packed_fingerprint()
             self.triangles[i0]._encode_one(buf)
         for i0 in range(self.vertices_length):
             assert self.vertices[i0]._get_packed_fingerprint() == geometry_msgs.Point._get_packed_fingerprint()
@@ -62,7 +61,7 @@ class Mesh(object):
         self.triangles_length, self.vertices_length = struct.unpack(">ii", buf.read(8))
         self.triangles = []
         for i0 in range(self.triangles_length):
-            self.triangles.append(shape_msgs.MeshTriangle._decode_one(buf))
+            self.triangles.append(MeshTriangle._decode_one(buf))
         self.vertices = []
         for i0 in range(self.vertices_length):
             self.vertices.append(geometry_msgs.Point._decode_one(buf))
@@ -72,7 +71,7 @@ class Mesh(object):
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0xdc739fb8d2f81ab9+ shape_msgs.MeshTriangle._get_hash_recursive(newparents)+ geometry_msgs.Point._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0xdc739fb8d2f81ab9+ MeshTriangle._get_hash_recursive(newparents)+ geometry_msgs.Point._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

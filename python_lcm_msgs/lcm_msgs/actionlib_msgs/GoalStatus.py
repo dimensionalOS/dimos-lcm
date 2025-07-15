@@ -7,15 +7,15 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.actionlib_msgs as actionlib_msgs
-
+from . import *
+from .GoalID import GoalID
 class GoalStatus(object):
 
-    msg_name = "actionlib_msgs.GoalStatus"
+    msg_name = "GoalStatus"
 
     __slots__ = ["goal_id", "status", "text"]
 
-    __typenames__ = ["actionlib_msgs.GoalID", "byte", "string"]
+    __typenames__ = ["GoalID", "byte", "string"]
 
     __dimensions__ = [None, None, None]
 
@@ -30,8 +30,8 @@ class GoalStatus(object):
     RECALLED = 8
     LOST = 9
 
-    def __init__(self, goal_id=actionlib_msgs.GoalID(), status=0, text=""):
-        # LCM Type: actionlib_msgs.GoalID
+    def __init__(self, goal_id=GoalID(), status=0, text=""):
+        # LCM Type: GoalID
         self.goal_id = goal_id
         # LCM Type: byte
         self.status = status
@@ -45,7 +45,7 @@ class GoalStatus(object):
         return buf.getvalue()
 
     def _encode_one(self, buf):
-        assert self.goal_id._get_packed_fingerprint() == actionlib_msgs.GoalID._get_packed_fingerprint()
+        assert self.goal_id._get_packed_fingerprint() == GoalID._get_packed_fingerprint()
         self.goal_id._encode_one(buf)
         buf.write(struct.pack(">B", self.status))
         __text_encoded = self.text.encode('utf-8')
@@ -66,7 +66,7 @@ class GoalStatus(object):
     @classmethod
     def _decode_one(cls, buf):
         self = GoalStatus()
-        self.goal_id = actionlib_msgs.GoalID._decode_one(buf)
+        self.goal_id = GoalID._decode_one(buf)
         self.status = struct.unpack(">B", buf.read(1))[0]
         __text_len = struct.unpack('>I', buf.read(4))[0]
         self.text = buf.read(__text_len)[:-1].decode('utf-8', 'replace')
@@ -76,7 +76,7 @@ class GoalStatus(object):
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0xc0b4e95febdcd994+ actionlib_msgs.GoalID._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0xc0b4e95febdcd994+ GoalID._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

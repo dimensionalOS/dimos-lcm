@@ -9,7 +9,7 @@ import struct
 
 class Char(object):
 
-    msg_name = "std_msgs.Char"
+    msg_name = "Char"
 
     __slots__ = ["data"]
 

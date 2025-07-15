@@ -9,7 +9,7 @@ import struct
 
 class Point2(object):
 
-    msg_name = "foxglove_msgs.Point2"
+    msg_name = "Point2"
 
     __slots__ = ["x", "y"]
 

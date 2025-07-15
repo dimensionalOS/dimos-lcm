@@ -7,22 +7,21 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import vision_msgs
-
-import lcm_msgs.geometry_msgs as geometry_msgs
-
+from . import *
+from lcm_msgs import geometry_msgs
+from .ObjectHypothesis import ObjectHypothesis
 class ObjectHypothesisWithPose(object):
 
-    msg_name = "vision_msgs.ObjectHypothesisWithPose"
+    msg_name = "ObjectHypothesisWithPose"
 
     __slots__ = ["hypothesis", "pose"]
 
-    __typenames__ = ["vision_msgs.ObjectHypothesis", "geometry_msgs.PoseWithCovariance"]
+    __typenames__ = ["ObjectHypothesis", "geometry_msgs.PoseWithCovariance"]
 
     __dimensions__ = [None, None]
 
-    def __init__(self, hypothesis=vision_msgs.ObjectHypothesis(), pose=geometry_msgs.PoseWithCovariance()):
-        # LCM Type: vision_msgs.ObjectHypothesis
+    def __init__(self, hypothesis=ObjectHypothesis(), pose=geometry_msgs.PoseWithCovariance()):
+        # LCM Type: ObjectHypothesis
         self.hypothesis = hypothesis
         # LCM Type: geometry_msgs.PoseWithCovariance
         self.pose = pose
@@ -34,7 +33,7 @@ class ObjectHypothesisWithPose(object):
         return buf.getvalue()
 
     def _encode_one(self, buf):
-        assert self.hypothesis._get_packed_fingerprint() == vision_msgs.ObjectHypothesis._get_packed_fingerprint()
+        assert self.hypothesis._get_packed_fingerprint() == ObjectHypothesis._get_packed_fingerprint()
         self.hypothesis._encode_one(buf)
         assert self.pose._get_packed_fingerprint() == geometry_msgs.PoseWithCovariance._get_packed_fingerprint()
         self.pose._encode_one(buf)
@@ -52,7 +51,7 @@ class ObjectHypothesisWithPose(object):
     @classmethod
     def _decode_one(cls, buf):
         self = ObjectHypothesisWithPose()
-        self.hypothesis = vision_msgs.ObjectHypothesis._decode_one(buf)
+        self.hypothesis = ObjectHypothesis._decode_one(buf)
         self.pose = geometry_msgs.PoseWithCovariance._decode_one(buf)
         return self
 
@@ -60,7 +59,7 @@ class ObjectHypothesisWithPose(object):
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0x65e1d44b451e8a8b+ vision_msgs.ObjectHypothesis._get_hash_recursive(newparents)+ geometry_msgs.PoseWithCovariance._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0x65e1d44b451e8a8b+ ObjectHypothesis._get_hash_recursive(newparents)+ geometry_msgs.PoseWithCovariance._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

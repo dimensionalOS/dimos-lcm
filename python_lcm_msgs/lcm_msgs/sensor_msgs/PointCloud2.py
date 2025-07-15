@@ -7,17 +7,16 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.std_msgs as std_msgs
-
-import lcm_msgs.sensor_msgs as sensor_msgs
-
+from lcm_msgs import std_msgs
+from . import *
+from .PointField import PointField
 class PointCloud2(object):
 
-    msg_name = "sensor_msgs.PointCloud2"
+    msg_name = "PointCloud2"
 
     __slots__ = ["fields_length", "data_length", "header", "height", "width", "fields", "is_bigendian", "point_step", "row_step", "data", "is_dense"]
 
-    __typenames__ = ["int32_t", "int32_t", "std_msgs.Header", "int32_t", "int32_t", "sensor_msgs.PointField", "boolean", "int32_t", "int32_t", "byte", "boolean"]
+    __typenames__ = ["int32_t", "int32_t", "std_msgs.Header", "int32_t", "int32_t", "PointField", "boolean", "int32_t", "int32_t", "byte", "boolean"]
 
     __dimensions__ = [None, None, None, None, None, ["fields_length"], None, None, None, ["data_length"], None]
 
@@ -32,7 +31,7 @@ class PointCloud2(object):
         self.height = height
         # LCM Type: int32_t
         self.width = width
-        # LCM Type: sensor_msgs.PointField[fields_length]
+        # LCM Type: PointField[fields_length]
         self.fields = fields
         # LCM Type: boolean
         self.is_bigendian = is_bigendian
@@ -57,7 +56,7 @@ class PointCloud2(object):
         self.header._encode_one(buf)
         buf.write(struct.pack(">ii", self.height, self.width))
         for i0 in range(self.fields_length):
-            assert self.fields[i0]._get_packed_fingerprint() == sensor_msgs.PointField._get_packed_fingerprint()
+            assert self.fields[i0]._get_packed_fingerprint() == PointField._get_packed_fingerprint()
             self.fields[i0]._encode_one(buf)
         buf.write(struct.pack(">bii", self.is_bigendian, self.point_step, self.row_step))
         buf.write(bytearray(self.data[:self.data_length]))
@@ -81,7 +80,7 @@ class PointCloud2(object):
         self.height, self.width = struct.unpack(">ii", buf.read(8))
         self.fields = []
         for i0 in range(self.fields_length):
-            self.fields.append(sensor_msgs.PointField._decode_one(buf))
+            self.fields.append(PointField._decode_one(buf))
         self.is_bigendian = bool(struct.unpack('b', buf.read(1))[0])
         self.point_step, self.row_step = struct.unpack(">ii", buf.read(8))
         self.data = buf.read(self.data_length)
@@ -92,7 +91,7 @@ class PointCloud2(object):
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0xeabe7183c4d74215+ std_msgs.Header._get_hash_recursive(newparents)+ sensor_msgs.PointField._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0xeabe7183c4d74215+ std_msgs.Header._get_hash_recursive(newparents)+ PointField._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

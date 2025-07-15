@@ -9,7 +9,7 @@ import struct
 
 class PackedElementField(object):
 
-    msg_name = "foxglove_msgs.PackedElementField"
+    msg_name = "PackedElementField"
 
     __slots__ = ["name", "offset", "type"]
 

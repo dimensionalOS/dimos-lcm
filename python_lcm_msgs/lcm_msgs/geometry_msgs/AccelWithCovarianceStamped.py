@@ -7,24 +7,23 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.geometry_msgs as geometry_msgs
-
-import lcm_msgs.std_msgs as std_msgs
-
+from . import *
+from lcm_msgs import std_msgs
+from .AccelWithCovariance import AccelWithCovariance
 class AccelWithCovarianceStamped(object):
 
-    msg_name = "geometry_msgs.AccelWithCovarianceStamped"
+    msg_name = "AccelWithCovarianceStamped"
 
     __slots__ = ["header", "accel"]
 
-    __typenames__ = ["std_msgs.Header", "geometry_msgs.AccelWithCovariance"]
+    __typenames__ = ["std_msgs.Header", "AccelWithCovariance"]
 
     __dimensions__ = [None, None]
 
-    def __init__(self, header=std_msgs.Header(), accel=geometry_msgs.AccelWithCovariance()):
+    def __init__(self, header=std_msgs.Header(), accel=AccelWithCovariance()):
         # LCM Type: std_msgs.Header
         self.header = header
-        # LCM Type: geometry_msgs.AccelWithCovariance
+        # LCM Type: AccelWithCovariance
         self.accel = accel
 
     def encode(self):
@@ -36,7 +35,7 @@ class AccelWithCovarianceStamped(object):
     def _encode_one(self, buf):
         assert self.header._get_packed_fingerprint() == std_msgs.Header._get_packed_fingerprint()
         self.header._encode_one(buf)
-        assert self.accel._get_packed_fingerprint() == geometry_msgs.AccelWithCovariance._get_packed_fingerprint()
+        assert self.accel._get_packed_fingerprint() == AccelWithCovariance._get_packed_fingerprint()
         self.accel._encode_one(buf)
 
     @classmethod
@@ -53,14 +52,14 @@ class AccelWithCovarianceStamped(object):
     def _decode_one(cls, buf):
         self = AccelWithCovarianceStamped()
         self.header = std_msgs.Header._decode_one(buf)
-        self.accel = geometry_msgs.AccelWithCovariance._decode_one(buf)
+        self.accel = AccelWithCovariance._decode_one(buf)
         return self
 
     @classmethod
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0xf012322e268930c2+ std_msgs.Header._get_hash_recursive(newparents)+ geometry_msgs.AccelWithCovariance._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0xf012322e268930c2+ std_msgs.Header._get_hash_recursive(newparents)+ AccelWithCovariance._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

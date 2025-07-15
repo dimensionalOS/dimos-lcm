@@ -7,22 +7,23 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.geometry_msgs as geometry_msgs
-
+from . import *
+from .Vector3 import Vector3
+from .Quaternion import Quaternion
 class Transform(object):
 
-    msg_name = "geometry_msgs.Transform"
+    msg_name = "Transform"
 
     __slots__ = ["translation", "rotation"]
 
-    __typenames__ = ["geometry_msgs.Vector3", "geometry_msgs.Quaternion"]
+    __typenames__ = ["Vector3", "Quaternion"]
 
     __dimensions__ = [None, None]
 
-    def __init__(self, translation=geometry_msgs.Vector3(), rotation=geometry_msgs.Quaternion()):
-        # LCM Type: geometry_msgs.Vector3
+    def __init__(self, translation=Vector3(), rotation=Quaternion()):
+        # LCM Type: Vector3
         self.translation = translation
-        # LCM Type: geometry_msgs.Quaternion
+        # LCM Type: Quaternion
         self.rotation = rotation
 
     def encode(self):
@@ -32,9 +33,9 @@ class Transform(object):
         return buf.getvalue()
 
     def _encode_one(self, buf):
-        assert self.translation._get_packed_fingerprint() == geometry_msgs.Vector3._get_packed_fingerprint()
+        assert self.translation._get_packed_fingerprint() == Vector3._get_packed_fingerprint()
         self.translation._encode_one(buf)
-        assert self.rotation._get_packed_fingerprint() == geometry_msgs.Quaternion._get_packed_fingerprint()
+        assert self.rotation._get_packed_fingerprint() == Quaternion._get_packed_fingerprint()
         self.rotation._encode_one(buf)
 
     @classmethod
@@ -50,15 +51,15 @@ class Transform(object):
     @classmethod
     def _decode_one(cls, buf):
         self = Transform()
-        self.translation = geometry_msgs.Vector3._decode_one(buf)
-        self.rotation = geometry_msgs.Quaternion._decode_one(buf)
+        self.translation = Vector3._decode_one(buf)
+        self.rotation = Quaternion._decode_one(buf)
         return self
 
     @classmethod
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0x1275bd1ccbdaf47f+ geometry_msgs.Vector3._get_hash_recursive(newparents)+ geometry_msgs.Quaternion._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0x1275bd1ccbdaf47f+ Vector3._get_hash_recursive(newparents)+ Quaternion._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

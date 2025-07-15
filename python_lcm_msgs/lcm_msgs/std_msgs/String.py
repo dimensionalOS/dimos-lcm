@@ -9,7 +9,7 @@ import struct
 
 class String(object):
 
-    msg_name = "std_msgs.String"
+    msg_name = "String"
 
     __slots__ = ["data"]
 

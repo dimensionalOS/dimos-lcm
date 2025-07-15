@@ -7,22 +7,22 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.std_msgs as std_msgs
-
+from . import *
+from .MultiArrayLayout import MultiArrayLayout
 class Int32MultiArray(object):
 
-    msg_name = "std_msgs.Int32MultiArray"
+    msg_name = "Int32MultiArray"
 
     __slots__ = ["data_length", "layout", "data"]
 
-    __typenames__ = ["int32_t", "std_msgs.MultiArrayLayout", "int32_t"]
+    __typenames__ = ["int32_t", "MultiArrayLayout", "int32_t"]
 
     __dimensions__ = [None, None, ["data_length"]]
 
-    def __init__(self, data_length=0, layout=std_msgs.MultiArrayLayout(), data=[]):
+    def __init__(self, data_length=0, layout=MultiArrayLayout(), data=[]):
         # LCM Type: int32_t
         self.data_length = data_length
-        # LCM Type: std_msgs.MultiArrayLayout
+        # LCM Type: MultiArrayLayout
         self.layout = layout
         # LCM Type: int32_t[data_length]
         self.data = data
@@ -35,7 +35,7 @@ class Int32MultiArray(object):
 
     def _encode_one(self, buf):
         buf.write(struct.pack(">i", self.data_length))
-        assert self.layout._get_packed_fingerprint() == std_msgs.MultiArrayLayout._get_packed_fingerprint()
+        assert self.layout._get_packed_fingerprint() == MultiArrayLayout._get_packed_fingerprint()
         self.layout._encode_one(buf)
         buf.write(struct.pack('>%di' % self.data_length, *self.data[:self.data_length]))
 
@@ -53,7 +53,7 @@ class Int32MultiArray(object):
     def _decode_one(cls, buf):
         self = Int32MultiArray()
         self.data_length = struct.unpack(">i", buf.read(4))[0]
-        self.layout = std_msgs.MultiArrayLayout._decode_one(buf)
+        self.layout = MultiArrayLayout._decode_one(buf)
         self.data = struct.unpack('>%di' % self.data_length, buf.read(self.data_length * 4))
         return self
 
@@ -61,7 +61,7 @@ class Int32MultiArray(object):
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0xaa51366c8f222486+ std_msgs.MultiArrayLayout._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0xaa51366c8f222486+ MultiArrayLayout._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

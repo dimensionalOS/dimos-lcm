@@ -7,17 +7,24 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.foxglove_msgs as foxglove_msgs
-
-import lcm_msgs.builtin_interfaces as builtin_interfaces
-
+from . import *
+from lcm_msgs import builtin_interfaces
+from .LinePrimitive import LinePrimitive
+from .SpherePrimitive import SpherePrimitive
+from .TriangleListPrimitive import TriangleListPrimitive
+from .CubePrimitive import CubePrimitive
+from .CylinderPrimitive import CylinderPrimitive
+from .TextPrimitive import TextPrimitive
+from .KeyValuePair import KeyValuePair
+from .ArrowPrimitive import ArrowPrimitive
+from .ModelPrimitive import ModelPrimitive
 class SceneEntity(object):
 
-    msg_name = "foxglove_msgs.SceneEntity"
+    msg_name = "SceneEntity"
 
     __slots__ = ["metadata_length", "arrows_length", "cubes_length", "spheres_length", "cylinders_length", "lines_length", "triangles_length", "texts_length", "models_length", "timestamp", "frame_id", "id", "lifetime", "frame_locked", "metadata", "arrows", "cubes", "spheres", "cylinders", "lines", "triangles", "texts", "models"]
 
-    __typenames__ = ["int32_t", "int32_t", "int32_t", "int32_t", "int32_t", "int32_t", "int32_t", "int32_t", "int32_t", "builtin_interfaces.Time", "string", "string", "builtin_interfaces.Duration", "boolean", "foxglove_msgs.KeyValuePair", "foxglove_msgs.ArrowPrimitive", "foxglove_msgs.CubePrimitive", "foxglove_msgs.SpherePrimitive", "foxglove_msgs.CylinderPrimitive", "foxglove_msgs.LinePrimitive", "foxglove_msgs.TriangleListPrimitive", "foxglove_msgs.TextPrimitive", "foxglove_msgs.ModelPrimitive"]
+    __typenames__ = ["int32_t", "int32_t", "int32_t", "int32_t", "int32_t", "int32_t", "int32_t", "int32_t", "int32_t", "builtin_interfaces.Time", "string", "string", "builtin_interfaces.Duration", "boolean", "KeyValuePair", "ArrowPrimitive", "CubePrimitive", "SpherePrimitive", "CylinderPrimitive", "LinePrimitive", "TriangleListPrimitive", "TextPrimitive", "ModelPrimitive"]
 
     __dimensions__ = [None, None, None, None, None, None, None, None, None, None, None, None, None, None, ["metadata_length"], ["arrows_length"], ["cubes_length"], ["spheres_length"], ["cylinders_length"], ["lines_length"], ["triangles_length"], ["texts_length"], ["models_length"]]
 
@@ -50,23 +57,23 @@ class SceneEntity(object):
         self.lifetime = lifetime
         # LCM Type: boolean
         self.frame_locked = frame_locked
-        # LCM Type: foxglove_msgs.KeyValuePair[metadata_length]
+        # LCM Type: KeyValuePair[metadata_length]
         self.metadata = metadata
-        # LCM Type: foxglove_msgs.ArrowPrimitive[arrows_length]
+        # LCM Type: ArrowPrimitive[arrows_length]
         self.arrows = arrows
-        # LCM Type: foxglove_msgs.CubePrimitive[cubes_length]
+        # LCM Type: CubePrimitive[cubes_length]
         self.cubes = cubes
-        # LCM Type: foxglove_msgs.SpherePrimitive[spheres_length]
+        # LCM Type: SpherePrimitive[spheres_length]
         self.spheres = spheres
-        # LCM Type: foxglove_msgs.CylinderPrimitive[cylinders_length]
+        # LCM Type: CylinderPrimitive[cylinders_length]
         self.cylinders = cylinders
-        # LCM Type: foxglove_msgs.LinePrimitive[lines_length]
+        # LCM Type: LinePrimitive[lines_length]
         self.lines = lines
-        # LCM Type: foxglove_msgs.TriangleListPrimitive[triangles_length]
+        # LCM Type: TriangleListPrimitive[triangles_length]
         self.triangles = triangles
-        # LCM Type: foxglove_msgs.TextPrimitive[texts_length]
+        # LCM Type: TextPrimitive[texts_length]
         self.texts = texts
-        # LCM Type: foxglove_msgs.ModelPrimitive[models_length]
+        # LCM Type: ModelPrimitive[models_length]
         self.models = models
 
     def encode(self):
@@ -91,31 +98,31 @@ class SceneEntity(object):
         self.lifetime._encode_one(buf)
         buf.write(struct.pack(">b", self.frame_locked))
         for i0 in range(self.metadata_length):
-            assert self.metadata[i0]._get_packed_fingerprint() == foxglove_msgs.KeyValuePair._get_packed_fingerprint()
+            assert self.metadata[i0]._get_packed_fingerprint() == KeyValuePair._get_packed_fingerprint()
             self.metadata[i0]._encode_one(buf)
         for i0 in range(self.arrows_length):
-            assert self.arrows[i0]._get_packed_fingerprint() == foxglove_msgs.ArrowPrimitive._get_packed_fingerprint()
+            assert self.arrows[i0]._get_packed_fingerprint() == ArrowPrimitive._get_packed_fingerprint()
             self.arrows[i0]._encode_one(buf)
         for i0 in range(self.cubes_length):
-            assert self.cubes[i0]._get_packed_fingerprint() == foxglove_msgs.CubePrimitive._get_packed_fingerprint()
+            assert self.cubes[i0]._get_packed_fingerprint() == CubePrimitive._get_packed_fingerprint()
             self.cubes[i0]._encode_one(buf)
         for i0 in range(self.spheres_length):
-            assert self.spheres[i0]._get_packed_fingerprint() == foxglove_msgs.SpherePrimitive._get_packed_fingerprint()
+            assert self.spheres[i0]._get_packed_fingerprint() == SpherePrimitive._get_packed_fingerprint()
             self.spheres[i0]._encode_one(buf)
         for i0 in range(self.cylinders_length):
-            assert self.cylinders[i0]._get_packed_fingerprint() == foxglove_msgs.CylinderPrimitive._get_packed_fingerprint()
+            assert self.cylinders[i0]._get_packed_fingerprint() == CylinderPrimitive._get_packed_fingerprint()
             self.cylinders[i0]._encode_one(buf)
         for i0 in range(self.lines_length):
-            assert self.lines[i0]._get_packed_fingerprint() == foxglove_msgs.LinePrimitive._get_packed_fingerprint()
+            assert self.lines[i0]._get_packed_fingerprint() == LinePrimitive._get_packed_fingerprint()
             self.lines[i0]._encode_one(buf)
         for i0 in range(self.triangles_length):
-            assert self.triangles[i0]._get_packed_fingerprint() == foxglove_msgs.TriangleListPrimitive._get_packed_fingerprint()
+            assert self.triangles[i0]._get_packed_fingerprint() == TriangleListPrimitive._get_packed_fingerprint()
             self.triangles[i0]._encode_one(buf)
         for i0 in range(self.texts_length):
-            assert self.texts[i0]._get_packed_fingerprint() == foxglove_msgs.TextPrimitive._get_packed_fingerprint()
+            assert self.texts[i0]._get_packed_fingerprint() == TextPrimitive._get_packed_fingerprint()
             self.texts[i0]._encode_one(buf)
         for i0 in range(self.models_length):
-            assert self.models[i0]._get_packed_fingerprint() == foxglove_msgs.ModelPrimitive._get_packed_fingerprint()
+            assert self.models[i0]._get_packed_fingerprint() == ModelPrimitive._get_packed_fingerprint()
             self.models[i0]._encode_one(buf)
 
     @classmethod
@@ -141,38 +148,38 @@ class SceneEntity(object):
         self.frame_locked = bool(struct.unpack('b', buf.read(1))[0])
         self.metadata = []
         for i0 in range(self.metadata_length):
-            self.metadata.append(foxglove_msgs.KeyValuePair._decode_one(buf))
+            self.metadata.append(KeyValuePair._decode_one(buf))
         self.arrows = []
         for i0 in range(self.arrows_length):
-            self.arrows.append(foxglove_msgs.ArrowPrimitive._decode_one(buf))
+            self.arrows.append(ArrowPrimitive._decode_one(buf))
         self.cubes = []
         for i0 in range(self.cubes_length):
-            self.cubes.append(foxglove_msgs.CubePrimitive._decode_one(buf))
+            self.cubes.append(CubePrimitive._decode_one(buf))
         self.spheres = []
         for i0 in range(self.spheres_length):
-            self.spheres.append(foxglove_msgs.SpherePrimitive._decode_one(buf))
+            self.spheres.append(SpherePrimitive._decode_one(buf))
         self.cylinders = []
         for i0 in range(self.cylinders_length):
-            self.cylinders.append(foxglove_msgs.CylinderPrimitive._decode_one(buf))
+            self.cylinders.append(CylinderPrimitive._decode_one(buf))
         self.lines = []
         for i0 in range(self.lines_length):
-            self.lines.append(foxglove_msgs.LinePrimitive._decode_one(buf))
+            self.lines.append(LinePrimitive._decode_one(buf))
         self.triangles = []
         for i0 in range(self.triangles_length):
-            self.triangles.append(foxglove_msgs.TriangleListPrimitive._decode_one(buf))
+            self.triangles.append(TriangleListPrimitive._decode_one(buf))
         self.texts = []
         for i0 in range(self.texts_length):
-            self.texts.append(foxglove_msgs.TextPrimitive._decode_one(buf))
+            self.texts.append(TextPrimitive._decode_one(buf))
         self.models = []
         for i0 in range(self.models_length):
-            self.models.append(foxglove_msgs.ModelPrimitive._decode_one(buf))
+            self.models.append(ModelPrimitive._decode_one(buf))
         return self
 
     @classmethod
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0xe143d679579f0ab0+ builtin_interfaces.Time._get_hash_recursive(newparents)+ builtin_interfaces.Duration._get_hash_recursive(newparents)+ foxglove_msgs.KeyValuePair._get_hash_recursive(newparents)+ foxglove_msgs.ArrowPrimitive._get_hash_recursive(newparents)+ foxglove_msgs.CubePrimitive._get_hash_recursive(newparents)+ foxglove_msgs.SpherePrimitive._get_hash_recursive(newparents)+ foxglove_msgs.CylinderPrimitive._get_hash_recursive(newparents)+ foxglove_msgs.LinePrimitive._get_hash_recursive(newparents)+ foxglove_msgs.TriangleListPrimitive._get_hash_recursive(newparents)+ foxglove_msgs.TextPrimitive._get_hash_recursive(newparents)+ foxglove_msgs.ModelPrimitive._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0xe143d679579f0ab0+ builtin_interfaces.Time._get_hash_recursive(newparents)+ builtin_interfaces.Duration._get_hash_recursive(newparents)+ KeyValuePair._get_hash_recursive(newparents)+ ArrowPrimitive._get_hash_recursive(newparents)+ CubePrimitive._get_hash_recursive(newparents)+ SpherePrimitive._get_hash_recursive(newparents)+ CylinderPrimitive._get_hash_recursive(newparents)+ LinePrimitive._get_hash_recursive(newparents)+ TriangleListPrimitive._get_hash_recursive(newparents)+ TextPrimitive._get_hash_recursive(newparents)+ ModelPrimitive._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

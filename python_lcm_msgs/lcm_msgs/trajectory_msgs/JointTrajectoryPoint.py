@@ -7,11 +7,10 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.std_msgs as std_msgs
-
+from lcm_msgs import std_msgs
 class JointTrajectoryPoint(object):
 
-    msg_name = "trajectory_msgs.JointTrajectoryPoint"
+    msg_name = "JointTrajectoryPoint"
 
     __slots__ = ["positions_length", "velocities_length", "accelerations_length", "effort_length", "positions", "velocities", "accelerations", "effort", "time_from_start"]
 

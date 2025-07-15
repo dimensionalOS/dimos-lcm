@@ -7,11 +7,10 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.builtin_interfaces as builtin_interfaces
-
+from lcm_msgs import builtin_interfaces
 class Log(object):
 
-    msg_name = "foxglove_msgs.Log"
+    msg_name = "Log"
 
     __slots__ = ["timestamp", "level", "message", "name", "file", "line"]
 

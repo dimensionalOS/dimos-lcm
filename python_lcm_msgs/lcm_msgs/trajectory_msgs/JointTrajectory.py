@@ -7,17 +7,16 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.trajectory_msgs as trajectory_msgs
-
-import lcm_msgs.std_msgs as std_msgs
-
+from . import *
+from lcm_msgs import std_msgs
+from .JointTrajectoryPoint import JointTrajectoryPoint
 class JointTrajectory(object):
 
-    msg_name = "trajectory_msgs.JointTrajectory"
+    msg_name = "JointTrajectory"
 
     __slots__ = ["joint_names_length", "points_length", "header", "joint_names", "points"]
 
-    __typenames__ = ["int32_t", "int32_t", "std_msgs.Header", "string", "trajectory_msgs.JointTrajectoryPoint"]
+    __typenames__ = ["int32_t", "int32_t", "std_msgs.Header", "string", "JointTrajectoryPoint"]
 
     __dimensions__ = [None, None, None, ["joint_names_length"], ["points_length"]]
 
@@ -30,7 +29,7 @@ class JointTrajectory(object):
         self.header = header
         # LCM Type: string[joint_names_length]
         self.joint_names = joint_names
-        # LCM Type: trajectory_msgs.JointTrajectoryPoint[points_length]
+        # LCM Type: JointTrajectoryPoint[points_length]
         self.points = points
 
     def encode(self):
@@ -49,7 +48,7 @@ class JointTrajectory(object):
             buf.write(__joint_names_encoded)
             buf.write(b"\0")
         for i0 in range(self.points_length):
-            assert self.points[i0]._get_packed_fingerprint() == trajectory_msgs.JointTrajectoryPoint._get_packed_fingerprint()
+            assert self.points[i0]._get_packed_fingerprint() == JointTrajectoryPoint._get_packed_fingerprint()
             self.points[i0]._encode_one(buf)
 
     @classmethod
@@ -73,14 +72,14 @@ class JointTrajectory(object):
             self.joint_names.append(buf.read(__joint_names_len)[:-1].decode('utf-8', 'replace'))
         self.points = []
         for i0 in range(self.points_length):
-            self.points.append(trajectory_msgs.JointTrajectoryPoint._decode_one(buf))
+            self.points.append(JointTrajectoryPoint._decode_one(buf))
         return self
 
     @classmethod
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0xf09db31afe774086+ std_msgs.Header._get_hash_recursive(newparents)+ trajectory_msgs.JointTrajectoryPoint._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0xf09db31afe774086+ std_msgs.Header._get_hash_recursive(newparents)+ JointTrajectoryPoint._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

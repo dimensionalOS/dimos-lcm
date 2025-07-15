@@ -9,7 +9,7 @@ import struct
 
 class PointField(object):
 
-    msg_name = "sensor_msgs.PointField"
+    msg_name = "PointField"
 
     __slots__ = ["name", "offset", "datatype", "count"]
 

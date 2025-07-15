@@ -7,17 +7,16 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.std_msgs as std_msgs
-
-import lcm_msgs.sensor_msgs as sensor_msgs
-
+from lcm_msgs import std_msgs
+from . import *
+from .LaserEcho import LaserEcho
 class MultiEchoLaserScan(object):
 
-    msg_name = "sensor_msgs.MultiEchoLaserScan"
+    msg_name = "MultiEchoLaserScan"
 
     __slots__ = ["ranges_length", "intensities_length", "header", "angle_min", "angle_max", "angle_increment", "time_increment", "scan_time", "range_min", "range_max", "ranges", "intensities"]
 
-    __typenames__ = ["int32_t", "int32_t", "std_msgs.Header", "float", "float", "float", "float", "float", "float", "float", "sensor_msgs.LaserEcho", "sensor_msgs.LaserEcho"]
+    __typenames__ = ["int32_t", "int32_t", "std_msgs.Header", "float", "float", "float", "float", "float", "float", "float", "LaserEcho", "LaserEcho"]
 
     __dimensions__ = [None, None, None, None, None, None, None, None, None, None, ["ranges_length"], ["intensities_length"]]
 
@@ -42,9 +41,9 @@ class MultiEchoLaserScan(object):
         self.range_min = range_min
         # LCM Type: float
         self.range_max = range_max
-        # LCM Type: sensor_msgs.LaserEcho[ranges_length]
+        # LCM Type: LaserEcho[ranges_length]
         self.ranges = ranges
-        # LCM Type: sensor_msgs.LaserEcho[intensities_length]
+        # LCM Type: LaserEcho[intensities_length]
         self.intensities = intensities
 
     def encode(self):
@@ -59,10 +58,10 @@ class MultiEchoLaserScan(object):
         self.header._encode_one(buf)
         buf.write(struct.pack(">fffffff", self.angle_min, self.angle_max, self.angle_increment, self.time_increment, self.scan_time, self.range_min, self.range_max))
         for i0 in range(self.ranges_length):
-            assert self.ranges[i0]._get_packed_fingerprint() == sensor_msgs.LaserEcho._get_packed_fingerprint()
+            assert self.ranges[i0]._get_packed_fingerprint() == LaserEcho._get_packed_fingerprint()
             self.ranges[i0]._encode_one(buf)
         for i0 in range(self.intensities_length):
-            assert self.intensities[i0]._get_packed_fingerprint() == sensor_msgs.LaserEcho._get_packed_fingerprint()
+            assert self.intensities[i0]._get_packed_fingerprint() == LaserEcho._get_packed_fingerprint()
             self.intensities[i0]._encode_one(buf)
 
     @classmethod
@@ -83,17 +82,17 @@ class MultiEchoLaserScan(object):
         self.angle_min, self.angle_max, self.angle_increment, self.time_increment, self.scan_time, self.range_min, self.range_max = struct.unpack(">fffffff", buf.read(28))
         self.ranges = []
         for i0 in range(self.ranges_length):
-            self.ranges.append(sensor_msgs.LaserEcho._decode_one(buf))
+            self.ranges.append(LaserEcho._decode_one(buf))
         self.intensities = []
         for i0 in range(self.intensities_length):
-            self.intensities.append(sensor_msgs.LaserEcho._decode_one(buf))
+            self.intensities.append(LaserEcho._decode_one(buf))
         return self
 
     @classmethod
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0xf02a6253849d18e2+ std_msgs.Header._get_hash_recursive(newparents)+ sensor_msgs.LaserEcho._get_hash_recursive(newparents)+ sensor_msgs.LaserEcho._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0xf02a6253849d18e2+ std_msgs.Header._get_hash_recursive(newparents)+ LaserEcho._get_hash_recursive(newparents)+ LaserEcho._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

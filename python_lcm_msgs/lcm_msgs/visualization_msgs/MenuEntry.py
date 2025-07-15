@@ -9,7 +9,7 @@ import struct
 
 class MenuEntry(object):
 
-    msg_name = "visualization_msgs.MenuEntry"
+    msg_name = "MenuEntry"
 
     __slots__ = ["id", "parent_id", "title", "command", "command_type"]
 

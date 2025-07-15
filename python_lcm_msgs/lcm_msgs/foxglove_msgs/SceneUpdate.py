@@ -7,15 +7,16 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.foxglove_msgs as foxglove_msgs
-
+from . import *
+from .SceneEntity import SceneEntity
+from .SceneEntityDeletion import SceneEntityDeletion
 class SceneUpdate(object):
 
-    msg_name = "foxglove_msgs.SceneUpdate"
+    msg_name = "SceneUpdate"
 
     __slots__ = ["deletions_length", "entities_length", "deletions", "entities"]
 
-    __typenames__ = ["int32_t", "int32_t", "foxglove_msgs.SceneEntityDeletion", "foxglove_msgs.SceneEntity"]
+    __typenames__ = ["int32_t", "int32_t", "SceneEntityDeletion", "SceneEntity"]
 
     __dimensions__ = [None, None, ["deletions_length"], ["entities_length"]]
 
@@ -24,9 +25,9 @@ class SceneUpdate(object):
         self.deletions_length = deletions_length
         # LCM Type: int32_t
         self.entities_length = entities_length
-        # LCM Type: foxglove_msgs.SceneEntityDeletion[deletions_length]
+        # LCM Type: SceneEntityDeletion[deletions_length]
         self.deletions = deletions
-        # LCM Type: foxglove_msgs.SceneEntity[entities_length]
+        # LCM Type: SceneEntity[entities_length]
         self.entities = entities
 
     def encode(self):
@@ -38,10 +39,10 @@ class SceneUpdate(object):
     def _encode_one(self, buf):
         buf.write(struct.pack(">ii", self.deletions_length, self.entities_length))
         for i0 in range(self.deletions_length):
-            assert self.deletions[i0]._get_packed_fingerprint() == foxglove_msgs.SceneEntityDeletion._get_packed_fingerprint()
+            assert self.deletions[i0]._get_packed_fingerprint() == SceneEntityDeletion._get_packed_fingerprint()
             self.deletions[i0]._encode_one(buf)
         for i0 in range(self.entities_length):
-            assert self.entities[i0]._get_packed_fingerprint() == foxglove_msgs.SceneEntity._get_packed_fingerprint()
+            assert self.entities[i0]._get_packed_fingerprint() == SceneEntity._get_packed_fingerprint()
             self.entities[i0]._encode_one(buf)
 
     @classmethod
@@ -60,17 +61,17 @@ class SceneUpdate(object):
         self.deletions_length, self.entities_length = struct.unpack(">ii", buf.read(8))
         self.deletions = []
         for i0 in range(self.deletions_length):
-            self.deletions.append(foxglove_msgs.SceneEntityDeletion._decode_one(buf))
+            self.deletions.append(SceneEntityDeletion._decode_one(buf))
         self.entities = []
         for i0 in range(self.entities_length):
-            self.entities.append(foxglove_msgs.SceneEntity._decode_one(buf))
+            self.entities.append(SceneEntity._decode_one(buf))
         return self
 
     @classmethod
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0x8f9d4ee9e2a92d31+ foxglove_msgs.SceneEntityDeletion._get_hash_recursive(newparents)+ foxglove_msgs.SceneEntity._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0x8f9d4ee9e2a92d31+ SceneEntityDeletion._get_hash_recursive(newparents)+ SceneEntity._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

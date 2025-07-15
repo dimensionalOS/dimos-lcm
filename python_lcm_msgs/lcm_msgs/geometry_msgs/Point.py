@@ -9,7 +9,7 @@ import struct
 
 class Point(object):
 
-    msg_name = "geometry_msgs.Point"
+    msg_name = "Point"
 
     __slots__ = ["x", "y", "z"]
 

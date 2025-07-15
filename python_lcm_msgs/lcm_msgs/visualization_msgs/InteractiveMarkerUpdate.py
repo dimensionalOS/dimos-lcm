@@ -7,15 +7,16 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.visualization_msgs as visualization_msgs
-
+from . import *
+from .InteractiveMarker import InteractiveMarker
+from .InteractiveMarkerPose import InteractiveMarkerPose
 class InteractiveMarkerUpdate(object):
 
-    msg_name = "visualization_msgs.InteractiveMarkerUpdate"
+    msg_name = "InteractiveMarkerUpdate"
 
     __slots__ = ["markers_length", "poses_length", "erases_length", "server_id", "seq_num", "type", "markers", "poses", "erases"]
 
-    __typenames__ = ["int32_t", "int32_t", "int32_t", "string", "int64_t", "byte", "visualization_msgs.InteractiveMarker", "visualization_msgs.InteractiveMarkerPose", "string"]
+    __typenames__ = ["int32_t", "int32_t", "int32_t", "string", "int64_t", "byte", "InteractiveMarker", "InteractiveMarkerPose", "string"]
 
     __dimensions__ = [None, None, None, None, None, None, ["markers_length"], ["poses_length"], ["erases_length"]]
 
@@ -35,9 +36,9 @@ class InteractiveMarkerUpdate(object):
         self.seq_num = seq_num
         # LCM Type: byte
         self.type = type
-        # LCM Type: visualization_msgs.InteractiveMarker[markers_length]
+        # LCM Type: InteractiveMarker[markers_length]
         self.markers = markers
-        # LCM Type: visualization_msgs.InteractiveMarkerPose[poses_length]
+        # LCM Type: InteractiveMarkerPose[poses_length]
         self.poses = poses
         # LCM Type: string[erases_length]
         self.erases = erases
@@ -56,10 +57,10 @@ class InteractiveMarkerUpdate(object):
         buf.write(b"\0")
         buf.write(struct.pack(">qB", self.seq_num, self.type))
         for i0 in range(self.markers_length):
-            assert self.markers[i0]._get_packed_fingerprint() == visualization_msgs.InteractiveMarker._get_packed_fingerprint()
+            assert self.markers[i0]._get_packed_fingerprint() == InteractiveMarker._get_packed_fingerprint()
             self.markers[i0]._encode_one(buf)
         for i0 in range(self.poses_length):
-            assert self.poses[i0]._get_packed_fingerprint() == visualization_msgs.InteractiveMarkerPose._get_packed_fingerprint()
+            assert self.poses[i0]._get_packed_fingerprint() == InteractiveMarkerPose._get_packed_fingerprint()
             self.poses[i0]._encode_one(buf)
         for i0 in range(self.erases_length):
             __erases_encoded = self.erases[i0].encode('utf-8')
@@ -86,10 +87,10 @@ class InteractiveMarkerUpdate(object):
         self.seq_num, self.type = struct.unpack(">qB", buf.read(9))
         self.markers = []
         for i0 in range(self.markers_length):
-            self.markers.append(visualization_msgs.InteractiveMarker._decode_one(buf))
+            self.markers.append(InteractiveMarker._decode_one(buf))
         self.poses = []
         for i0 in range(self.poses_length):
-            self.poses.append(visualization_msgs.InteractiveMarkerPose._decode_one(buf))
+            self.poses.append(InteractiveMarkerPose._decode_one(buf))
         self.erases = []
         for i0 in range(self.erases_length):
             __erases_len = struct.unpack('>I', buf.read(4))[0]
@@ -100,7 +101,7 @@ class InteractiveMarkerUpdate(object):
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0xf6eebb4c4a608b4c+ visualization_msgs.InteractiveMarker._get_hash_recursive(newparents)+ visualization_msgs.InteractiveMarkerPose._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0xf6eebb4c4a608b4c+ InteractiveMarker._get_hash_recursive(newparents)+ InteractiveMarkerPose._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

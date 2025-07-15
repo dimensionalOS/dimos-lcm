@@ -7,22 +7,22 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.geometry_msgs as geometry_msgs
-
+from . import *
+from .Vector3 import Vector3
 class Twist(object):
 
-    msg_name = "geometry_msgs.Twist"
+    msg_name = "Twist"
 
     __slots__ = ["linear", "angular"]
 
-    __typenames__ = ["geometry_msgs.Vector3", "geometry_msgs.Vector3"]
+    __typenames__ = ["Vector3", "Vector3"]
 
     __dimensions__ = [None, None]
 
-    def __init__(self, linear=geometry_msgs.Vector3(), angular=geometry_msgs.Vector3()):
-        # LCM Type: geometry_msgs.Vector3
+    def __init__(self, linear=Vector3(), angular=Vector3()):
+        # LCM Type: Vector3
         self.linear = linear
-        # LCM Type: geometry_msgs.Vector3
+        # LCM Type: Vector3
         self.angular = angular
 
     def encode(self):
@@ -32,9 +32,9 @@ class Twist(object):
         return buf.getvalue()
 
     def _encode_one(self, buf):
-        assert self.linear._get_packed_fingerprint() == geometry_msgs.Vector3._get_packed_fingerprint()
+        assert self.linear._get_packed_fingerprint() == Vector3._get_packed_fingerprint()
         self.linear._encode_one(buf)
-        assert self.angular._get_packed_fingerprint() == geometry_msgs.Vector3._get_packed_fingerprint()
+        assert self.angular._get_packed_fingerprint() == Vector3._get_packed_fingerprint()
         self.angular._encode_one(buf)
 
     @classmethod
@@ -50,15 +50,15 @@ class Twist(object):
     @classmethod
     def _decode_one(cls, buf):
         self = Twist()
-        self.linear = geometry_msgs.Vector3._decode_one(buf)
-        self.angular = geometry_msgs.Vector3._decode_one(buf)
+        self.linear = Vector3._decode_one(buf)
+        self.angular = Vector3._decode_one(buf)
         return self
 
     @classmethod
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0x3a4144772922add7+ geometry_msgs.Vector3._get_hash_recursive(newparents)+ geometry_msgs.Vector3._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0x3a4144772922add7+ Vector3._get_hash_recursive(newparents)+ Vector3._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

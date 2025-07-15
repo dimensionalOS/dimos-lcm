@@ -7,24 +7,23 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.geometry_msgs as geometry_msgs
-
-import lcm_msgs.std_msgs as std_msgs
-
+from . import *
+from lcm_msgs import std_msgs
+from .Polygon import Polygon
 class PolygonStamped(object):
 
-    msg_name = "geometry_msgs.PolygonStamped"
+    msg_name = "PolygonStamped"
 
     __slots__ = ["header", "polygon"]
 
-    __typenames__ = ["std_msgs.Header", "geometry_msgs.Polygon"]
+    __typenames__ = ["std_msgs.Header", "Polygon"]
 
     __dimensions__ = [None, None]
 
-    def __init__(self, header=std_msgs.Header(), polygon=geometry_msgs.Polygon()):
+    def __init__(self, header=std_msgs.Header(), polygon=Polygon()):
         # LCM Type: std_msgs.Header
         self.header = header
-        # LCM Type: geometry_msgs.Polygon
+        # LCM Type: Polygon
         self.polygon = polygon
 
     def encode(self):
@@ -36,7 +35,7 @@ class PolygonStamped(object):
     def _encode_one(self, buf):
         assert self.header._get_packed_fingerprint() == std_msgs.Header._get_packed_fingerprint()
         self.header._encode_one(buf)
-        assert self.polygon._get_packed_fingerprint() == geometry_msgs.Polygon._get_packed_fingerprint()
+        assert self.polygon._get_packed_fingerprint() == Polygon._get_packed_fingerprint()
         self.polygon._encode_one(buf)
 
     @classmethod
@@ -53,14 +52,14 @@ class PolygonStamped(object):
     def _decode_one(cls, buf):
         self = PolygonStamped()
         self.header = std_msgs.Header._decode_one(buf)
-        self.polygon = geometry_msgs.Polygon._decode_one(buf)
+        self.polygon = Polygon._decode_one(buf)
         return self
 
     @classmethod
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0x413a2f753630b1d7+ std_msgs.Header._get_hash_recursive(newparents)+ geometry_msgs.Polygon._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0x413a2f753630b1d7+ std_msgs.Header._get_hash_recursive(newparents)+ Polygon._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

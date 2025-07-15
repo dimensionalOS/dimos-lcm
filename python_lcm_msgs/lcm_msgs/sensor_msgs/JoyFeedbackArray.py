@@ -7,22 +7,22 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.sensor_msgs as sensor_msgs
-
+from . import *
+from .JoyFeedback import JoyFeedback
 class JoyFeedbackArray(object):
 
-    msg_name = "sensor_msgs.JoyFeedbackArray"
+    msg_name = "JoyFeedbackArray"
 
     __slots__ = ["array_length", "array"]
 
-    __typenames__ = ["int32_t", "sensor_msgs.JoyFeedback"]
+    __typenames__ = ["int32_t", "JoyFeedback"]
 
     __dimensions__ = [None, ["array_length"]]
 
     def __init__(self, array_length=0, array=[]):
         # LCM Type: int32_t
         self.array_length = array_length
-        # LCM Type: sensor_msgs.JoyFeedback[array_length]
+        # LCM Type: JoyFeedback[array_length]
         self.array = array
 
     def encode(self):
@@ -34,7 +34,7 @@ class JoyFeedbackArray(object):
     def _encode_one(self, buf):
         buf.write(struct.pack(">i", self.array_length))
         for i0 in range(self.array_length):
-            assert self.array[i0]._get_packed_fingerprint() == sensor_msgs.JoyFeedback._get_packed_fingerprint()
+            assert self.array[i0]._get_packed_fingerprint() == JoyFeedback._get_packed_fingerprint()
             self.array[i0]._encode_one(buf)
 
     @classmethod
@@ -53,14 +53,14 @@ class JoyFeedbackArray(object):
         self.array_length = struct.unpack(">i", buf.read(4))[0]
         self.array = []
         for i0 in range(self.array_length):
-            self.array.append(sensor_msgs.JoyFeedback._decode_one(buf))
+            self.array.append(JoyFeedback._decode_one(buf))
         return self
 
     @classmethod
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0xde2a78c20ffefa04+ sensor_msgs.JoyFeedback._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0xde2a78c20ffefa04+ JoyFeedback._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

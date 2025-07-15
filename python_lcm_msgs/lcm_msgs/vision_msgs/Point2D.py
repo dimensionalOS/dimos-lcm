@@ -9,7 +9,7 @@ import struct
 
 class Point2D(object):
 
-    msg_name = "vision_msgs.Point2D"
+    msg_name = "Point2D"
 
     __slots__ = ["x", "y"]
 

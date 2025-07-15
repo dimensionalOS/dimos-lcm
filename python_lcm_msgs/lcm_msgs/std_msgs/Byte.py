@@ -9,7 +9,7 @@ import struct
 
 class Byte(object):
 
-    msg_name = "std_msgs.Byte"
+    msg_name = "Byte"
 
     __slots__ = ["data"]
 

@@ -9,7 +9,7 @@ import struct
 
 class Empty(object):
 
-    msg_name = "std_msgs.Empty"
+    msg_name = "Empty"
 
     __slots__ = []
 

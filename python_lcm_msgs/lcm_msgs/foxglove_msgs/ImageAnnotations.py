@@ -7,15 +7,17 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-import lcm_msgs.foxglove_msgs as foxglove_msgs
-
+from . import *
+from .CircleAnnotation import CircleAnnotation
+from .TextAnnotation import TextAnnotation
+from .PointsAnnotation import PointsAnnotation
 class ImageAnnotations(object):
 
-    msg_name = "foxglove_msgs.ImageAnnotations"
+    msg_name = "ImageAnnotations"
 
     __slots__ = ["circles_length", "points_length", "texts_length", "circles", "points", "texts"]
 
-    __typenames__ = ["int32_t", "int32_t", "int32_t", "foxglove_msgs.CircleAnnotation", "foxglove_msgs.PointsAnnotation", "foxglove_msgs.TextAnnotation"]
+    __typenames__ = ["int32_t", "int32_t", "int32_t", "CircleAnnotation", "PointsAnnotation", "TextAnnotation"]
 
     __dimensions__ = [None, None, None, ["circles_length"], ["points_length"], ["texts_length"]]
 
@@ -26,11 +28,11 @@ class ImageAnnotations(object):
         self.points_length = points_length
         # LCM Type: int32_t
         self.texts_length = texts_length
-        # LCM Type: foxglove_msgs.CircleAnnotation[circles_length]
+        # LCM Type: CircleAnnotation[circles_length]
         self.circles = circles
-        # LCM Type: foxglove_msgs.PointsAnnotation[points_length]
+        # LCM Type: PointsAnnotation[points_length]
         self.points = points
-        # LCM Type: foxglove_msgs.TextAnnotation[texts_length]
+        # LCM Type: TextAnnotation[texts_length]
         self.texts = texts
 
     def encode(self):
@@ -42,13 +44,13 @@ class ImageAnnotations(object):
     def _encode_one(self, buf):
         buf.write(struct.pack(">iii", self.circles_length, self.points_length, self.texts_length))
         for i0 in range(self.circles_length):
-            assert self.circles[i0]._get_packed_fingerprint() == foxglove_msgs.CircleAnnotation._get_packed_fingerprint()
+            assert self.circles[i0]._get_packed_fingerprint() == CircleAnnotation._get_packed_fingerprint()
             self.circles[i0]._encode_one(buf)
         for i0 in range(self.points_length):
-            assert self.points[i0]._get_packed_fingerprint() == foxglove_msgs.PointsAnnotation._get_packed_fingerprint()
+            assert self.points[i0]._get_packed_fingerprint() == PointsAnnotation._get_packed_fingerprint()
             self.points[i0]._encode_one(buf)
         for i0 in range(self.texts_length):
-            assert self.texts[i0]._get_packed_fingerprint() == foxglove_msgs.TextAnnotation._get_packed_fingerprint()
+            assert self.texts[i0]._get_packed_fingerprint() == TextAnnotation._get_packed_fingerprint()
             self.texts[i0]._encode_one(buf)
 
     @classmethod
@@ -67,20 +69,20 @@ class ImageAnnotations(object):
         self.circles_length, self.points_length, self.texts_length = struct.unpack(">iii", buf.read(12))
         self.circles = []
         for i0 in range(self.circles_length):
-            self.circles.append(foxglove_msgs.CircleAnnotation._decode_one(buf))
+            self.circles.append(CircleAnnotation._decode_one(buf))
         self.points = []
         for i0 in range(self.points_length):
-            self.points.append(foxglove_msgs.PointsAnnotation._decode_one(buf))
+            self.points.append(PointsAnnotation._decode_one(buf))
         self.texts = []
         for i0 in range(self.texts_length):
-            self.texts.append(foxglove_msgs.TextAnnotation._decode_one(buf))
+            self.texts.append(TextAnnotation._decode_one(buf))
         return self
 
     @classmethod
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0x8b3a52c632c59b07+ foxglove_msgs.CircleAnnotation._get_hash_recursive(newparents)+ foxglove_msgs.PointsAnnotation._get_hash_recursive(newparents)+ foxglove_msgs.TextAnnotation._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0x8b3a52c632c59b07+ CircleAnnotation._get_hash_recursive(newparents)+ PointsAnnotation._get_hash_recursive(newparents)+ TextAnnotation._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None
