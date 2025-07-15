@@ -7,18 +7,19 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-from lcm_msgs import geometry_msgs
-from lcm_msgs import std_msgs
-from . import *
-from .InteractiveMarkerControl import InteractiveMarkerControl
-from .MenuEntry import MenuEntry
+import lcm_msgs.geometry_msgs as geometry_msgs
+
+import lcm_msgs.std_msgs as std_msgs
+
+import lcm_msgs.visualization_msgs as visualization_msgs
+
 class InteractiveMarker(object):
 
-    msg_name = "InteractiveMarker"
+    msg_name = "visualization_msgs.InteractiveMarker"
 
     __slots__ = ["menu_entries_length", "controls_length", "header", "pose", "name", "description", "scale", "menu_entries", "controls"]
 
-    __typenames__ = ["int32_t", "int32_t", "std_msgs.Header", "geometry_msgs.Pose", "string", "string", "float", "MenuEntry", "InteractiveMarkerControl"]
+    __typenames__ = ["int32_t", "int32_t", "std_msgs.Header", "geometry_msgs.Pose", "string", "string", "float", "visualization_msgs.MenuEntry", "visualization_msgs.InteractiveMarkerControl"]
 
     __dimensions__ = [None, None, None, None, None, None, None, ["menu_entries_length"], ["controls_length"]]
 
@@ -37,9 +38,9 @@ class InteractiveMarker(object):
         self.description = description
         # LCM Type: float
         self.scale = scale
-        # LCM Type: MenuEntry[menu_entries_length]
+        # LCM Type: visualization_msgs.MenuEntry[menu_entries_length]
         self.menu_entries = menu_entries
-        # LCM Type: InteractiveMarkerControl[controls_length]
+        # LCM Type: visualization_msgs.InteractiveMarkerControl[controls_length]
         self.controls = controls
 
     def encode(self):
@@ -64,10 +65,10 @@ class InteractiveMarker(object):
         buf.write(b"\0")
         buf.write(struct.pack(">f", self.scale))
         for i0 in range(self.menu_entries_length):
-            assert self.menu_entries[i0]._get_packed_fingerprint() == MenuEntry._get_packed_fingerprint()
+            assert self.menu_entries[i0]._get_packed_fingerprint() == visualization_msgs.MenuEntry._get_packed_fingerprint()
             self.menu_entries[i0]._encode_one(buf)
         for i0 in range(self.controls_length):
-            assert self.controls[i0]._get_packed_fingerprint() == InteractiveMarkerControl._get_packed_fingerprint()
+            assert self.controls[i0]._get_packed_fingerprint() == visualization_msgs.InteractiveMarkerControl._get_packed_fingerprint()
             self.controls[i0]._encode_one(buf)
 
     @classmethod
@@ -93,17 +94,17 @@ class InteractiveMarker(object):
         self.scale = struct.unpack(">f", buf.read(4))[0]
         self.menu_entries = []
         for i0 in range(self.menu_entries_length):
-            self.menu_entries.append(MenuEntry._decode_one(buf))
+            self.menu_entries.append(visualization_msgs.MenuEntry._decode_one(buf))
         self.controls = []
         for i0 in range(self.controls_length):
-            self.controls.append(InteractiveMarkerControl._decode_one(buf))
+            self.controls.append(visualization_msgs.InteractiveMarkerControl._decode_one(buf))
         return self
 
     @classmethod
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0xe9ed8e5f9a72545f+ std_msgs.Header._get_hash_recursive(newparents)+ geometry_msgs.Pose._get_hash_recursive(newparents)+ MenuEntry._get_hash_recursive(newparents)+ InteractiveMarkerControl._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0xe9ed8e5f9a72545f+ std_msgs.Header._get_hash_recursive(newparents)+ geometry_msgs.Pose._get_hash_recursive(newparents)+ visualization_msgs.MenuEntry._get_hash_recursive(newparents)+ visualization_msgs.InteractiveMarkerControl._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

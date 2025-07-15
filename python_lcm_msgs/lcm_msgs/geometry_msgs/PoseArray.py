@@ -7,16 +7,17 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-from . import *
-from lcm_msgs import std_msgs
-from .Pose import Pose
+import lcm_msgs.geometry_msgs as geometry_msgs
+
+import lcm_msgs.std_msgs as std_msgs
+
 class PoseArray(object):
 
-    msg_name = "PoseArray"
+    msg_name = "geometry_msgs.PoseArray"
 
     __slots__ = ["poses_length", "header", "poses"]
 
-    __typenames__ = ["int32_t", "std_msgs.Header", "Pose"]
+    __typenames__ = ["int32_t", "std_msgs.Header", "geometry_msgs.Pose"]
 
     __dimensions__ = [None, None, ["poses_length"]]
 
@@ -25,7 +26,7 @@ class PoseArray(object):
         self.poses_length = poses_length
         # LCM Type: std_msgs.Header
         self.header = header
-        # LCM Type: Pose[poses_length]
+        # LCM Type: geometry_msgs.Pose[poses_length]
         self.poses = poses
 
     def encode(self):
@@ -39,7 +40,7 @@ class PoseArray(object):
         assert self.header._get_packed_fingerprint() == std_msgs.Header._get_packed_fingerprint()
         self.header._encode_one(buf)
         for i0 in range(self.poses_length):
-            assert self.poses[i0]._get_packed_fingerprint() == Pose._get_packed_fingerprint()
+            assert self.poses[i0]._get_packed_fingerprint() == geometry_msgs.Pose._get_packed_fingerprint()
             self.poses[i0]._encode_one(buf)
 
     @classmethod
@@ -59,14 +60,14 @@ class PoseArray(object):
         self.header = std_msgs.Header._decode_one(buf)
         self.poses = []
         for i0 in range(self.poses_length):
-            self.poses.append(Pose._decode_one(buf))
+            self.poses.append(geometry_msgs.Pose._decode_one(buf))
         return self
 
     @classmethod
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0xc779b6acc503055a+ std_msgs.Header._get_hash_recursive(newparents)+ Pose._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0xc779b6acc503055a+ std_msgs.Header._get_hash_recursive(newparents)+ geometry_msgs.Pose._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

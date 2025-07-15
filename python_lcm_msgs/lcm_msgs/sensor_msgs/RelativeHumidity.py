@@ -7,10 +7,11 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-from lcm_msgs import std_msgs
+import lcm_msgs.std_msgs as std_msgs
+
 class RelativeHumidity(object):
 
-    msg_name = "RelativeHumidity"
+    msg_name = "sensor_msgs.RelativeHumidity"
 
     __slots__ = ["header", "relative_humidity", "variance"]
 

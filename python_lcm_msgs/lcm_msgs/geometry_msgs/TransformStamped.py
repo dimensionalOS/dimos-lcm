@@ -7,25 +7,26 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-from . import *
-from lcm_msgs import std_msgs
-from .Transform import Transform
+import lcm_msgs.geometry_msgs as geometry_msgs
+
+import lcm_msgs.std_msgs as std_msgs
+
 class TransformStamped(object):
 
-    msg_name = "TransformStamped"
+    msg_name = "geometry_msgs.TransformStamped"
 
     __slots__ = ["header", "child_frame_id", "transform"]
 
-    __typenames__ = ["std_msgs.Header", "string", "Transform"]
+    __typenames__ = ["std_msgs.Header", "string", "geometry_msgs.Transform"]
 
     __dimensions__ = [None, None, None]
 
-    def __init__(self, header=std_msgs.Header(), child_frame_id="", transform=Transform()):
+    def __init__(self, header=std_msgs.Header(), child_frame_id="", transform=geometry_msgs.Transform()):
         # LCM Type: std_msgs.Header
         self.header = header
         # LCM Type: string
         self.child_frame_id = child_frame_id
-        # LCM Type: Transform
+        # LCM Type: geometry_msgs.Transform
         self.transform = transform
 
     def encode(self):
@@ -41,7 +42,7 @@ class TransformStamped(object):
         buf.write(struct.pack('>I', len(__child_frame_id_encoded)+1))
         buf.write(__child_frame_id_encoded)
         buf.write(b"\0")
-        assert self.transform._get_packed_fingerprint() == Transform._get_packed_fingerprint()
+        assert self.transform._get_packed_fingerprint() == geometry_msgs.Transform._get_packed_fingerprint()
         self.transform._encode_one(buf)
 
     @classmethod
@@ -60,14 +61,14 @@ class TransformStamped(object):
         self.header = std_msgs.Header._decode_one(buf)
         __child_frame_id_len = struct.unpack('>I', buf.read(4))[0]
         self.child_frame_id = buf.read(__child_frame_id_len)[:-1].decode('utf-8', 'replace')
-        self.transform = Transform._decode_one(buf)
+        self.transform = geometry_msgs.Transform._decode_one(buf)
         return self
 
     @classmethod
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0xf694f4a6d8779002+ std_msgs.Header._get_hash_recursive(newparents)+ Transform._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0xf694f4a6d8779002+ std_msgs.Header._get_hash_recursive(newparents)+ geometry_msgs.Transform._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

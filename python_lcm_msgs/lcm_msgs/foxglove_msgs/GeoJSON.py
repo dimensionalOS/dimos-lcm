@@ -9,7 +9,7 @@ import struct
 
 class GeoJSON(object):
 
-    msg_name = "GeoJSON"
+    msg_name = "foxglove_msgs.GeoJSON"
 
     __slots__ = ["geojson"]
 

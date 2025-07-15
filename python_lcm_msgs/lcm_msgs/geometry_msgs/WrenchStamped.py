@@ -7,23 +7,24 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-from . import *
-from lcm_msgs import std_msgs
-from .Wrench import Wrench
+import lcm_msgs.geometry_msgs as geometry_msgs
+
+import lcm_msgs.std_msgs as std_msgs
+
 class WrenchStamped(object):
 
-    msg_name = "WrenchStamped"
+    msg_name = "geometry_msgs.WrenchStamped"
 
     __slots__ = ["header", "wrench"]
 
-    __typenames__ = ["std_msgs.Header", "Wrench"]
+    __typenames__ = ["std_msgs.Header", "geometry_msgs.Wrench"]
 
     __dimensions__ = [None, None]
 
-    def __init__(self, header=std_msgs.Header(), wrench=Wrench()):
+    def __init__(self, header=std_msgs.Header(), wrench=geometry_msgs.Wrench()):
         # LCM Type: std_msgs.Header
         self.header = header
-        # LCM Type: Wrench
+        # LCM Type: geometry_msgs.Wrench
         self.wrench = wrench
 
     def encode(self):
@@ -35,7 +36,7 @@ class WrenchStamped(object):
     def _encode_one(self, buf):
         assert self.header._get_packed_fingerprint() == std_msgs.Header._get_packed_fingerprint()
         self.header._encode_one(buf)
-        assert self.wrench._get_packed_fingerprint() == Wrench._get_packed_fingerprint()
+        assert self.wrench._get_packed_fingerprint() == geometry_msgs.Wrench._get_packed_fingerprint()
         self.wrench._encode_one(buf)
 
     @classmethod
@@ -52,14 +53,14 @@ class WrenchStamped(object):
     def _decode_one(cls, buf):
         self = WrenchStamped()
         self.header = std_msgs.Header._decode_one(buf)
-        self.wrench = Wrench._decode_one(buf)
+        self.wrench = geometry_msgs.Wrench._decode_one(buf)
         return self
 
     @classmethod
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0xecb7c2d77fc5d5e0+ std_msgs.Header._get_hash_recursive(newparents)+ Wrench._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0xecb7c2d77fc5d5e0+ std_msgs.Header._get_hash_recursive(newparents)+ geometry_msgs.Wrench._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

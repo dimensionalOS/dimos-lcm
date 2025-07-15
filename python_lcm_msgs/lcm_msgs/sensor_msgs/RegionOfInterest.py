@@ -9,7 +9,7 @@ import struct
 
 class RegionOfInterest(object):
 
-    msg_name = "RegionOfInterest"
+    msg_name = "sensor_msgs.RegionOfInterest"
 
     __slots__ = ["x_offset", "y_offset", "height", "width", "do_rectify"]
 

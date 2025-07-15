@@ -7,17 +7,17 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-from . import *
-from lcm_msgs import builtin_interfaces
-from .Color import Color
-from .Point2 import Point2
+import lcm_msgs.foxglove_msgs as foxglove_msgs
+
+import lcm_msgs.builtin_interfaces as builtin_interfaces
+
 class PointsAnnotation(object):
 
-    msg_name = "PointsAnnotation"
+    msg_name = "foxglove_msgs.PointsAnnotation"
 
     __slots__ = ["points_length", "outline_colors_length", "timestamp", "type", "points", "outline_color", "outline_colors", "fill_color", "thickness"]
 
-    __typenames__ = ["int32_t", "int32_t", "builtin_interfaces.Time", "byte", "Point2", "Color", "Color", "Color", "double"]
+    __typenames__ = ["int32_t", "int32_t", "builtin_interfaces.Time", "byte", "foxglove_msgs.Point2", "foxglove_msgs.Color", "foxglove_msgs.Color", "foxglove_msgs.Color", "double"]
 
     __dimensions__ = [None, None, None, None, ["points_length"], None, ["outline_colors_length"], None, None]
 
@@ -27,7 +27,7 @@ class PointsAnnotation(object):
     LINE_STRIP = 3
     LINE_LIST = 4
 
-    def __init__(self, points_length=0, outline_colors_length=0, timestamp=builtin_interfaces.Time(), type=0, points=[], outline_color=Color(), outline_colors=[], fill_color=Color(), thickness=0.0):
+    def __init__(self, points_length=0, outline_colors_length=0, timestamp=builtin_interfaces.Time(), type=0, points=[], outline_color=foxglove_msgs.Color(), outline_colors=[], fill_color=foxglove_msgs.Color(), thickness=0.0):
         # LCM Type: int32_t
         self.points_length = points_length
         # LCM Type: int32_t
@@ -36,13 +36,13 @@ class PointsAnnotation(object):
         self.timestamp = timestamp
         # LCM Type: byte
         self.type = type
-        # LCM Type: Point2[points_length]
+        # LCM Type: foxglove_msgs.Point2[points_length]
         self.points = points
-        # LCM Type: Color
+        # LCM Type: foxglove_msgs.Color
         self.outline_color = outline_color
-        # LCM Type: Color[outline_colors_length]
+        # LCM Type: foxglove_msgs.Color[outline_colors_length]
         self.outline_colors = outline_colors
-        # LCM Type: Color
+        # LCM Type: foxglove_msgs.Color
         self.fill_color = fill_color
         # LCM Type: double
         self.thickness = thickness
@@ -59,14 +59,14 @@ class PointsAnnotation(object):
         self.timestamp._encode_one(buf)
         buf.write(struct.pack(">B", self.type))
         for i0 in range(self.points_length):
-            assert self.points[i0]._get_packed_fingerprint() == Point2._get_packed_fingerprint()
+            assert self.points[i0]._get_packed_fingerprint() == foxglove_msgs.Point2._get_packed_fingerprint()
             self.points[i0]._encode_one(buf)
-        assert self.outline_color._get_packed_fingerprint() == Color._get_packed_fingerprint()
+        assert self.outline_color._get_packed_fingerprint() == foxglove_msgs.Color._get_packed_fingerprint()
         self.outline_color._encode_one(buf)
         for i0 in range(self.outline_colors_length):
-            assert self.outline_colors[i0]._get_packed_fingerprint() == Color._get_packed_fingerprint()
+            assert self.outline_colors[i0]._get_packed_fingerprint() == foxglove_msgs.Color._get_packed_fingerprint()
             self.outline_colors[i0]._encode_one(buf)
-        assert self.fill_color._get_packed_fingerprint() == Color._get_packed_fingerprint()
+        assert self.fill_color._get_packed_fingerprint() == foxglove_msgs.Color._get_packed_fingerprint()
         self.fill_color._encode_one(buf)
         buf.write(struct.pack(">d", self.thickness))
 
@@ -88,12 +88,12 @@ class PointsAnnotation(object):
         self.type = struct.unpack(">B", buf.read(1))[0]
         self.points = []
         for i0 in range(self.points_length):
-            self.points.append(Point2._decode_one(buf))
-        self.outline_color = Color._decode_one(buf)
+            self.points.append(foxglove_msgs.Point2._decode_one(buf))
+        self.outline_color = foxglove_msgs.Color._decode_one(buf)
         self.outline_colors = []
         for i0 in range(self.outline_colors_length):
-            self.outline_colors.append(Color._decode_one(buf))
-        self.fill_color = Color._decode_one(buf)
+            self.outline_colors.append(foxglove_msgs.Color._decode_one(buf))
+        self.fill_color = foxglove_msgs.Color._decode_one(buf)
         self.thickness = struct.unpack(">d", buf.read(8))[0]
         return self
 
@@ -101,7 +101,7 @@ class PointsAnnotation(object):
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0x97465363cc7c2a18+ builtin_interfaces.Time._get_hash_recursive(newparents)+ Point2._get_hash_recursive(newparents)+ Color._get_hash_recursive(newparents)+ Color._get_hash_recursive(newparents)+ Color._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0x97465363cc7c2a18+ builtin_interfaces.Time._get_hash_recursive(newparents)+ foxglove_msgs.Point2._get_hash_recursive(newparents)+ foxglove_msgs.Color._get_hash_recursive(newparents)+ foxglove_msgs.Color._get_hash_recursive(newparents)+ foxglove_msgs.Color._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

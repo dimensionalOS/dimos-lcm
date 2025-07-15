@@ -7,15 +7,15 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-from . import *
-from .InteractiveMarker import InteractiveMarker
+import lcm_msgs.visualization_msgs as visualization_msgs
+
 class InteractiveMarkerInit(object):
 
-    msg_name = "InteractiveMarkerInit"
+    msg_name = "visualization_msgs.InteractiveMarkerInit"
 
     __slots__ = ["markers_length", "server_id", "seq_num", "markers"]
 
-    __typenames__ = ["int32_t", "string", "int64_t", "InteractiveMarker"]
+    __typenames__ = ["int32_t", "string", "int64_t", "visualization_msgs.InteractiveMarker"]
 
     __dimensions__ = [None, None, None, ["markers_length"]]
 
@@ -26,7 +26,7 @@ class InteractiveMarkerInit(object):
         self.server_id = server_id
         # LCM Type: int64_t
         self.seq_num = seq_num
-        # LCM Type: InteractiveMarker[markers_length]
+        # LCM Type: visualization_msgs.InteractiveMarker[markers_length]
         self.markers = markers
 
     def encode(self):
@@ -43,7 +43,7 @@ class InteractiveMarkerInit(object):
         buf.write(b"\0")
         buf.write(struct.pack(">q", self.seq_num))
         for i0 in range(self.markers_length):
-            assert self.markers[i0]._get_packed_fingerprint() == InteractiveMarker._get_packed_fingerprint()
+            assert self.markers[i0]._get_packed_fingerprint() == visualization_msgs.InteractiveMarker._get_packed_fingerprint()
             self.markers[i0]._encode_one(buf)
 
     @classmethod
@@ -65,14 +65,14 @@ class InteractiveMarkerInit(object):
         self.seq_num = struct.unpack(">q", buf.read(8))[0]
         self.markers = []
         for i0 in range(self.markers_length):
-            self.markers.append(InteractiveMarker._decode_one(buf))
+            self.markers.append(visualization_msgs.InteractiveMarker._decode_one(buf))
         return self
 
     @classmethod
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0xd2afaf11cff61d9+ InteractiveMarker._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0xd2afaf11cff61d9+ visualization_msgs.InteractiveMarker._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

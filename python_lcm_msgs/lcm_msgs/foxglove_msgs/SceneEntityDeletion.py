@@ -7,10 +7,11 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-from lcm_msgs import builtin_interfaces
+import lcm_msgs.builtin_interfaces as builtin_interfaces
+
 class SceneEntityDeletion(object):
 
-    msg_name = "SceneEntityDeletion"
+    msg_name = "foxglove_msgs.SceneEntityDeletion"
 
     __slots__ = ["timestamp", "type", "id"]
 

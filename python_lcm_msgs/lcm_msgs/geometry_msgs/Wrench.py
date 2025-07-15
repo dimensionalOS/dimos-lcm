@@ -7,22 +7,22 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-from . import *
-from .Vector3 import Vector3
+import lcm_msgs.geometry_msgs as geometry_msgs
+
 class Wrench(object):
 
-    msg_name = "Wrench"
+    msg_name = "geometry_msgs.Wrench"
 
     __slots__ = ["force", "torque"]
 
-    __typenames__ = ["Vector3", "Vector3"]
+    __typenames__ = ["geometry_msgs.Vector3", "geometry_msgs.Vector3"]
 
     __dimensions__ = [None, None]
 
-    def __init__(self, force=Vector3(), torque=Vector3()):
-        # LCM Type: Vector3
+    def __init__(self, force=geometry_msgs.Vector3(), torque=geometry_msgs.Vector3()):
+        # LCM Type: geometry_msgs.Vector3
         self.force = force
-        # LCM Type: Vector3
+        # LCM Type: geometry_msgs.Vector3
         self.torque = torque
 
     def encode(self):
@@ -32,9 +32,9 @@ class Wrench(object):
         return buf.getvalue()
 
     def _encode_one(self, buf):
-        assert self.force._get_packed_fingerprint() == Vector3._get_packed_fingerprint()
+        assert self.force._get_packed_fingerprint() == geometry_msgs.Vector3._get_packed_fingerprint()
         self.force._encode_one(buf)
-        assert self.torque._get_packed_fingerprint() == Vector3._get_packed_fingerprint()
+        assert self.torque._get_packed_fingerprint() == geometry_msgs.Vector3._get_packed_fingerprint()
         self.torque._encode_one(buf)
 
     @classmethod
@@ -50,15 +50,15 @@ class Wrench(object):
     @classmethod
     def _decode_one(cls, buf):
         self = Wrench()
-        self.force = Vector3._decode_one(buf)
-        self.torque = Vector3._decode_one(buf)
+        self.force = geometry_msgs.Vector3._decode_one(buf)
+        self.torque = geometry_msgs.Vector3._decode_one(buf)
         return self
 
     @classmethod
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0x980c3aea984c9a6+ Vector3._get_hash_recursive(newparents)+ Vector3._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0x980c3aea984c9a6+ geometry_msgs.Vector3._get_hash_recursive(newparents)+ geometry_msgs.Vector3._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

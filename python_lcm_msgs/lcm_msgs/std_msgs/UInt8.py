@@ -9,7 +9,7 @@ import struct
 
 class UInt8(object):
 
-    msg_name = "UInt8"
+    msg_name = "std_msgs.UInt8"
 
     __slots__ = ["data"]
 

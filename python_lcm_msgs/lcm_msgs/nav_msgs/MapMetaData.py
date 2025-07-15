@@ -7,11 +7,13 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-from lcm_msgs import geometry_msgs
-from lcm_msgs import std_msgs
+import lcm_msgs.geometry_msgs as geometry_msgs
+
+import lcm_msgs.std_msgs as std_msgs
+
 class MapMetaData(object):
 
-    msg_name = "MapMetaData"
+    msg_name = "nav_msgs.MapMetaData"
 
     __slots__ = ["map_load_time", "resolution", "width", "height", "origin"]
 

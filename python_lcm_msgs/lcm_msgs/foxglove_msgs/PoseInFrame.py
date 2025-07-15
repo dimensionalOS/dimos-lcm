@@ -7,11 +7,13 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-from lcm_msgs import geometry_msgs
-from lcm_msgs import builtin_interfaces
+import lcm_msgs.geometry_msgs as geometry_msgs
+
+import lcm_msgs.builtin_interfaces as builtin_interfaces
+
 class PoseInFrame(object):
 
-    msg_name = "PoseInFrame"
+    msg_name = "foxglove_msgs.PoseInFrame"
 
     __slots__ = ["timestamp", "frame_id", "pose"]
 

@@ -9,7 +9,7 @@ import struct
 
 class VisionClass(object):
 
-    msg_name = "VisionClass"
+    msg_name = "vision_msgs.VisionClass"
 
     __slots__ = ["class_id", "class_name"]
 

@@ -7,10 +7,11 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-from lcm_msgs import std_msgs
+import lcm_msgs.std_msgs as std_msgs
+
 class TimeReference(object):
 
-    msg_name = "TimeReference"
+    msg_name = "sensor_msgs.TimeReference"
 
     __slots__ = ["header", "time_ref", "source"]
 

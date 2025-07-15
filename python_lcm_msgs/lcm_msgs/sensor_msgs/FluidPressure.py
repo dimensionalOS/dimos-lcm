@@ -7,10 +7,11 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-from lcm_msgs import std_msgs
+import lcm_msgs.std_msgs as std_msgs
+
 class FluidPressure(object):
 
-    msg_name = "FluidPressure"
+    msg_name = "sensor_msgs.FluidPressure"
 
     __slots__ = ["header", "fluid_pressure", "variance"]
 

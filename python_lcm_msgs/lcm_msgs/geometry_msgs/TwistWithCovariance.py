@@ -7,20 +7,20 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-from . import *
-from .Twist import Twist
+import lcm_msgs.geometry_msgs as geometry_msgs
+
 class TwistWithCovariance(object):
 
-    msg_name = "TwistWithCovariance"
+    msg_name = "geometry_msgs.TwistWithCovariance"
 
     __slots__ = ["twist", "covariance"]
 
-    __typenames__ = ["Twist", "double"]
+    __typenames__ = ["geometry_msgs.Twist", "double"]
 
     __dimensions__ = [None, [36]]
 
-    def __init__(self, twist=Twist(), covariance=[ 0.0 for dim0 in range(36) ]):
-        # LCM Type: Twist
+    def __init__(self, twist=geometry_msgs.Twist(), covariance=[ 0.0 for dim0 in range(36) ]):
+        # LCM Type: geometry_msgs.Twist
         self.twist = twist
         # LCM Type: double[36]
         self.covariance = covariance
@@ -32,7 +32,7 @@ class TwistWithCovariance(object):
         return buf.getvalue()
 
     def _encode_one(self, buf):
-        assert self.twist._get_packed_fingerprint() == Twist._get_packed_fingerprint()
+        assert self.twist._get_packed_fingerprint() == geometry_msgs.Twist._get_packed_fingerprint()
         self.twist._encode_one(buf)
         buf.write(struct.pack('>36d', *self.covariance[:36]))
 
@@ -49,7 +49,7 @@ class TwistWithCovariance(object):
     @classmethod
     def _decode_one(cls, buf):
         self = TwistWithCovariance()
-        self.twist = Twist._decode_one(buf)
+        self.twist = geometry_msgs.Twist._decode_one(buf)
         self.covariance = struct.unpack('>36d', buf.read(288))
         return self
 
@@ -57,7 +57,7 @@ class TwistWithCovariance(object):
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0xaba0a9d55e98da5d+ Twist._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0xaba0a9d55e98da5d+ geometry_msgs.Twist._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

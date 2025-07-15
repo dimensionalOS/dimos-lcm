@@ -7,16 +7,17 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-from lcm_msgs import geometry_msgs
-from . import *
-from .Marker import Marker
+import lcm_msgs.geometry_msgs as geometry_msgs
+
+import lcm_msgs.visualization_msgs as visualization_msgs
+
 class InteractiveMarkerControl(object):
 
-    msg_name = "InteractiveMarkerControl"
+    msg_name = "visualization_msgs.InteractiveMarkerControl"
 
     __slots__ = ["markers_length", "name", "orientation", "orientation_mode", "interaction_mode", "always_visible", "markers", "independent_marker_orientation", "description"]
 
-    __typenames__ = ["int32_t", "string", "geometry_msgs.Quaternion", "byte", "byte", "boolean", "Marker", "boolean", "string"]
+    __typenames__ = ["int32_t", "string", "geometry_msgs.Quaternion", "byte", "byte", "boolean", "visualization_msgs.Marker", "boolean", "string"]
 
     __dimensions__ = [None, None, None, None, None, None, ["markers_length"], None, None]
 
@@ -47,7 +48,7 @@ class InteractiveMarkerControl(object):
         self.interaction_mode = interaction_mode
         # LCM Type: boolean
         self.always_visible = always_visible
-        # LCM Type: Marker[markers_length]
+        # LCM Type: visualization_msgs.Marker[markers_length]
         self.markers = markers
         # LCM Type: boolean
         self.independent_marker_orientation = independent_marker_orientation
@@ -70,7 +71,7 @@ class InteractiveMarkerControl(object):
         self.orientation._encode_one(buf)
         buf.write(struct.pack(">BBb", self.orientation_mode, self.interaction_mode, self.always_visible))
         for i0 in range(self.markers_length):
-            assert self.markers[i0]._get_packed_fingerprint() == Marker._get_packed_fingerprint()
+            assert self.markers[i0]._get_packed_fingerprint() == visualization_msgs.Marker._get_packed_fingerprint()
             self.markers[i0]._encode_one(buf)
         buf.write(struct.pack(">b", self.independent_marker_orientation))
         __description_encoded = self.description.encode('utf-8')
@@ -99,7 +100,7 @@ class InteractiveMarkerControl(object):
         self.always_visible = bool(struct.unpack('b', buf.read(1))[0])
         self.markers = []
         for i0 in range(self.markers_length):
-            self.markers.append(Marker._decode_one(buf))
+            self.markers.append(visualization_msgs.Marker._decode_one(buf))
         self.independent_marker_orientation = bool(struct.unpack('b', buf.read(1))[0])
         __description_len = struct.unpack('>I', buf.read(4))[0]
         self.description = buf.read(__description_len)[:-1].decode('utf-8', 'replace')
@@ -109,7 +110,7 @@ class InteractiveMarkerControl(object):
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0x9e1db7d7740da609+ geometry_msgs.Quaternion._get_hash_recursive(newparents)+ Marker._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0x9e1db7d7740da609+ geometry_msgs.Quaternion._get_hash_recursive(newparents)+ visualization_msgs.Marker._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

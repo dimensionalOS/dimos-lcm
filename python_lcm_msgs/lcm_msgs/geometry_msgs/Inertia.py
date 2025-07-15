@@ -7,22 +7,22 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-from . import *
-from .Vector3 import Vector3
+import lcm_msgs.geometry_msgs as geometry_msgs
+
 class Inertia(object):
 
-    msg_name = "Inertia"
+    msg_name = "geometry_msgs.Inertia"
 
     __slots__ = ["m", "com", "ixx", "ixy", "ixz", "iyy", "iyz", "izz"]
 
-    __typenames__ = ["double", "Vector3", "double", "double", "double", "double", "double", "double"]
+    __typenames__ = ["double", "geometry_msgs.Vector3", "double", "double", "double", "double", "double", "double"]
 
     __dimensions__ = [None, None, None, None, None, None, None, None]
 
-    def __init__(self, m=0.0, com=Vector3(), ixx=0.0, ixy=0.0, ixz=0.0, iyy=0.0, iyz=0.0, izz=0.0):
+    def __init__(self, m=0.0, com=geometry_msgs.Vector3(), ixx=0.0, ixy=0.0, ixz=0.0, iyy=0.0, iyz=0.0, izz=0.0):
         # LCM Type: double
         self.m = m
-        # LCM Type: Vector3
+        # LCM Type: geometry_msgs.Vector3
         self.com = com
         # LCM Type: double
         self.ixx = ixx
@@ -45,7 +45,7 @@ class Inertia(object):
 
     def _encode_one(self, buf):
         buf.write(struct.pack(">d", self.m))
-        assert self.com._get_packed_fingerprint() == Vector3._get_packed_fingerprint()
+        assert self.com._get_packed_fingerprint() == geometry_msgs.Vector3._get_packed_fingerprint()
         self.com._encode_one(buf)
         buf.write(struct.pack(">dddddd", self.ixx, self.ixy, self.ixz, self.iyy, self.iyz, self.izz))
 
@@ -63,7 +63,7 @@ class Inertia(object):
     def _decode_one(cls, buf):
         self = Inertia()
         self.m = struct.unpack(">d", buf.read(8))[0]
-        self.com = Vector3._decode_one(buf)
+        self.com = geometry_msgs.Vector3._decode_one(buf)
         self.ixx, self.ixy, self.ixz, self.iyy, self.iyz, self.izz = struct.unpack(">dddddd", buf.read(48))
         return self
 
@@ -71,7 +71,7 @@ class Inertia(object):
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0xbeaa1a2a4c70b2e0+ Vector3._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0xbeaa1a2a4c70b2e0+ geometry_msgs.Vector3._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

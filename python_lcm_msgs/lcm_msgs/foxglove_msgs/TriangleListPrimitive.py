@@ -7,20 +7,21 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-from lcm_msgs import geometry_msgs
-from . import *
-from .Color import Color
+import lcm_msgs.geometry_msgs as geometry_msgs
+
+import lcm_msgs.foxglove_msgs as foxglove_msgs
+
 class TriangleListPrimitive(object):
 
-    msg_name = "TriangleListPrimitive"
+    msg_name = "foxglove_msgs.TriangleListPrimitive"
 
     __slots__ = ["points_length", "colors_length", "indices_length", "pose", "points", "color", "colors", "indices"]
 
-    __typenames__ = ["int32_t", "int32_t", "int32_t", "geometry_msgs.Pose", "geometry_msgs.Point", "Color", "Color", "int32_t"]
+    __typenames__ = ["int32_t", "int32_t", "int32_t", "geometry_msgs.Pose", "geometry_msgs.Point", "foxglove_msgs.Color", "foxglove_msgs.Color", "int32_t"]
 
     __dimensions__ = [None, None, None, None, ["points_length"], None, ["colors_length"], ["indices_length"]]
 
-    def __init__(self, points_length=0, colors_length=0, indices_length=0, pose=geometry_msgs.Pose(), points=[], color=Color(), colors=[], indices=[]):
+    def __init__(self, points_length=0, colors_length=0, indices_length=0, pose=geometry_msgs.Pose(), points=[], color=foxglove_msgs.Color(), colors=[], indices=[]):
         # LCM Type: int32_t
         self.points_length = points_length
         # LCM Type: int32_t
@@ -31,9 +32,9 @@ class TriangleListPrimitive(object):
         self.pose = pose
         # LCM Type: geometry_msgs.Point[points_length]
         self.points = points
-        # LCM Type: Color
+        # LCM Type: foxglove_msgs.Color
         self.color = color
-        # LCM Type: Color[colors_length]
+        # LCM Type: foxglove_msgs.Color[colors_length]
         self.colors = colors
         # LCM Type: int32_t[indices_length]
         self.indices = indices
@@ -51,10 +52,10 @@ class TriangleListPrimitive(object):
         for i0 in range(self.points_length):
             assert self.points[i0]._get_packed_fingerprint() == geometry_msgs.Point._get_packed_fingerprint()
             self.points[i0]._encode_one(buf)
-        assert self.color._get_packed_fingerprint() == Color._get_packed_fingerprint()
+        assert self.color._get_packed_fingerprint() == foxglove_msgs.Color._get_packed_fingerprint()
         self.color._encode_one(buf)
         for i0 in range(self.colors_length):
-            assert self.colors[i0]._get_packed_fingerprint() == Color._get_packed_fingerprint()
+            assert self.colors[i0]._get_packed_fingerprint() == foxglove_msgs.Color._get_packed_fingerprint()
             self.colors[i0]._encode_one(buf)
         buf.write(struct.pack('>%di' % self.indices_length, *self.indices[:self.indices_length]))
 
@@ -76,10 +77,10 @@ class TriangleListPrimitive(object):
         self.points = []
         for i0 in range(self.points_length):
             self.points.append(geometry_msgs.Point._decode_one(buf))
-        self.color = Color._decode_one(buf)
+        self.color = foxglove_msgs.Color._decode_one(buf)
         self.colors = []
         for i0 in range(self.colors_length):
-            self.colors.append(Color._decode_one(buf))
+            self.colors.append(foxglove_msgs.Color._decode_one(buf))
         self.indices = struct.unpack('>%di' % self.indices_length, buf.read(self.indices_length * 4))
         return self
 
@@ -87,7 +88,7 @@ class TriangleListPrimitive(object):
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0xcf3047947917a6cc+ geometry_msgs.Pose._get_hash_recursive(newparents)+ geometry_msgs.Point._get_hash_recursive(newparents)+ Color._get_hash_recursive(newparents)+ Color._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0xcf3047947917a6cc+ geometry_msgs.Pose._get_hash_recursive(newparents)+ geometry_msgs.Point._get_hash_recursive(newparents)+ foxglove_msgs.Color._get_hash_recursive(newparents)+ foxglove_msgs.Color._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

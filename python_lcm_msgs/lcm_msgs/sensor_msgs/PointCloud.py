@@ -7,17 +7,19 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-from lcm_msgs import geometry_msgs
-from lcm_msgs import std_msgs
-from . import *
-from .ChannelFloat32 import ChannelFloat32
+import lcm_msgs.geometry_msgs as geometry_msgs
+
+import lcm_msgs.std_msgs as std_msgs
+
+import lcm_msgs.sensor_msgs as sensor_msgs
+
 class PointCloud(object):
 
-    msg_name = "PointCloud"
+    msg_name = "sensor_msgs.PointCloud"
 
     __slots__ = ["points_length", "channels_length", "header", "points", "channels"]
 
-    __typenames__ = ["int32_t", "int32_t", "std_msgs.Header", "geometry_msgs.Point32", "ChannelFloat32"]
+    __typenames__ = ["int32_t", "int32_t", "std_msgs.Header", "geometry_msgs.Point32", "sensor_msgs.ChannelFloat32"]
 
     __dimensions__ = [None, None, None, ["points_length"], ["channels_length"]]
 
@@ -30,7 +32,7 @@ class PointCloud(object):
         self.header = header
         # LCM Type: geometry_msgs.Point32[points_length]
         self.points = points
-        # LCM Type: ChannelFloat32[channels_length]
+        # LCM Type: sensor_msgs.ChannelFloat32[channels_length]
         self.channels = channels
 
     def encode(self):
@@ -47,7 +49,7 @@ class PointCloud(object):
             assert self.points[i0]._get_packed_fingerprint() == geometry_msgs.Point32._get_packed_fingerprint()
             self.points[i0]._encode_one(buf)
         for i0 in range(self.channels_length):
-            assert self.channels[i0]._get_packed_fingerprint() == ChannelFloat32._get_packed_fingerprint()
+            assert self.channels[i0]._get_packed_fingerprint() == sensor_msgs.ChannelFloat32._get_packed_fingerprint()
             self.channels[i0]._encode_one(buf)
 
     @classmethod
@@ -70,14 +72,14 @@ class PointCloud(object):
             self.points.append(geometry_msgs.Point32._decode_one(buf))
         self.channels = []
         for i0 in range(self.channels_length):
-            self.channels.append(ChannelFloat32._decode_one(buf))
+            self.channels.append(sensor_msgs.ChannelFloat32._decode_one(buf))
         return self
 
     @classmethod
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0x3ff7dc99e345164e+ std_msgs.Header._get_hash_recursive(newparents)+ geometry_msgs.Point32._get_hash_recursive(newparents)+ ChannelFloat32._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0x3ff7dc99e345164e+ std_msgs.Header._get_hash_recursive(newparents)+ geometry_msgs.Point32._get_hash_recursive(newparents)+ sensor_msgs.ChannelFloat32._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

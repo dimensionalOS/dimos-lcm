@@ -7,25 +7,26 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-from . import *
-from lcm_msgs import std_msgs
-from .MapMetaData import MapMetaData
+import lcm_msgs.nav_msgs as nav_msgs
+
+import lcm_msgs.std_msgs as std_msgs
+
 class OccupancyGrid(object):
 
-    msg_name = "OccupancyGrid"
+    msg_name = "nav_msgs.OccupancyGrid"
 
     __slots__ = ["data_length", "header", "info", "data"]
 
-    __typenames__ = ["int32_t", "std_msgs.Header", "MapMetaData", "int8_t"]
+    __typenames__ = ["int32_t", "std_msgs.Header", "nav_msgs.MapMetaData", "int8_t"]
 
     __dimensions__ = [None, None, None, ["data_length"]]
 
-    def __init__(self, data_length=0, header=std_msgs.Header(), info=MapMetaData(), data=[]):
+    def __init__(self, data_length=0, header=std_msgs.Header(), info=nav_msgs.MapMetaData(), data=[]):
         # LCM Type: int32_t
         self.data_length = data_length
         # LCM Type: std_msgs.Header
         self.header = header
-        # LCM Type: MapMetaData
+        # LCM Type: nav_msgs.MapMetaData
         self.info = info
         # LCM Type: int8_t[data_length]
         self.data = data
@@ -40,7 +41,7 @@ class OccupancyGrid(object):
         buf.write(struct.pack(">i", self.data_length))
         assert self.header._get_packed_fingerprint() == std_msgs.Header._get_packed_fingerprint()
         self.header._encode_one(buf)
-        assert self.info._get_packed_fingerprint() == MapMetaData._get_packed_fingerprint()
+        assert self.info._get_packed_fingerprint() == nav_msgs.MapMetaData._get_packed_fingerprint()
         self.info._encode_one(buf)
         buf.write(struct.pack('>%db' % self.data_length, *self.data[:self.data_length]))
 
@@ -59,7 +60,7 @@ class OccupancyGrid(object):
         self = OccupancyGrid()
         self.data_length = struct.unpack(">i", buf.read(4))[0]
         self.header = std_msgs.Header._decode_one(buf)
-        self.info = MapMetaData._decode_one(buf)
+        self.info = nav_msgs.MapMetaData._decode_one(buf)
         self.data = struct.unpack('>%db' % self.data_length, buf.read(self.data_length))
         return self
 
@@ -67,7 +68,7 @@ class OccupancyGrid(object):
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0x9e67f3f149308d87+ std_msgs.Header._get_hash_recursive(newparents)+ MapMetaData._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0x9e67f3f149308d87+ std_msgs.Header._get_hash_recursive(newparents)+ nav_msgs.MapMetaData._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

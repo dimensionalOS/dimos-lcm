@@ -7,16 +7,17 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-from . import *
-from lcm_msgs import std_msgs
-from .DiagnosticStatus import DiagnosticStatus
+import lcm_msgs.diagnostic_msgs as diagnostic_msgs
+
+import lcm_msgs.std_msgs as std_msgs
+
 class DiagnosticArray(object):
 
-    msg_name = "DiagnosticArray"
+    msg_name = "diagnostic_msgs.DiagnosticArray"
 
     __slots__ = ["status_length", "header", "status"]
 
-    __typenames__ = ["int32_t", "std_msgs.Header", "DiagnosticStatus"]
+    __typenames__ = ["int32_t", "std_msgs.Header", "diagnostic_msgs.DiagnosticStatus"]
 
     __dimensions__ = [None, None, ["status_length"]]
 
@@ -25,7 +26,7 @@ class DiagnosticArray(object):
         self.status_length = status_length
         # LCM Type: std_msgs.Header
         self.header = header
-        # LCM Type: DiagnosticStatus[status_length]
+        # LCM Type: diagnostic_msgs.DiagnosticStatus[status_length]
         self.status = status
 
     def encode(self):
@@ -39,7 +40,7 @@ class DiagnosticArray(object):
         assert self.header._get_packed_fingerprint() == std_msgs.Header._get_packed_fingerprint()
         self.header._encode_one(buf)
         for i0 in range(self.status_length):
-            assert self.status[i0]._get_packed_fingerprint() == DiagnosticStatus._get_packed_fingerprint()
+            assert self.status[i0]._get_packed_fingerprint() == diagnostic_msgs.DiagnosticStatus._get_packed_fingerprint()
             self.status[i0]._encode_one(buf)
 
     @classmethod
@@ -59,14 +60,14 @@ class DiagnosticArray(object):
         self.header = std_msgs.Header._decode_one(buf)
         self.status = []
         for i0 in range(self.status_length):
-            self.status.append(DiagnosticStatus._decode_one(buf))
+            self.status.append(diagnostic_msgs.DiagnosticStatus._decode_one(buf))
         return self
 
     @classmethod
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0x163c308c500b94d+ std_msgs.Header._get_hash_recursive(newparents)+ DiagnosticStatus._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0x163c308c500b94d+ std_msgs.Header._get_hash_recursive(newparents)+ diagnostic_msgs.DiagnosticStatus._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

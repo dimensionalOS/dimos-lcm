@@ -7,11 +7,13 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-from lcm_msgs import geometry_msgs
-from lcm_msgs import std_msgs
+import lcm_msgs.geometry_msgs as geometry_msgs
+
+import lcm_msgs.std_msgs as std_msgs
+
 class MultiDOFJointTrajectoryPoint(object):
 
-    msg_name = "MultiDOFJointTrajectoryPoint"
+    msg_name = "trajectory_msgs.MultiDOFJointTrajectoryPoint"
 
     __slots__ = ["transforms_length", "velocities_length", "accelerations_length", "transforms", "velocities", "accelerations", "time_from_start"]
 

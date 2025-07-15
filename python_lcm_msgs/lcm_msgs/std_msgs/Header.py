@@ -7,22 +7,22 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-from . import *
-from .Time import Time
+import lcm_msgs.std_msgs as std_msgs
+
 class Header(object):
 
-    msg_name = "Header"
+    msg_name = "std_msgs.Header"
 
     __slots__ = ["seq", "stamp", "frame_id"]
 
-    __typenames__ = ["int32_t", "Time", "string"]
+    __typenames__ = ["int32_t", "std_msgs.Time", "string"]
 
     __dimensions__ = [None, None, None]
 
-    def __init__(self, seq=0, stamp=Time(), frame_id=""):
+    def __init__(self, seq=0, stamp=std_msgs.Time(), frame_id=""):
         # LCM Type: int32_t
         self.seq = seq
-        # LCM Type: Time
+        # LCM Type: std_msgs.Time
         self.stamp = stamp
         # LCM Type: string
         self.frame_id = frame_id
@@ -35,7 +35,7 @@ class Header(object):
 
     def _encode_one(self, buf):
         buf.write(struct.pack(">i", self.seq))
-        assert self.stamp._get_packed_fingerprint() == Time._get_packed_fingerprint()
+        assert self.stamp._get_packed_fingerprint() == std_msgs.Time._get_packed_fingerprint()
         self.stamp._encode_one(buf)
         __frame_id_encoded = self.frame_id.encode('utf-8')
         buf.write(struct.pack('>I', len(__frame_id_encoded)+1))
@@ -56,7 +56,7 @@ class Header(object):
     def _decode_one(cls, buf):
         self = Header()
         self.seq = struct.unpack(">i", buf.read(4))[0]
-        self.stamp = Time._decode_one(buf)
+        self.stamp = std_msgs.Time._decode_one(buf)
         __frame_id_len = struct.unpack('>I', buf.read(4))[0]
         self.frame_id = buf.read(__frame_id_len)[:-1].decode('utf-8', 'replace')
         return self
@@ -65,7 +65,7 @@ class Header(object):
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0xdbb33f5b4c19b8ea+ Time._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0xdbb33f5b4c19b8ea+ std_msgs.Time._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

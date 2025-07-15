@@ -7,16 +7,17 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-from lcm_msgs import std_msgs
-from . import *
-from .NavSatStatus import NavSatStatus
+import lcm_msgs.std_msgs as std_msgs
+
+import lcm_msgs.sensor_msgs as sensor_msgs
+
 class NavSatFix(object):
 
-    msg_name = "NavSatFix"
+    msg_name = "sensor_msgs.NavSatFix"
 
     __slots__ = ["header", "status", "latitude", "longitude", "altitude", "position_covariance", "position_covariance_type"]
 
-    __typenames__ = ["std_msgs.Header", "NavSatStatus", "double", "double", "double", "double", "byte"]
+    __typenames__ = ["std_msgs.Header", "sensor_msgs.NavSatStatus", "double", "double", "double", "double", "byte"]
 
     __dimensions__ = [None, None, None, None, None, [9], None]
 
@@ -25,10 +26,10 @@ class NavSatFix(object):
     COVARIANCE_TYPE_DIAGONAL_KNOWN = 2
     COVARIANCE_TYPE_KNOWN = 3
 
-    def __init__(self, header=std_msgs.Header(), status=NavSatStatus(), latitude=0.0, longitude=0.0, altitude=0.0, position_covariance=[ 0.0 for dim0 in range(9) ], position_covariance_type=0):
+    def __init__(self, header=std_msgs.Header(), status=sensor_msgs.NavSatStatus(), latitude=0.0, longitude=0.0, altitude=0.0, position_covariance=[ 0.0 for dim0 in range(9) ], position_covariance_type=0):
         # LCM Type: std_msgs.Header
         self.header = header
-        # LCM Type: NavSatStatus
+        # LCM Type: sensor_msgs.NavSatStatus
         self.status = status
         # LCM Type: double
         self.latitude = latitude
@@ -50,7 +51,7 @@ class NavSatFix(object):
     def _encode_one(self, buf):
         assert self.header._get_packed_fingerprint() == std_msgs.Header._get_packed_fingerprint()
         self.header._encode_one(buf)
-        assert self.status._get_packed_fingerprint() == NavSatStatus._get_packed_fingerprint()
+        assert self.status._get_packed_fingerprint() == sensor_msgs.NavSatStatus._get_packed_fingerprint()
         self.status._encode_one(buf)
         buf.write(struct.pack(">ddd", self.latitude, self.longitude, self.altitude))
         buf.write(struct.pack('>9d', *self.position_covariance[:9]))
@@ -70,7 +71,7 @@ class NavSatFix(object):
     def _decode_one(cls, buf):
         self = NavSatFix()
         self.header = std_msgs.Header._decode_one(buf)
-        self.status = NavSatStatus._decode_one(buf)
+        self.status = sensor_msgs.NavSatStatus._decode_one(buf)
         self.latitude, self.longitude, self.altitude = struct.unpack(">ddd", buf.read(24))
         self.position_covariance = struct.unpack('>9d', buf.read(72))
         self.position_covariance_type = struct.unpack(">B", buf.read(1))[0]
@@ -80,7 +81,7 @@ class NavSatFix(object):
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0x4a84d20526d9067a+ std_msgs.Header._get_hash_recursive(newparents)+ NavSatStatus._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0x4a84d20526d9067a+ std_msgs.Header._get_hash_recursive(newparents)+ sensor_msgs.NavSatStatus._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

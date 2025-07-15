@@ -7,22 +7,22 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-from . import *
-from .Point32 import Point32
+import lcm_msgs.geometry_msgs as geometry_msgs
+
 class Polygon(object):
 
-    msg_name = "Polygon"
+    msg_name = "geometry_msgs.Polygon"
 
     __slots__ = ["points_length", "points"]
 
-    __typenames__ = ["int32_t", "Point32"]
+    __typenames__ = ["int32_t", "geometry_msgs.Point32"]
 
     __dimensions__ = [None, ["points_length"]]
 
     def __init__(self, points_length=0, points=[]):
         # LCM Type: int32_t
         self.points_length = points_length
-        # LCM Type: Point32[points_length]
+        # LCM Type: geometry_msgs.Point32[points_length]
         self.points = points
 
     def encode(self):
@@ -34,7 +34,7 @@ class Polygon(object):
     def _encode_one(self, buf):
         buf.write(struct.pack(">i", self.points_length))
         for i0 in range(self.points_length):
-            assert self.points[i0]._get_packed_fingerprint() == Point32._get_packed_fingerprint()
+            assert self.points[i0]._get_packed_fingerprint() == geometry_msgs.Point32._get_packed_fingerprint()
             self.points[i0]._encode_one(buf)
 
     @classmethod
@@ -53,14 +53,14 @@ class Polygon(object):
         self.points_length = struct.unpack(">i", buf.read(4))[0]
         self.points = []
         for i0 in range(self.points_length):
-            self.points.append(Point32._decode_one(buf))
+            self.points.append(geometry_msgs.Point32._decode_one(buf))
         return self
 
     @classmethod
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0x5634733b354407e8+ Point32._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0x5634733b354407e8+ geometry_msgs.Point32._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

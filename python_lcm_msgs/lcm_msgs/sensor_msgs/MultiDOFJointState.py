@@ -7,11 +7,13 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-from lcm_msgs import geometry_msgs
-from lcm_msgs import std_msgs
+import lcm_msgs.geometry_msgs as geometry_msgs
+
+import lcm_msgs.std_msgs as std_msgs
+
 class MultiDOFJointState(object):
 
-    msg_name = "MultiDOFJointState"
+    msg_name = "sensor_msgs.MultiDOFJointState"
 
     __slots__ = ["joint_names_length", "transforms_length", "twist_length", "wrench_length", "header", "joint_names", "transforms", "twist", "wrench"]
 

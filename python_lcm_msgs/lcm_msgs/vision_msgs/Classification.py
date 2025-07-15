@@ -7,16 +7,17 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-from . import *
-from lcm_msgs import std_msgs
-from .ObjectHypothesis import ObjectHypothesis
+import vision_msgs
+
+import lcm_msgs.std_msgs as std_msgs
+
 class Classification(object):
 
-    msg_name = "Classification"
+    msg_name = "vision_msgs.Classification"
 
     __slots__ = ["results_length", "header", "results"]
 
-    __typenames__ = ["int32_t", "std_msgs.Header", "ObjectHypothesis"]
+    __typenames__ = ["int32_t", "std_msgs.Header", "vision_msgs.ObjectHypothesis"]
 
     __dimensions__ = [None, None, ["results_length"]]
 
@@ -25,7 +26,7 @@ class Classification(object):
         self.results_length = results_length
         # LCM Type: std_msgs.Header
         self.header = header
-        # LCM Type: ObjectHypothesis[results_length]
+        # LCM Type: vision_msgs.ObjectHypothesis[results_length]
         self.results = results
 
     def encode(self):
@@ -39,7 +40,7 @@ class Classification(object):
         assert self.header._get_packed_fingerprint() == std_msgs.Header._get_packed_fingerprint()
         self.header._encode_one(buf)
         for i0 in range(self.results_length):
-            assert self.results[i0]._get_packed_fingerprint() == ObjectHypothesis._get_packed_fingerprint()
+            assert self.results[i0]._get_packed_fingerprint() == vision_msgs.ObjectHypothesis._get_packed_fingerprint()
             self.results[i0]._encode_one(buf)
 
     @classmethod
@@ -59,14 +60,14 @@ class Classification(object):
         self.header = std_msgs.Header._decode_one(buf)
         self.results = []
         for i0 in range(self.results_length):
-            self.results.append(ObjectHypothesis._decode_one(buf))
+            self.results.append(vision_msgs.ObjectHypothesis._decode_one(buf))
         return self
 
     @classmethod
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0x60719354aae1b22a+ std_msgs.Header._get_hash_recursive(newparents)+ ObjectHypothesis._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0x60719354aae1b22a+ std_msgs.Header._get_hash_recursive(newparents)+ vision_msgs.ObjectHypothesis._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

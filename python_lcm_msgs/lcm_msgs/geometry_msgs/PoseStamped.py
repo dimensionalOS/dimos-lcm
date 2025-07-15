@@ -7,23 +7,24 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-from . import *
-from lcm_msgs import std_msgs
-from .Pose import Pose
+import lcm_msgs.geometry_msgs as geometry_msgs
+
+import lcm_msgs.std_msgs as std_msgs
+
 class PoseStamped(object):
 
-    msg_name = "PoseStamped"
+    msg_name = "geometry_msgs.PoseStamped"
 
     __slots__ = ["header", "pose"]
 
-    __typenames__ = ["std_msgs.Header", "Pose"]
+    __typenames__ = ["std_msgs.Header", "geometry_msgs.Pose"]
 
     __dimensions__ = [None, None]
 
-    def __init__(self, header=std_msgs.Header(), pose=Pose()):
+    def __init__(self, header=std_msgs.Header(), pose=geometry_msgs.Pose()):
         # LCM Type: std_msgs.Header
         self.header = header
-        # LCM Type: Pose
+        # LCM Type: geometry_msgs.Pose
         self.pose = pose
 
     def encode(self):
@@ -35,7 +36,7 @@ class PoseStamped(object):
     def _encode_one(self, buf):
         assert self.header._get_packed_fingerprint() == std_msgs.Header._get_packed_fingerprint()
         self.header._encode_one(buf)
-        assert self.pose._get_packed_fingerprint() == Pose._get_packed_fingerprint()
+        assert self.pose._get_packed_fingerprint() == geometry_msgs.Pose._get_packed_fingerprint()
         self.pose._encode_one(buf)
 
     @classmethod
@@ -52,14 +53,14 @@ class PoseStamped(object):
     def _decode_one(cls, buf):
         self = PoseStamped()
         self.header = std_msgs.Header._decode_one(buf)
-        self.pose = Pose._decode_one(buf)
+        self.pose = geometry_msgs.Pose._decode_one(buf)
         return self
 
     @classmethod
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0xe10feebec5c97663+ std_msgs.Header._get_hash_recursive(newparents)+ Pose._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0xe10feebec5c97663+ std_msgs.Header._get_hash_recursive(newparents)+ geometry_msgs.Pose._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

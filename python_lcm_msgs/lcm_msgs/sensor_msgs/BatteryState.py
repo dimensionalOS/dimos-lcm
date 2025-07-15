@@ -7,10 +7,11 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-from lcm_msgs import std_msgs
+import lcm_msgs.std_msgs as std_msgs
+
 class BatteryState(object):
 
-    msg_name = "BatteryState"
+    msg_name = "sensor_msgs.BatteryState"
 
     __slots__ = ["cell_voltage_length", "cell_temperature_length", "header", "voltage", "temperature", "current", "charge", "capacity", "design_capacity", "percentage", "power_supply_status", "power_supply_health", "power_supply_technology", "present", "cell_voltage", "cell_temperature", "location", "serial_number"]
 

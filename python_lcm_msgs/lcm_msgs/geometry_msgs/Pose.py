@@ -7,23 +7,22 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-from . import *
-from .Point import Point
-from .Quaternion import Quaternion
+import lcm_msgs.geometry_msgs as geometry_msgs
+
 class Pose(object):
 
-    msg_name = "Pose"
+    msg_name = "geometry_msgs.Pose"
 
     __slots__ = ["position", "orientation"]
 
-    __typenames__ = ["Point", "Quaternion"]
+    __typenames__ = ["geometry_msgs.Point", "geometry_msgs.Quaternion"]
 
     __dimensions__ = [None, None]
 
-    def __init__(self, position=Point(), orientation=Quaternion()):
-        # LCM Type: Point
+    def __init__(self, position=geometry_msgs.Point(), orientation=geometry_msgs.Quaternion()):
+        # LCM Type: geometry_msgs.Point
         self.position = position
-        # LCM Type: Quaternion
+        # LCM Type: geometry_msgs.Quaternion
         self.orientation = orientation
 
     def encode(self):
@@ -33,9 +32,9 @@ class Pose(object):
         return buf.getvalue()
 
     def _encode_one(self, buf):
-        assert self.position._get_packed_fingerprint() == Point._get_packed_fingerprint()
+        assert self.position._get_packed_fingerprint() == geometry_msgs.Point._get_packed_fingerprint()
         self.position._encode_one(buf)
-        assert self.orientation._get_packed_fingerprint() == Quaternion._get_packed_fingerprint()
+        assert self.orientation._get_packed_fingerprint() == geometry_msgs.Quaternion._get_packed_fingerprint()
         self.orientation._encode_one(buf)
 
     @classmethod
@@ -51,15 +50,15 @@ class Pose(object):
     @classmethod
     def _decode_one(cls, buf):
         self = Pose()
-        self.position = Point._decode_one(buf)
-        self.orientation = Quaternion._decode_one(buf)
+        self.position = geometry_msgs.Point._decode_one(buf)
+        self.orientation = geometry_msgs.Quaternion._decode_one(buf)
         return self
 
     @classmethod
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0x2d70dd60bd541272+ Point._get_hash_recursive(newparents)+ Quaternion._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0x2d70dd60bd541272+ geometry_msgs.Point._get_hash_recursive(newparents)+ geometry_msgs.Quaternion._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

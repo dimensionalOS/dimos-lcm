@@ -7,23 +7,24 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-from . import *
-from lcm_msgs import std_msgs
-from .Quaternion import Quaternion
+import lcm_msgs.geometry_msgs as geometry_msgs
+
+import lcm_msgs.std_msgs as std_msgs
+
 class QuaternionStamped(object):
 
-    msg_name = "QuaternionStamped"
+    msg_name = "geometry_msgs.QuaternionStamped"
 
     __slots__ = ["header", "quaternion"]
 
-    __typenames__ = ["std_msgs.Header", "Quaternion"]
+    __typenames__ = ["std_msgs.Header", "geometry_msgs.Quaternion"]
 
     __dimensions__ = [None, None]
 
-    def __init__(self, header=std_msgs.Header(), quaternion=Quaternion()):
+    def __init__(self, header=std_msgs.Header(), quaternion=geometry_msgs.Quaternion()):
         # LCM Type: std_msgs.Header
         self.header = header
-        # LCM Type: Quaternion
+        # LCM Type: geometry_msgs.Quaternion
         self.quaternion = quaternion
 
     def encode(self):
@@ -35,7 +36,7 @@ class QuaternionStamped(object):
     def _encode_one(self, buf):
         assert self.header._get_packed_fingerprint() == std_msgs.Header._get_packed_fingerprint()
         self.header._encode_one(buf)
-        assert self.quaternion._get_packed_fingerprint() == Quaternion._get_packed_fingerprint()
+        assert self.quaternion._get_packed_fingerprint() == geometry_msgs.Quaternion._get_packed_fingerprint()
         self.quaternion._encode_one(buf)
 
     @classmethod
@@ -52,14 +53,14 @@ class QuaternionStamped(object):
     def _decode_one(cls, buf):
         self = QuaternionStamped()
         self.header = std_msgs.Header._decode_one(buf)
-        self.quaternion = Quaternion._decode_one(buf)
+        self.quaternion = geometry_msgs.Quaternion._decode_one(buf)
         return self
 
     @classmethod
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0x7a3833b23af3ee48+ std_msgs.Header._get_hash_recursive(newparents)+ Quaternion._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0x7a3833b23af3ee48+ std_msgs.Header._get_hash_recursive(newparents)+ geometry_msgs.Quaternion._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

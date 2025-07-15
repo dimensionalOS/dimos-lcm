@@ -7,10 +7,11 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-from lcm_msgs import std_msgs
+import lcm_msgs.std_msgs as std_msgs
+
 class CompressedImage(object):
 
-    msg_name = "CompressedImage"
+    msg_name = "sensor_msgs.CompressedImage"
 
     __slots__ = ["data_length", "header", "format", "data"]
 

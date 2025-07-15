@@ -9,7 +9,7 @@ import struct
 
 class Duration(object):
 
-    msg_name = "Duration"
+    msg_name = "builtin_interfaces.Duration"
 
     __slots__ = ["sec", "nanosec"]
 

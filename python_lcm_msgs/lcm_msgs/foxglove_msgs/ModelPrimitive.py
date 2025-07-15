@@ -7,27 +7,28 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-from lcm_msgs import geometry_msgs
-from . import *
-from .Color import Color
+import lcm_msgs.geometry_msgs as geometry_msgs
+
+import lcm_msgs.foxglove_msgs as foxglove_msgs
+
 class ModelPrimitive(object):
 
-    msg_name = "ModelPrimitive"
+    msg_name = "foxglove_msgs.ModelPrimitive"
 
     __slots__ = ["data_length", "pose", "scale", "color", "override_color", "url", "media_type", "data"]
 
-    __typenames__ = ["int32_t", "geometry_msgs.Pose", "geometry_msgs.Vector3", "Color", "boolean", "string", "string", "byte"]
+    __typenames__ = ["int32_t", "geometry_msgs.Pose", "geometry_msgs.Vector3", "foxglove_msgs.Color", "boolean", "string", "string", "byte"]
 
     __dimensions__ = [None, None, None, None, None, None, None, ["data_length"]]
 
-    def __init__(self, data_length=0, pose=geometry_msgs.Pose(), scale=geometry_msgs.Vector3(), color=Color(), override_color=False, url="", media_type="", data=b""):
+    def __init__(self, data_length=0, pose=geometry_msgs.Pose(), scale=geometry_msgs.Vector3(), color=foxglove_msgs.Color(), override_color=False, url="", media_type="", data=b""):
         # LCM Type: int32_t
         self.data_length = data_length
         # LCM Type: geometry_msgs.Pose
         self.pose = pose
         # LCM Type: geometry_msgs.Vector3
         self.scale = scale
-        # LCM Type: Color
+        # LCM Type: foxglove_msgs.Color
         self.color = color
         # LCM Type: boolean
         self.override_color = override_color
@@ -50,7 +51,7 @@ class ModelPrimitive(object):
         self.pose._encode_one(buf)
         assert self.scale._get_packed_fingerprint() == geometry_msgs.Vector3._get_packed_fingerprint()
         self.scale._encode_one(buf)
-        assert self.color._get_packed_fingerprint() == Color._get_packed_fingerprint()
+        assert self.color._get_packed_fingerprint() == foxglove_msgs.Color._get_packed_fingerprint()
         self.color._encode_one(buf)
         buf.write(struct.pack(">b", self.override_color))
         __url_encoded = self.url.encode('utf-8')
@@ -79,7 +80,7 @@ class ModelPrimitive(object):
         self.data_length = struct.unpack(">i", buf.read(4))[0]
         self.pose = geometry_msgs.Pose._decode_one(buf)
         self.scale = geometry_msgs.Vector3._decode_one(buf)
-        self.color = Color._decode_one(buf)
+        self.color = foxglove_msgs.Color._decode_one(buf)
         self.override_color = bool(struct.unpack('b', buf.read(1))[0])
         __url_len = struct.unpack('>I', buf.read(4))[0]
         self.url = buf.read(__url_len)[:-1].decode('utf-8', 'replace')
@@ -92,7 +93,7 @@ class ModelPrimitive(object):
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0x23cd41ba898fa1fa+ geometry_msgs.Pose._get_hash_recursive(newparents)+ geometry_msgs.Vector3._get_hash_recursive(newparents)+ Color._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0x23cd41ba898fa1fa+ geometry_msgs.Pose._get_hash_recursive(newparents)+ geometry_msgs.Vector3._get_hash_recursive(newparents)+ foxglove_msgs.Color._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

@@ -7,32 +7,32 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-from . import *
-from lcm_msgs import builtin_interfaces
-from .Color import Color
-from .Point2 import Point2
+import lcm_msgs.foxglove_msgs as foxglove_msgs
+
+import lcm_msgs.builtin_interfaces as builtin_interfaces
+
 class TextAnnotation(object):
 
-    msg_name = "TextAnnotation"
+    msg_name = "foxglove_msgs.TextAnnotation"
 
     __slots__ = ["timestamp", "position", "text", "font_size", "text_color", "background_color"]
 
-    __typenames__ = ["builtin_interfaces.Time", "Point2", "string", "double", "Color", "Color"]
+    __typenames__ = ["builtin_interfaces.Time", "foxglove_msgs.Point2", "string", "double", "foxglove_msgs.Color", "foxglove_msgs.Color"]
 
     __dimensions__ = [None, None, None, None, None, None]
 
-    def __init__(self, timestamp=builtin_interfaces.Time(), position=Point2(), text="", font_size=0.0, text_color=Color(), background_color=Color()):
+    def __init__(self, timestamp=builtin_interfaces.Time(), position=foxglove_msgs.Point2(), text="", font_size=0.0, text_color=foxglove_msgs.Color(), background_color=foxglove_msgs.Color()):
         # LCM Type: builtin_interfaces.Time
         self.timestamp = timestamp
-        # LCM Type: Point2
+        # LCM Type: foxglove_msgs.Point2
         self.position = position
         # LCM Type: string
         self.text = text
         # LCM Type: double
         self.font_size = font_size
-        # LCM Type: Color
+        # LCM Type: foxglove_msgs.Color
         self.text_color = text_color
-        # LCM Type: Color
+        # LCM Type: foxglove_msgs.Color
         self.background_color = background_color
 
     def encode(self):
@@ -44,16 +44,16 @@ class TextAnnotation(object):
     def _encode_one(self, buf):
         assert self.timestamp._get_packed_fingerprint() == builtin_interfaces.Time._get_packed_fingerprint()
         self.timestamp._encode_one(buf)
-        assert self.position._get_packed_fingerprint() == Point2._get_packed_fingerprint()
+        assert self.position._get_packed_fingerprint() == foxglove_msgs.Point2._get_packed_fingerprint()
         self.position._encode_one(buf)
         __text_encoded = self.text.encode('utf-8')
         buf.write(struct.pack('>I', len(__text_encoded)+1))
         buf.write(__text_encoded)
         buf.write(b"\0")
         buf.write(struct.pack(">d", self.font_size))
-        assert self.text_color._get_packed_fingerprint() == Color._get_packed_fingerprint()
+        assert self.text_color._get_packed_fingerprint() == foxglove_msgs.Color._get_packed_fingerprint()
         self.text_color._encode_one(buf)
-        assert self.background_color._get_packed_fingerprint() == Color._get_packed_fingerprint()
+        assert self.background_color._get_packed_fingerprint() == foxglove_msgs.Color._get_packed_fingerprint()
         self.background_color._encode_one(buf)
 
     @classmethod
@@ -70,19 +70,19 @@ class TextAnnotation(object):
     def _decode_one(cls, buf):
         self = TextAnnotation()
         self.timestamp = builtin_interfaces.Time._decode_one(buf)
-        self.position = Point2._decode_one(buf)
+        self.position = foxglove_msgs.Point2._decode_one(buf)
         __text_len = struct.unpack('>I', buf.read(4))[0]
         self.text = buf.read(__text_len)[:-1].decode('utf-8', 'replace')
         self.font_size = struct.unpack(">d", buf.read(8))[0]
-        self.text_color = Color._decode_one(buf)
-        self.background_color = Color._decode_one(buf)
+        self.text_color = foxglove_msgs.Color._decode_one(buf)
+        self.background_color = foxglove_msgs.Color._decode_one(buf)
         return self
 
     @classmethod
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0x1354af1f564701e9+ builtin_interfaces.Time._get_hash_recursive(newparents)+ Point2._get_hash_recursive(newparents)+ Color._get_hash_recursive(newparents)+ Color._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0x1354af1f564701e9+ builtin_interfaces.Time._get_hash_recursive(newparents)+ foxglove_msgs.Point2._get_hash_recursive(newparents)+ foxglove_msgs.Color._get_hash_recursive(newparents)+ foxglove_msgs.Color._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None

@@ -7,20 +7,21 @@ DO NOT MODIFY BY HAND!!!!
 from io import BytesIO
 import struct
 
-from lcm_msgs import geometry_msgs
-from . import *
-from .Color import Color
+import lcm_msgs.geometry_msgs as geometry_msgs
+
+import lcm_msgs.foxglove_msgs as foxglove_msgs
+
 class ArrowPrimitive(object):
 
-    msg_name = "ArrowPrimitive"
+    msg_name = "foxglove_msgs.ArrowPrimitive"
 
     __slots__ = ["pose", "shaft_length", "shaft_diameter", "head_length", "head_diameter", "color"]
 
-    __typenames__ = ["geometry_msgs.Pose", "double", "double", "double", "double", "Color"]
+    __typenames__ = ["geometry_msgs.Pose", "double", "double", "double", "double", "foxglove_msgs.Color"]
 
     __dimensions__ = [None, None, None, None, None, None]
 
-    def __init__(self, pose=geometry_msgs.Pose(), shaft_length=0.0, shaft_diameter=0.0, head_length=0.0, head_diameter=0.0, color=Color()):
+    def __init__(self, pose=geometry_msgs.Pose(), shaft_length=0.0, shaft_diameter=0.0, head_length=0.0, head_diameter=0.0, color=foxglove_msgs.Color()):
         # LCM Type: geometry_msgs.Pose
         self.pose = pose
         # LCM Type: double
@@ -31,7 +32,7 @@ class ArrowPrimitive(object):
         self.head_length = head_length
         # LCM Type: double
         self.head_diameter = head_diameter
-        # LCM Type: Color
+        # LCM Type: foxglove_msgs.Color
         self.color = color
 
     def encode(self):
@@ -44,7 +45,7 @@ class ArrowPrimitive(object):
         assert self.pose._get_packed_fingerprint() == geometry_msgs.Pose._get_packed_fingerprint()
         self.pose._encode_one(buf)
         buf.write(struct.pack(">dddd", self.shaft_length, self.shaft_diameter, self.head_length, self.head_diameter))
-        assert self.color._get_packed_fingerprint() == Color._get_packed_fingerprint()
+        assert self.color._get_packed_fingerprint() == foxglove_msgs.Color._get_packed_fingerprint()
         self.color._encode_one(buf)
 
     @classmethod
@@ -62,14 +63,14 @@ class ArrowPrimitive(object):
         self = ArrowPrimitive()
         self.pose = geometry_msgs.Pose._decode_one(buf)
         self.shaft_length, self.shaft_diameter, self.head_length, self.head_diameter = struct.unpack(">dddd", buf.read(32))
-        self.color = Color._decode_one(buf)
+        self.color = foxglove_msgs.Color._decode_one(buf)
         return self
 
     @classmethod
     def _get_hash_recursive(cls, parents):
         if cls in parents: return 0
         newparents = parents + [cls]
-        tmphash = (0xb1f9d32968e60fbb+ geometry_msgs.Pose._get_hash_recursive(newparents)+ Color._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0xb1f9d32968e60fbb+ geometry_msgs.Pose._get_hash_recursive(newparents)+ foxglove_msgs.Color._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _packed_fingerprint = None
