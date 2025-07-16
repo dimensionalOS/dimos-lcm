@@ -28,7 +28,7 @@ from foxglove_websocket.server import FoxgloveServer, FoxgloveServerListener
 from foxglove_websocket.types import ChannelId
 
 # Constants
-ROS_MSGS_DIR = "ros_msgs"
+ROS_MSGS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ros_msgs")
 LCM_PYTHON_MODULES_PATH = "python_lcm_msgs/lcm_msgs"
 DEFAULT_THREAD_POOL_SIZE = 8
 MESSAGE_BATCH_SIZE = 10
@@ -338,6 +338,7 @@ class SchemaGenerator:
         # Find the .msg file
         msg_file_path = os.path.join(ROS_MSGS_DIR, package, "msg", f"{msg_type}.msg")
         if not os.path.exists(msg_file_path):
+
             raise FileNotFoundError(f"Message file not found: {msg_file_path}")
         
         # Parse the .msg file and generate schema
