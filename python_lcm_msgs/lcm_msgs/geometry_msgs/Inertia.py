@@ -11,7 +11,7 @@ from . import *
 from .Vector3 import Vector3
 class Inertia(object):
 
-    msg_name = "Inertia"
+    msg_name = "geometry_msgs.Inertia"
 
     __slots__ = ["m", "com", "ixx", "ixy", "ixz", "iyy", "iyz", "izz"]
 

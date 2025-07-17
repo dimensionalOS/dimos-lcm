@@ -12,7 +12,7 @@ from . import *
 from .Color import Color
 class ModelPrimitive(object):
 
-    msg_name = "ModelPrimitive"
+    msg_name = "foxglove_msgs.ModelPrimitive"
 
     __slots__ = ["data_length", "pose", "scale", "color", "override_color", "url", "media_type", "data"]
 

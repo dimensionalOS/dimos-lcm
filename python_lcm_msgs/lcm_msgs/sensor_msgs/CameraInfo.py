@@ -12,7 +12,7 @@ from . import *
 from .RegionOfInterest import RegionOfInterest
 class CameraInfo(object):
 
-    msg_name = "CameraInfo"
+    msg_name = "sensor_msgs.CameraInfo"
 
     __slots__ = ["D_length", "header", "height", "width", "distortion_model", "D", "K", "R", "P", "binning_x", "binning_y", "roi"]
 

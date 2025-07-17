@@ -11,7 +11,7 @@ from lcm_msgs import geometry_msgs
 from lcm_msgs import std_msgs
 class InteractiveMarkerPose(object):
 
-    msg_name = "InteractiveMarkerPose"
+    msg_name = "visualization_msgs.InteractiveMarkerPose"
 
     __slots__ = ["header", "pose", "name"]
 

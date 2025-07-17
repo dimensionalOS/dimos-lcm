@@ -11,7 +11,7 @@ from . import *
 from .Point32 import Point32
 class Polygon(object):
 
-    msg_name = "Polygon"
+    msg_name = "geometry_msgs.Polygon"
 
     __slots__ = ["points_length", "points"]
 

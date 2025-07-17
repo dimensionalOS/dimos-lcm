@@ -9,7 +9,7 @@ import struct
 
 class MultiArrayDimension(object):
 
-    msg_name = "MultiArrayDimension"
+    msg_name = "std_msgs.MultiArrayDimension"
 
     __slots__ = ["label", "size", "stride"]
 

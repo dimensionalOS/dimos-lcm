@@ -12,7 +12,7 @@ from . import *
 from .Color import Color
 class TriangleListPrimitive(object):
 
-    msg_name = "TriangleListPrimitive"
+    msg_name = "foxglove_msgs.TriangleListPrimitive"
 
     __slots__ = ["points_length", "colors_length", "indices_length", "pose", "points", "color", "colors", "indices"]
 

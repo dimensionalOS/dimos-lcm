@@ -10,7 +10,7 @@ import struct
 from lcm_msgs import std_msgs
 class VisionInfo(object):
 
-    msg_name = "VisionInfo"
+    msg_name = "vision_msgs.VisionInfo"
 
     __slots__ = ["header", "method", "database_location", "database_version"]
 

@@ -13,7 +13,7 @@ from . import *
 from .ChannelFloat32 import ChannelFloat32
 class PointCloud(object):
 
-    msg_name = "PointCloud"
+    msg_name = "sensor_msgs.PointCloud"
 
     __slots__ = ["points_length", "channels_length", "header", "points", "channels"]
 

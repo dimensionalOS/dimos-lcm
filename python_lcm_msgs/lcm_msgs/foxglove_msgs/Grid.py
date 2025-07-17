@@ -14,7 +14,7 @@ from .Vector2 import Vector2
 from .PackedElementField import PackedElementField
 class Grid(object):
 
-    msg_name = "Grid"
+    msg_name = "foxglove_msgs.Grid"
 
     __slots__ = ["fields_length", "data_length", "timestamp", "frame_id", "pose", "column_count", "cell_size", "row_stride", "cell_stride", "fields", "data"]
 

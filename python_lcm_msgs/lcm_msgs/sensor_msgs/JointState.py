@@ -10,7 +10,7 @@ import struct
 from lcm_msgs import std_msgs
 class JointState(object):
 
-    msg_name = "JointState"
+    msg_name = "sensor_msgs.JointState"
 
     __slots__ = ["name_length", "position_length", "velocity_length", "effort_length", "header", "name", "position", "velocity", "effort"]
 

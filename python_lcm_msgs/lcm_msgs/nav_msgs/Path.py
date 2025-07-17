@@ -11,7 +11,7 @@ from lcm_msgs import geometry_msgs
 from lcm_msgs import std_msgs
 class Path(object):
 
-    msg_name = "Path"
+    msg_name = "nav_msgs.Path"
 
     __slots__ = ["poses_length", "header", "poses"]
 

@@ -12,7 +12,7 @@ from lcm_msgs import std_msgs
 from .MapMetaData import MapMetaData
 class OccupancyGrid(object):
 
-    msg_name = "OccupancyGrid"
+    msg_name = "nav_msgs.OccupancyGrid"
 
     __slots__ = ["data_length", "header", "info", "data"]
 

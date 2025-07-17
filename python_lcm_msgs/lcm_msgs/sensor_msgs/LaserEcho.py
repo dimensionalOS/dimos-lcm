@@ -9,7 +9,7 @@ import struct
 
 class LaserEcho(object):
 
-    msg_name = "LaserEcho"
+    msg_name = "sensor_msgs.LaserEcho"
 
     __slots__ = ["echoes_length", "echoes"]
 

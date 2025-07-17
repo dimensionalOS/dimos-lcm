@@ -9,18 +9,18 @@ import struct
 
 from . import *
 from lcm_msgs import builtin_interfaces
-from .LinePrimitive import LinePrimitive
-from .SpherePrimitive import SpherePrimitive
-from .TriangleListPrimitive import TriangleListPrimitive
-from .CubePrimitive import CubePrimitive
-from .CylinderPrimitive import CylinderPrimitive
 from .TextPrimitive import TextPrimitive
 from .KeyValuePair import KeyValuePair
-from .ArrowPrimitive import ArrowPrimitive
 from .ModelPrimitive import ModelPrimitive
+from .ArrowPrimitive import ArrowPrimitive
+from .SpherePrimitive import SpherePrimitive
+from .CylinderPrimitive import CylinderPrimitive
+from .LinePrimitive import LinePrimitive
+from .CubePrimitive import CubePrimitive
+from .TriangleListPrimitive import TriangleListPrimitive
 class SceneEntity(object):
 
-    msg_name = "SceneEntity"
+    msg_name = "foxglove_msgs.SceneEntity"
 
     __slots__ = ["metadata_length", "arrows_length", "cubes_length", "spheres_length", "cylinders_length", "lines_length", "triangles_length", "texts_length", "models_length", "timestamp", "frame_id", "id", "lifetime", "frame_locked", "metadata", "arrows", "cubes", "spheres", "cylinders", "lines", "triangles", "texts", "models"]
 

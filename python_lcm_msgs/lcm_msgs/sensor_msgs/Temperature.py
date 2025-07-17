@@ -10,7 +10,7 @@ import struct
 from lcm_msgs import std_msgs
 class Temperature(object):
 
-    msg_name = "Temperature"
+    msg_name = "sensor_msgs.Temperature"
 
     __slots__ = ["header", "temperature", "variance"]
 

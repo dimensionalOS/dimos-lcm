@@ -11,7 +11,7 @@ from lcm_msgs import geometry_msgs
 from lcm_msgs import std_msgs
 class MagneticField(object):
 
-    msg_name = "MagneticField"
+    msg_name = "sensor_msgs.MagneticField"
 
     __slots__ = ["header", "magnetic_field", "magnetic_field_covariance"]
 

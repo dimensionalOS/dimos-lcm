@@ -12,7 +12,7 @@ from . import *
 from .PointField import PointField
 class PointCloud2(object):
 
-    msg_name = "PointCloud2"
+    msg_name = "sensor_msgs.PointCloud2"
 
     __slots__ = ["fields_length", "data_length", "header", "height", "width", "fields", "is_bigendian", "point_step", "row_step", "data", "is_dense"]
 

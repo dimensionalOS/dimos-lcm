@@ -11,7 +11,7 @@ from . import *
 from .MultiArrayLayout import MultiArrayLayout
 class ByteMultiArray(object):
 
-    msg_name = "ByteMultiArray"
+    msg_name = "std_msgs.ByteMultiArray"
 
     __slots__ = ["data_length", "layout", "data"]
 

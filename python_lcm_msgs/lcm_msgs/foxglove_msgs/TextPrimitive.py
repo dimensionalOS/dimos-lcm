@@ -12,7 +12,7 @@ from . import *
 from .Color import Color
 class TextPrimitive(object):
 
-    msg_name = "TextPrimitive"
+    msg_name = "foxglove_msgs.TextPrimitive"
 
     __slots__ = ["pose", "billboard", "font_size", "scale_invariant", "color", "text"]
 

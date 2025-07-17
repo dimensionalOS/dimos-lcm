@@ -56,9 +56,15 @@ def fix_file_imports(file_path):
                 updated = True
                 
             # Replace pkg_name.ClassName() with just ClassName()
+            # But exclude msg_name = "pkg_name.ClassName" patterns
             pattern = fr'{pkg}\.\w+'
             matches = re.findall(pattern, content)
             for match in matches:
+                # Skip if this is part of msg_name assignment
+                msg_name_pattern = fr'msg_name\s*=\s*["\']' + re.escape(match) + r'["\']'
+                if re.search(msg_name_pattern, content):
+                    print(f"Skipping {match} as it's part of msg_name")
+                    continue
                 class_name = match.split('.')[1]
                 content = content.replace(match, class_name)
                 updated = True

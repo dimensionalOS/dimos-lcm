@@ -11,7 +11,7 @@ from lcm_msgs import geometry_msgs
 from lcm_msgs import std_msgs
 class Imu(object):
 
-    msg_name = "Imu"
+    msg_name = "sensor_msgs.Imu"
 
     __slots__ = ["header", "orientation", "orientation_covariance", "angular_velocity", "angular_velocity_covariance", "linear_acceleration", "linear_acceleration_covariance"]
 

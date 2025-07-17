@@ -11,7 +11,7 @@ from . import *
 from .Point2D import Point2D
 class Pose2D(object):
 
-    msg_name = "Pose2D"
+    msg_name = "vision_msgs.Pose2D"
 
     __slots__ = ["position", "theta"]
 

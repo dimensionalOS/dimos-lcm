@@ -10,7 +10,7 @@ import struct
 from lcm_msgs import std_msgs
 class Range(object):
 
-    msg_name = "Range"
+    msg_name = "sensor_msgs.Range"
 
     __slots__ = ["header", "radiation_type", "field_of_view", "min_range", "max_range", "range"]
 

@@ -11,7 +11,7 @@ from lcm_msgs import geometry_msgs
 from lcm_msgs import builtin_interfaces
 class PosesInFrame(object):
 
-    msg_name = "PosesInFrame"
+    msg_name = "foxglove_msgs.PosesInFrame"
 
     __slots__ = ["poses_length", "timestamp", "frame_id", "poses"]
 

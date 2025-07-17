@@ -11,7 +11,7 @@ from . import *
 from .MultiArrayLayout import MultiArrayLayout
 class UInt32MultiArray(object):
 
-    msg_name = "UInt32MultiArray"
+    msg_name = "std_msgs.UInt32MultiArray"
 
     __slots__ = ["data_length", "layout", "data"]
 

@@ -10,7 +10,7 @@ import struct
 from lcm_msgs import builtin_interfaces
 class CompressedImage(object):
 
-    msg_name = "CompressedImage"
+    msg_name = "foxglove_msgs.CompressedImage"
 
     __slots__ = ["data_length", "timestamp", "frame_id", "data", "format"]
 

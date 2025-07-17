@@ -11,7 +11,7 @@ from lcm_msgs import geometry_msgs
 from lcm_msgs import std_msgs
 class InteractiveMarkerFeedback(object):
 
-    msg_name = "InteractiveMarkerFeedback"
+    msg_name = "visualization_msgs.InteractiveMarkerFeedback"
 
     __slots__ = ["header", "client_id", "marker_name", "control_name", "event_type", "pose", "menu_entry_id", "mouse_point", "mouse_point_valid"]
 

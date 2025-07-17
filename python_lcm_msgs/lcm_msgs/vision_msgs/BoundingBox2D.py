@@ -11,7 +11,7 @@ from . import *
 from .Pose2D import Pose2D
 class BoundingBox2D(object):
 
-    msg_name = "BoundingBox2D"
+    msg_name = "vision_msgs.BoundingBox2D"
 
     __slots__ = ["center", "size_x", "size_y"]
 

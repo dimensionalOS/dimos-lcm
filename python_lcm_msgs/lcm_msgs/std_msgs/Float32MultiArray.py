@@ -11,7 +11,7 @@ from . import *
 from .MultiArrayLayout import MultiArrayLayout
 class Float32MultiArray(object):
 
-    msg_name = "Float32MultiArray"
+    msg_name = "std_msgs.Float32MultiArray"
 
     __slots__ = ["data_length", "layout", "data"]
 

@@ -8,12 +8,12 @@ from io import BytesIO
 import struct
 
 from . import *
+from .PointsAnnotation import PointsAnnotation
 from .CircleAnnotation import CircleAnnotation
 from .TextAnnotation import TextAnnotation
-from .PointsAnnotation import PointsAnnotation
 class ImageAnnotations(object):
 
-    msg_name = "ImageAnnotations"
+    msg_name = "foxglove_msgs.ImageAnnotations"
 
     __slots__ = ["circles_length", "points_length", "texts_length", "circles", "points", "texts"]
 

@@ -12,7 +12,7 @@ from .Point import Point
 from .Quaternion import Quaternion
 class Pose(object):
 
-    msg_name = "Pose"
+    msg_name = "geometry_msgs.Pose"
 
     __slots__ = ["position", "orientation"]
 

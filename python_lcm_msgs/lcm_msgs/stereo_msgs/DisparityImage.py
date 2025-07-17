@@ -11,7 +11,7 @@ from lcm_msgs import std_msgs
 from lcm_msgs import sensor_msgs
 class DisparityImage(object):
 
-    msg_name = "DisparityImage"
+    msg_name = "stereo_msgs.DisparityImage"
 
     __slots__ = ["header", "image", "f", "T", "valid_window", "min_disparity", "max_disparity", "delta_d"]
 

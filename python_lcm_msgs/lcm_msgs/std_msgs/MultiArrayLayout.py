@@ -11,7 +11,7 @@ from . import *
 from .MultiArrayDimension import MultiArrayDimension
 class MultiArrayLayout(object):
 
-    msg_name = "MultiArrayLayout"
+    msg_name = "std_msgs.MultiArrayLayout"
 
     __slots__ = ["dim_length", "dim", "data_offset"]
 

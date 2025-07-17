@@ -11,7 +11,7 @@ from . import *
 from .Vector3 import Vector3
 class Twist(object):
 
-    msg_name = "Twist"
+    msg_name = "geometry_msgs.Twist"
 
     __slots__ = ["linear", "angular"]
 

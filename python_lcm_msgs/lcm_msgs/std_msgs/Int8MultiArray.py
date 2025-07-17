@@ -11,7 +11,7 @@ from . import *
 from .MultiArrayLayout import MultiArrayLayout
 class Int8MultiArray(object):
 
-    msg_name = "Int8MultiArray"
+    msg_name = "std_msgs.Int8MultiArray"
 
     __slots__ = ["data_length", "layout", "data"]
 

@@ -11,7 +11,7 @@ from . import *
 from .Vector3 import Vector3
 class Accel(object):
 
-    msg_name = "Accel"
+    msg_name = "geometry_msgs.Accel"
 
     __slots__ = ["linear", "angular"]
 

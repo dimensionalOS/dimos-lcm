@@ -9,11 +9,11 @@ import struct
 
 from . import *
 from lcm_msgs import std_msgs
-from .BoundingBox3D import BoundingBox3D
 from .ObjectHypothesisWithPose import ObjectHypothesisWithPose
+from .BoundingBox3D import BoundingBox3D
 class Detection3D(object):
 
-    msg_name = "Detection3D"
+    msg_name = "vision_msgs.Detection3D"
 
     __slots__ = ["results_length", "header", "results", "bbox", "id"]
 

@@ -11,7 +11,7 @@ from . import *
 from .KeyValue import KeyValue
 class DiagnosticStatus(object):
 
-    msg_name = "DiagnosticStatus"
+    msg_name = "diagnostic_msgs.DiagnosticStatus"
 
     __slots__ = ["values_length", "level", "name", "message", "hardware_id", "values"]
 

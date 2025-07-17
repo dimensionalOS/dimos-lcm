@@ -12,7 +12,7 @@ from . import *
 from .Color import Color
 class LinePrimitive(object):
 
-    msg_name = "LinePrimitive"
+    msg_name = "foxglove_msgs.LinePrimitive"
 
     __slots__ = ["points_length", "colors_length", "indices_length", "type", "pose", "thickness", "scale_invariant", "points", "color", "colors", "indices"]
 

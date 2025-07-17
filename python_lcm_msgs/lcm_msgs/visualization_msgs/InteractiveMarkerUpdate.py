@@ -8,8 +8,8 @@ from io import BytesIO
 import struct
 
 from . import *
-from .InteractiveMarker import InteractiveMarker
 from .InteractiveMarkerPose import InteractiveMarkerPose
+from .InteractiveMarker import InteractiveMarker
 class InteractiveMarkerUpdate(object):
 
     msg_name = "InteractiveMarkerUpdate"

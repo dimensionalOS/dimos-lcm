@@ -11,7 +11,7 @@ from lcm_msgs import geometry_msgs
 from lcm_msgs import std_msgs
 class GridCells(object):
 
-    msg_name = "GridCells"
+    msg_name = "nav_msgs.GridCells"
 
     __slots__ = ["cells_length", "header", "cell_width", "cell_height", "cells"]
 

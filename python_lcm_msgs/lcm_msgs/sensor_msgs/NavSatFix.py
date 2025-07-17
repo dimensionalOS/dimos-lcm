@@ -12,7 +12,7 @@ from . import *
 from .NavSatStatus import NavSatStatus
 class NavSatFix(object):
 
-    msg_name = "NavSatFix"
+    msg_name = "sensor_msgs.NavSatFix"
 
     __slots__ = ["header", "status", "latitude", "longitude", "altitude", "position_covariance", "position_covariance_type"]
 

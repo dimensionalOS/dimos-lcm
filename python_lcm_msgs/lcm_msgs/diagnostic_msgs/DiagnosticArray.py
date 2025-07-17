@@ -12,7 +12,7 @@ from lcm_msgs import std_msgs
 from .DiagnosticStatus import DiagnosticStatus
 class DiagnosticArray(object):
 
-    msg_name = "DiagnosticArray"
+    msg_name = "diagnostic_msgs.DiagnosticArray"
 
     __slots__ = ["status_length", "header", "status"]
 

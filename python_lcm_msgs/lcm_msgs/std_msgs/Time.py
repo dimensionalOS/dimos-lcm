@@ -9,7 +9,7 @@ import struct
 
 class Time(object):
 
-    msg_name = "Time"
+    msg_name = "std_msgs.Time"
 
     __slots__ = ["sec", "nsec"]
 
