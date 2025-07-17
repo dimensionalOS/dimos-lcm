@@ -12,7 +12,7 @@ from lcm_msgs import geometry_msgs
 from .MeshTriangle import MeshTriangle
 class Mesh(object):
 
-    msg_name = "Mesh"
+    msg_name = "shape_msgs.Mesh"
 
     __slots__ = ["triangles_length", "vertices_length", "triangles", "vertices"]
 

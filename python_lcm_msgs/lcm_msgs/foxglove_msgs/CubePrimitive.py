@@ -12,7 +12,7 @@ from . import *
 from .Color import Color
 class CubePrimitive(object):
 
-    msg_name = "CubePrimitive"
+    msg_name = "foxglove_msgs.CubePrimitive"
 
     __slots__ = ["pose", "size", "color"]
 

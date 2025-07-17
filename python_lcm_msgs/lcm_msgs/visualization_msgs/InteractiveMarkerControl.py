@@ -12,7 +12,7 @@ from . import *
 from .Marker import Marker
 class InteractiveMarkerControl(object):
 
-    msg_name = "InteractiveMarkerControl"
+    msg_name = "visualization_msgs.InteractiveMarkerControl"
 
     __slots__ = ["markers_length", "name", "orientation", "orientation_mode", "interaction_mode", "always_visible", "markers", "independent_marker_orientation", "description"]
 

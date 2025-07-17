@@ -11,7 +11,7 @@ from . import *
 from .Time import Time
 class Header(object):
 
-    msg_name = "Header"
+    msg_name = "std_msgs.Header"
 
     __slots__ = ["seq", "stamp", "frame_id"]
 

@@ -12,7 +12,7 @@ from lcm_msgs import std_msgs
 from .VisionClass import VisionClass
 class LabelInfo(object):
 
-    msg_name = "LabelInfo"
+    msg_name = "vision_msgs.LabelInfo"
 
     __slots__ = ["class_map_length", "header", "class_map", "threshold"]
 

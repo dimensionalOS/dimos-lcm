@@ -12,7 +12,7 @@ from lcm_msgs import std_msgs
 from .ObjectHypothesis import ObjectHypothesis
 class Classification(object):
 
-    msg_name = "Classification"
+    msg_name = "vision_msgs.Classification"
 
     __slots__ = ["results_length", "header", "results"]
 

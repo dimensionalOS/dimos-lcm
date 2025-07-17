@@ -13,7 +13,7 @@ from lcm_msgs import builtin_interfaces
 from .PackedElementField import PackedElementField
 class PointCloud(object):
 
-    msg_name = "PointCloud"
+    msg_name = "foxglove_msgs.PointCloud"
 
     __slots__ = ["fields_length", "data_length", "timestamp", "frame_id", "pose", "point_stride", "fields", "data"]
 

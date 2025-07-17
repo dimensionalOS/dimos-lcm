@@ -12,7 +12,7 @@ from lcm_msgs import std_msgs
 from .JointTrajectoryPoint import JointTrajectoryPoint
 class JointTrajectory(object):
 
-    msg_name = "JointTrajectory"
+    msg_name = "trajectory_msgs.JointTrajectory"
 
     __slots__ = ["joint_names_length", "points_length", "header", "joint_names", "points"]
 

@@ -10,7 +10,7 @@ import struct
 from lcm_msgs import std_msgs
 class GoalID(object):
 
-    msg_name = "GoalID"
+    msg_name = "actionlib_msgs.GoalID"
 
     __slots__ = ["stamp", "id"]
 

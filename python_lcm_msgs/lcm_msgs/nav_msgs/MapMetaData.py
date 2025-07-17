@@ -11,7 +11,7 @@ from lcm_msgs import geometry_msgs
 from lcm_msgs import std_msgs
 class MapMetaData(object):
 
-    msg_name = "MapMetaData"
+    msg_name = "nav_msgs.MapMetaData"
 
     __slots__ = ["map_load_time", "resolution", "width", "height", "origin"]
 

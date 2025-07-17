@@ -11,7 +11,7 @@ from lcm_msgs import geometry_msgs
 from lcm_msgs import std_msgs
 class Odometry(object):
 
-    msg_name = "Odometry"
+    msg_name = "nav_msgs.Odometry"
 
     __slots__ = ["header", "child_frame_id", "pose", "twist"]
 

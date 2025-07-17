@@ -12,7 +12,7 @@ from .SceneEntity import SceneEntity
 from .SceneEntityDeletion import SceneEntityDeletion
 class SceneUpdate(object):
 
-    msg_name = "SceneUpdate"
+    msg_name = "foxglove_msgs.SceneUpdate"
 
     __slots__ = ["deletions_length", "entities_length", "deletions", "entities"]
 

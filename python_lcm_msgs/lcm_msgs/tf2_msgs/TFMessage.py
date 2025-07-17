@@ -10,7 +10,7 @@ import struct
 from lcm_msgs import geometry_msgs
 class TFMessage(object):
 
-    msg_name = "TFMessage"
+    msg_name = "tf2_msgs.TFMessage"
 
     __slots__ = ["transforms_length", "transforms"]
 

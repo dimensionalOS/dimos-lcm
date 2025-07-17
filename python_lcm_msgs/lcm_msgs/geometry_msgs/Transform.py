@@ -12,7 +12,7 @@ from .Vector3 import Vector3
 from .Quaternion import Quaternion
 class Transform(object):
 
-    msg_name = "Transform"
+    msg_name = "geometry_msgs.Transform"
 
     __slots__ = ["translation", "rotation"]
 

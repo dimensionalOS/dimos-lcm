@@ -9,7 +9,7 @@ import struct
 
 class Time(object):
 
-    msg_name = "Time"
+    msg_name = "builtin_interfaces.Time"
 
     __slots__ = ["sec", "nanosec"]
 

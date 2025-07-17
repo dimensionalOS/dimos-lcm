@@ -9,11 +9,11 @@ import struct
 
 from . import *
 from lcm_msgs import builtin_interfaces
-from .Point2 import Point2
 from .Color import Color
+from .Point2 import Point2
 class PointsAnnotation(object):
 
-    msg_name = "PointsAnnotation"
+    msg_name = "foxglove_msgs.PointsAnnotation"
 
     __slots__ = ["points_length", "outline_colors_length", "timestamp", "type", "points", "outline_color", "outline_colors", "fill_color", "thickness"]
 

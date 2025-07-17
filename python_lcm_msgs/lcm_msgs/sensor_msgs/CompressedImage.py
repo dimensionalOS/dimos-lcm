@@ -10,7 +10,7 @@ import struct
 from lcm_msgs import std_msgs
 class CompressedImage(object):
 
-    msg_name = "CompressedImage"
+    msg_name = "sensor_msgs.CompressedImage"
 
     __slots__ = ["data_length", "header", "format", "data"]
 

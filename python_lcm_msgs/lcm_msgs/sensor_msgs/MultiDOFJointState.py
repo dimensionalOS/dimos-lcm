@@ -11,7 +11,7 @@ from lcm_msgs import geometry_msgs
 from lcm_msgs import std_msgs
 class MultiDOFJointState(object):
 
-    msg_name = "MultiDOFJointState"
+    msg_name = "sensor_msgs.MultiDOFJointState"
 
     __slots__ = ["joint_names_length", "transforms_length", "twist_length", "wrench_length", "header", "joint_names", "transforms", "twist", "wrench"]
 

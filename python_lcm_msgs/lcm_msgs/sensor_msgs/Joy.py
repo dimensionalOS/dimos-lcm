@@ -10,7 +10,7 @@ import struct
 from lcm_msgs import std_msgs
 class Joy(object):
 
-    msg_name = "Joy"
+    msg_name = "sensor_msgs.Joy"
 
     __slots__ = ["axes_length", "buttons_length", "header", "axes", "buttons"]
 

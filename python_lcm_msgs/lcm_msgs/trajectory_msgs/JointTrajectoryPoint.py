@@ -10,7 +10,7 @@ import struct
 from lcm_msgs import std_msgs
 class JointTrajectoryPoint(object):
 
-    msg_name = "JointTrajectoryPoint"
+    msg_name = "trajectory_msgs.JointTrajectoryPoint"
 
     __slots__ = ["positions_length", "velocities_length", "accelerations_length", "effort_length", "positions", "velocities", "accelerations", "effort", "time_from_start"]
 

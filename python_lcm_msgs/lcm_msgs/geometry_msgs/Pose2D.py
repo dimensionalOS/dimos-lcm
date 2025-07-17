@@ -9,7 +9,7 @@ import struct
 
 class Pose2D(object):
 
-    msg_name = "Pose2D"
+    msg_name = "geometry_msgs.Pose2D"
 
     __slots__ = ["x", "y", "theta"]
 

@@ -11,7 +11,7 @@ from . import *
 from .GoalID import GoalID
 class GoalStatus(object):
 
-    msg_name = "GoalStatus"
+    msg_name = "actionlib_msgs.GoalStatus"
 
     __slots__ = ["goal_id", "status", "text"]
 

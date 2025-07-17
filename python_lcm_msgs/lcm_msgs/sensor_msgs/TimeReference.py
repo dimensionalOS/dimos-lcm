@@ -10,7 +10,7 @@ import struct
 from lcm_msgs import std_msgs
 class TimeReference(object):
 
-    msg_name = "TimeReference"
+    msg_name = "sensor_msgs.TimeReference"
 
     __slots__ = ["header", "time_ref", "source"]
 

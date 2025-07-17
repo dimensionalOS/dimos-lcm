@@ -11,7 +11,7 @@ from . import *
 from .Vector3 import Vector3
 class Wrench(object):
 
-    msg_name = "Wrench"
+    msg_name = "geometry_msgs.Wrench"
 
     __slots__ = ["force", "torque"]
 

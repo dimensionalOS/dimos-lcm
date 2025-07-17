@@ -10,7 +10,7 @@ import struct
 from lcm_msgs import builtin_interfaces
 class LocationFix(object):
 
-    msg_name = "LocationFix"
+    msg_name = "foxglove_msgs.LocationFix"
 
     __slots__ = ["timestamp", "frame_id", "latitude", "longitude", "altitude", "position_covariance", "position_covariance_type"]
 

@@ -10,7 +10,7 @@ import struct
 from lcm_msgs import std_msgs
 class RelativeHumidity(object):
 
-    msg_name = "RelativeHumidity"
+    msg_name = "sensor_msgs.RelativeHumidity"
 
     __slots__ = ["header", "relative_humidity", "variance"]
 

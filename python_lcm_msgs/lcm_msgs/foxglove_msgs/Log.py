@@ -10,7 +10,7 @@ import struct
 from lcm_msgs import builtin_interfaces
 class Log(object):
 
-    msg_name = "Log"
+    msg_name = "foxglove_msgs.Log"
 
     __slots__ = ["timestamp", "level", "message", "name", "file", "line"]
 

@@ -10,7 +10,7 @@ import struct
 from lcm_msgs import std_msgs
 class Illuminance(object):
 
-    msg_name = "Illuminance"
+    msg_name = "sensor_msgs.Illuminance"
 
     __slots__ = ["header", "illuminance", "variance"]
 

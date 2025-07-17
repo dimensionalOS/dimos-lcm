@@ -13,7 +13,7 @@ from .ObjectHypothesisWithPose import ObjectHypothesisWithPose
 from .BoundingBox2D import BoundingBox2D
 class Detection2D(object):
 
-    msg_name = "Detection2D"
+    msg_name = "vision_msgs.Detection2D"
 
     __slots__ = ["results_length", "header", "results", "bbox", "id"]
 

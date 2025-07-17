@@ -11,7 +11,7 @@ from lcm_msgs import geometry_msgs
 from lcm_msgs import builtin_interfaces
 class FrameTransform(object):
 
-    msg_name = "FrameTransform"
+    msg_name = "foxglove_msgs.FrameTransform"
 
     __slots__ = ["timestamp", "parent_frame_id", "child_frame_id", "translation", "rotation"]
 

@@ -11,7 +11,7 @@ from lcm_msgs import geometry_msgs
 from lcm_msgs import std_msgs
 class ImageMarker(object):
 
-    msg_name = "ImageMarker"
+    msg_name = "visualization_msgs.ImageMarker"
 
     __slots__ = ["points_length", "outline_colors_length", "header", "ns", "id", "type", "action", "position", "scale", "outline_color", "filled", "fill_color", "lifetime", "points", "outline_colors"]
 

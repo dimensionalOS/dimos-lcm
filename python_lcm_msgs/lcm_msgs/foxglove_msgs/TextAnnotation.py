@@ -13,7 +13,7 @@ from .Point2 import Point2
 from .Color import Color
 class TextAnnotation(object):
 
-    msg_name = "TextAnnotation"
+    msg_name = "foxglove_msgs.TextAnnotation"
 
     __slots__ = ["timestamp", "position", "text", "font_size", "text_color", "background_color"]
 

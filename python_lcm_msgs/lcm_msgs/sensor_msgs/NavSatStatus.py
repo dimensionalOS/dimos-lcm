@@ -9,7 +9,7 @@ import struct
 
 class NavSatStatus(object):
 
-    msg_name = "NavSatStatus"
+    msg_name = "sensor_msgs.NavSatStatus"
 
     __slots__ = ["status", "service"]
 

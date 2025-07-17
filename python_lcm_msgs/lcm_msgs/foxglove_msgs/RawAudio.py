@@ -10,7 +10,7 @@ import struct
 from lcm_msgs import builtin_interfaces
 class RawAudio(object):
 
-    msg_name = "RawAudio"
+    msg_name = "foxglove_msgs.RawAudio"
 
     __slots__ = ["data_length", "timestamp", "data", "format", "sample_rate", "number_of_channels"]
 

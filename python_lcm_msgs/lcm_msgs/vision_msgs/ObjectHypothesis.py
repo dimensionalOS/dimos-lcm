@@ -9,7 +9,7 @@ import struct
 
 class ObjectHypothesis(object):
 
-    msg_name = "ObjectHypothesis"
+    msg_name = "vision_msgs.ObjectHypothesis"
 
     __slots__ = ["class_id", "score"]
 

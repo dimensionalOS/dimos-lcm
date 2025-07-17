@@ -12,7 +12,7 @@ from . import *
 from .Color import Color
 class SpherePrimitive(object):
 
-    msg_name = "SpherePrimitive"
+    msg_name = "foxglove_msgs.SpherePrimitive"
 
     __slots__ = ["pose", "size", "color"]
 

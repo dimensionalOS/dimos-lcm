@@ -12,7 +12,7 @@ from . import *
 from .Color import Color
 class CylinderPrimitive(object):
 
-    msg_name = "CylinderPrimitive"
+    msg_name = "foxglove_msgs.CylinderPrimitive"
 
     __slots__ = ["pose", "size", "bottom_scale", "top_scale", "color"]
 
