@@ -50,7 +50,7 @@ class JoyFeedback(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = JoyFeedback()
+        self = cls()
         self.type, self.id, self.intensity = struct.unpack(">BBf", buf.read(6))
         return self
 

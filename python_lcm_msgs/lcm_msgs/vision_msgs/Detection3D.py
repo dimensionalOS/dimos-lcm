@@ -65,7 +65,7 @@ class Detection3D(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Detection3D()
+        self = cls()
         self.results_length = struct.unpack(">i", buf.read(4))[0]
         self.header = std_msgs.Header._decode_one(buf)
         self.results = []

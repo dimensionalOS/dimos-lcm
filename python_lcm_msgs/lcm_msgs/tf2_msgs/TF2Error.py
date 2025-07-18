@@ -56,7 +56,7 @@ class TF2Error(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = TF2Error()
+        self = cls()
         self.error = struct.unpack(">B", buf.read(1))[0]
         __error_string_len = struct.unpack('>I', buf.read(4))[0]
         self.error_string = buf.read(__error_string_len)[:-1].decode('utf-8', 'replace')

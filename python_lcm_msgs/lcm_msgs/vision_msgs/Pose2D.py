@@ -48,7 +48,7 @@ class Pose2D(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Pose2D()
+        self = cls()
         self.position = Point2D._decode_one(buf)
         self.theta = struct.unpack(">d", buf.read(8))[0]
         return self

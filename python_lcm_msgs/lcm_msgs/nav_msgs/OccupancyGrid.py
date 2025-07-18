@@ -56,7 +56,7 @@ class OccupancyGrid(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = OccupancyGrid()
+        self = cls()
         self.data_length = struct.unpack(">i", buf.read(4))[0]
         self.header = std_msgs.Header._decode_one(buf)
         self.info = MapMetaData._decode_one(buf)

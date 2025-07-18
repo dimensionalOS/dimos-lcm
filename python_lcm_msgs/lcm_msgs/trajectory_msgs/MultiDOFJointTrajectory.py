@@ -63,7 +63,7 @@ class MultiDOFJointTrajectory(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = MultiDOFJointTrajectory()
+        self = cls()
         self.joint_names_length, self.points_length = struct.unpack(">ii", buf.read(8))
         self.header = std_msgs.Header._decode_one(buf)
         self.joint_names = []

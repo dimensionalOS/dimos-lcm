@@ -50,7 +50,7 @@ class PoseStamped(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = PoseStamped()
+        self = cls()
         self.header = std_msgs.Header._decode_one(buf)
         self.pose = Pose._decode_one(buf)
         return self

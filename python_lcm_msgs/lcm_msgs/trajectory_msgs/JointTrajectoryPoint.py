@@ -65,7 +65,7 @@ class JointTrajectoryPoint(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = JointTrajectoryPoint()
+        self = cls()
         self.positions_length, self.velocities_length, self.accelerations_length, self.effort_length = struct.unpack(">iiii", buf.read(16))
         self.positions = struct.unpack('>%dd' % self.positions_length, buf.read(self.positions_length * 8))
         self.velocities = struct.unpack('>%dd' % self.velocities_length, buf.read(self.velocities_length * 8))

@@ -61,7 +61,7 @@ class Inertia(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Inertia()
+        self = cls()
         self.m = struct.unpack(">d", buf.read(8))[0]
         self.com = Vector3._decode_one(buf)
         self.ixx, self.ixy, self.ixz, self.iyy, self.iyz, self.izz = struct.unpack(">dddddd", buf.read(48))

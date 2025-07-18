@@ -54,7 +54,7 @@ class GoalStatusArray(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = GoalStatusArray()
+        self = cls()
         self.status_list_length = struct.unpack(">i", buf.read(4))[0]
         self.header = std_msgs.Header._decode_one(buf)
         self.status_list = []

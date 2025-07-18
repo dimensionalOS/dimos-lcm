@@ -50,7 +50,7 @@ class WrenchStamped(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = WrenchStamped()
+        self = cls()
         self.header = std_msgs.Header._decode_one(buf)
         self.wrench = Wrench._decode_one(buf)
         return self

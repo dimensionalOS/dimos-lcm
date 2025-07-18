@@ -50,7 +50,7 @@ class GoalID(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = GoalID()
+        self = cls()
         self.stamp = std_msgs.Time._decode_one(buf)
         __id_len = struct.unpack('>I', buf.read(4))[0]
         self.id = buf.read(__id_len)[:-1].decode('utf-8', 'replace')

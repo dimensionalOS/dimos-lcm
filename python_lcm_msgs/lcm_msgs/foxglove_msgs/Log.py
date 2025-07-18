@@ -75,7 +75,7 @@ class Log(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Log()
+        self = cls()
         self.timestamp = builtin_interfaces.Time._decode_one(buf)
         self.level = struct.unpack(">B", buf.read(1))[0]
         __message_len = struct.unpack('>I', buf.read(4))[0]

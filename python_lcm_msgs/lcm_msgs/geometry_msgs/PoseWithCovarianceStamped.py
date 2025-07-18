@@ -50,7 +50,7 @@ class PoseWithCovarianceStamped(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = PoseWithCovarianceStamped()
+        self = cls()
         self.header = std_msgs.Header._decode_one(buf)
         self.pose = PoseWithCovariance._decode_one(buf)
         return self

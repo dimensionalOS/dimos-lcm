@@ -76,7 +76,7 @@ class CameraCalibration(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = CameraCalibration()
+        self = cls()
         self.d_length = struct.unpack(">i", buf.read(4))[0]
         self.timestamp = builtin_interfaces.Time._decode_one(buf)
         __frame_id_len = struct.unpack('>I', buf.read(4))[0]

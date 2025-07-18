@@ -58,7 +58,7 @@ class GridCells(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = GridCells()
+        self = cls()
         self.cells_length = struct.unpack(">i", buf.read(4))[0]
         self.header = std_msgs.Header._decode_one(buf)
         self.cell_width, self.cell_height = struct.unpack(">ff", buf.read(8))

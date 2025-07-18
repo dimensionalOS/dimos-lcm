@@ -8,9 +8,9 @@ from io import BytesIO
 import struct
 
 from . import *
-from .PointsAnnotation import PointsAnnotation
-from .CircleAnnotation import CircleAnnotation
 from .TextAnnotation import TextAnnotation
+from .CircleAnnotation import CircleAnnotation
+from .PointsAnnotation import PointsAnnotation
 class ImageAnnotations(object):
 
     msg_name = "foxglove_msgs.ImageAnnotations"
@@ -65,7 +65,7 @@ class ImageAnnotations(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = ImageAnnotations()
+        self = cls()
         self.circles_length, self.points_length, self.texts_length = struct.unpack(">iii", buf.read(12))
         self.circles = []
         for i0 in range(self.circles_length):

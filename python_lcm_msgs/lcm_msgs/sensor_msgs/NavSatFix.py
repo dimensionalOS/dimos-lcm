@@ -68,7 +68,7 @@ class NavSatFix(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = NavSatFix()
+        self = cls()
         self.header = std_msgs.Header._decode_one(buf)
         self.status = NavSatStatus._decode_one(buf)
         self.latitude, self.longitude, self.altitude = struct.unpack(">ddd", buf.read(24))

@@ -50,7 +50,7 @@ class InertiaStamped(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = InertiaStamped()
+        self = cls()
         self.header = std_msgs.Header._decode_one(buf)
         self.inertia = Inertia._decode_one(buf)
         return self

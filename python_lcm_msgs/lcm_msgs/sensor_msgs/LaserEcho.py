@@ -45,7 +45,7 @@ class LaserEcho(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = LaserEcho()
+        self = cls()
         self.echoes_length = struct.unpack(">i", buf.read(4))[0]
         self.echoes = struct.unpack('>%df' % self.echoes_length, buf.read(self.echoes_length * 4))
         return self

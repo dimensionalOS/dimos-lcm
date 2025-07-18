@@ -49,7 +49,7 @@ class JoyFeedbackArray(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = JoyFeedbackArray()
+        self = cls()
         self.array_length = struct.unpack(">i", buf.read(4))[0]
         self.array = []
         for i0 in range(self.array_length):

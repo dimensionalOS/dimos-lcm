@@ -42,7 +42,7 @@ class Float64(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Float64()
+        self = cls()
         self.data = struct.unpack(">d", buf.read(8))[0]
         return self
 

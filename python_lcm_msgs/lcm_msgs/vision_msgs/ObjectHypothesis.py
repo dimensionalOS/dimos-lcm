@@ -48,7 +48,7 @@ class ObjectHypothesis(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = ObjectHypothesis()
+        self = cls()
         __class_id_len = struct.unpack('>I', buf.read(4))[0]
         self.class_id = buf.read(__class_id_len)[:-1].decode('utf-8', 'replace')
         self.score = struct.unpack(">d", buf.read(8))[0]

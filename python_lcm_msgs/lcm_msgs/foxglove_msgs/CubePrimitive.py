@@ -54,7 +54,7 @@ class CubePrimitive(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = CubePrimitive()
+        self = cls()
         self.pose = geometry_msgs.Pose._decode_one(buf)
         self.size = geometry_msgs.Vector3._decode_one(buf)
         self.color = Color._decode_one(buf)

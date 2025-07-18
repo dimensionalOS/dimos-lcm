@@ -42,7 +42,7 @@ class UInt8(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = UInt8()
+        self = cls()
         self.data = struct.unpack(">B", buf.read(1))[0]
         return self
 

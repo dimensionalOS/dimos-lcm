@@ -68,7 +68,7 @@ class TextAnnotation(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = TextAnnotation()
+        self = cls()
         self.timestamp = builtin_interfaces.Time._decode_one(buf)
         self.position = Point2._decode_one(buf)
         __text_len = struct.unpack('>I', buf.read(4))[0]

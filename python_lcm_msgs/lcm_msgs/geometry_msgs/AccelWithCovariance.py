@@ -48,7 +48,7 @@ class AccelWithCovariance(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = AccelWithCovariance()
+        self = cls()
         self.accel = Accel._decode_one(buf)
         self.covariance = struct.unpack('>36d', buf.read(288))
         return self

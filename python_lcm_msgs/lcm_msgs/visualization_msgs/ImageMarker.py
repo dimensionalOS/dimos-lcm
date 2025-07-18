@@ -103,7 +103,7 @@ class ImageMarker(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = ImageMarker()
+        self = cls()
         self.points_length, self.outline_colors_length = struct.unpack(">ii", buf.read(8))
         self.header = std_msgs.Header._decode_one(buf)
         __ns_len = struct.unpack('>I', buf.read(4))[0]

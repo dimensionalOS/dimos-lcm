@@ -42,7 +42,7 @@ class UInt16(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = UInt16()
+        self = cls()
         self.data = struct.unpack(">h", buf.read(2))[0]
         return self
 

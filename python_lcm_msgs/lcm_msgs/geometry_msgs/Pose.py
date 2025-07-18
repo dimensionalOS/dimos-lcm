@@ -50,7 +50,7 @@ class Pose(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Pose()
+        self = cls()
         self.position = Point._decode_one(buf)
         self.orientation = Quaternion._decode_one(buf)
         return self

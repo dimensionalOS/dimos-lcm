@@ -48,7 +48,7 @@ class Color(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Color()
+        self = cls()
         self.r, self.g, self.b, self.a = struct.unpack(">dddd", buf.read(32))
         return self
 

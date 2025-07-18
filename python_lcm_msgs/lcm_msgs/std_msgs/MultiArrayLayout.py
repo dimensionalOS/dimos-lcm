@@ -52,7 +52,7 @@ class MultiArrayLayout(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = MultiArrayLayout()
+        self = cls()
         self.dim_length = struct.unpack(">i", buf.read(4))[0]
         self.dim = []
         for i0 in range(self.dim_length):

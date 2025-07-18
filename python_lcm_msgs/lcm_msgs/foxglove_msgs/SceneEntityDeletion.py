@@ -56,7 +56,7 @@ class SceneEntityDeletion(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = SceneEntityDeletion()
+        self = cls()
         self.timestamp = builtin_interfaces.Time._decode_one(buf)
         self.type = struct.unpack(">B", buf.read(1))[0]
         __id_len = struct.unpack('>I', buf.read(4))[0]

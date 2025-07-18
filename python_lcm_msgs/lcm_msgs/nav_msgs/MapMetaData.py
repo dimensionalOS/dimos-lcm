@@ -56,7 +56,7 @@ class MapMetaData(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = MapMetaData()
+        self = cls()
         self.map_load_time = std_msgs.Time._decode_one(buf)
         self.resolution, self.width, self.height = struct.unpack(">fii", buf.read(12))
         self.origin = geometry_msgs.Pose._decode_one(buf)

@@ -50,7 +50,7 @@ class ObjectHypothesisWithPose(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = ObjectHypothesisWithPose()
+        self = cls()
         self.hypothesis = ObjectHypothesis._decode_one(buf)
         self.pose = geometry_msgs.PoseWithCovariance._decode_one(buf)
         return self

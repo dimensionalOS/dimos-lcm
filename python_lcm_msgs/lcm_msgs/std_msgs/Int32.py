@@ -42,7 +42,7 @@ class Int32(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Int32()
+        self = cls()
         self.data = struct.unpack(">i", buf.read(4))[0]
         return self
 

@@ -50,7 +50,7 @@ class MultiArrayDimension(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = MultiArrayDimension()
+        self = cls()
         __label_len = struct.unpack('>I', buf.read(4))[0]
         self.label = buf.read(__label_len)[:-1].decode('utf-8', 'replace')
         self.size, self.stride = struct.unpack(">ii", buf.read(8))

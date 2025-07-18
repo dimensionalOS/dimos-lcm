@@ -65,7 +65,7 @@ class GoalStatus(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = GoalStatus()
+        self = cls()
         self.goal_id = GoalID._decode_one(buf)
         self.status = struct.unpack(">B", buf.read(1))[0]
         __text_len = struct.unpack('>I', buf.read(4))[0]

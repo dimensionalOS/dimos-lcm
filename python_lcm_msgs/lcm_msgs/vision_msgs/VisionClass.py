@@ -48,7 +48,7 @@ class VisionClass(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = VisionClass()
+        self = cls()
         self.class_id = struct.unpack(">h", buf.read(2))[0]
         __class_name_len = struct.unpack('>I', buf.read(4))[0]
         self.class_name = buf.read(__class_name_len)[:-1].decode('utf-8', 'replace')

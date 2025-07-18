@@ -67,7 +67,7 @@ class MultiDOFJointTrajectoryPoint(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = MultiDOFJointTrajectoryPoint()
+        self = cls()
         self.transforms_length, self.velocities_length, self.accelerations_length = struct.unpack(">iii", buf.read(12))
         self.transforms = []
         for i0 in range(self.transforms_length):

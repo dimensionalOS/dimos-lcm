@@ -9,8 +9,8 @@ import struct
 
 from . import *
 from lcm_msgs import builtin_interfaces
-from .Color import Color
 from .Point2 import Point2
+from .Color import Color
 class CircleAnnotation(object):
 
     msg_name = "foxglove_msgs.CircleAnnotation"
@@ -64,7 +64,7 @@ class CircleAnnotation(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = CircleAnnotation()
+        self = cls()
         self.timestamp = builtin_interfaces.Time._decode_one(buf)
         self.position = Point2._decode_one(buf)
         self.diameter, self.thickness = struct.unpack(">dd", buf.read(16))

@@ -49,7 +49,7 @@ class Wrench(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Wrench()
+        self = cls()
         self.force = Vector3._decode_one(buf)
         self.torque = Vector3._decode_one(buf)
         return self

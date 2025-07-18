@@ -51,7 +51,7 @@ class KeyValuePair(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = KeyValuePair()
+        self = cls()
         __key_len = struct.unpack('>I', buf.read(4))[0]
         self.key = buf.read(__key_len)[:-1].decode('utf-8', 'replace')
         __value_len = struct.unpack('>I', buf.read(4))[0]

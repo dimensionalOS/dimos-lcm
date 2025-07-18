@@ -49,7 +49,7 @@ class Accel(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Accel()
+        self = cls()
         self.linear = Vector3._decode_one(buf)
         self.angular = Vector3._decode_one(buf)
         return self

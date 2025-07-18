@@ -55,7 +55,7 @@ class InteractiveMarkerPose(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = InteractiveMarkerPose()
+        self = cls()
         self.header = std_msgs.Header._decode_one(buf)
         self.pose = geometry_msgs.Pose._decode_one(buf)
         __name_len = struct.unpack('>I', buf.read(4))[0]

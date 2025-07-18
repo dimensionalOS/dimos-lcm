@@ -42,7 +42,7 @@ class Byte(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Byte()
+        self = cls()
         self.data = struct.unpack(">b", buf.read(1))[0]
         return self
 

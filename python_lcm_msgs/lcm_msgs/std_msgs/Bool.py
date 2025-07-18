@@ -42,7 +42,7 @@ class Bool(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Bool()
+        self = cls()
         self.data = bool(struct.unpack('b', buf.read(1))[0])
         return self
 

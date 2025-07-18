@@ -57,7 +57,7 @@ class LabelInfo(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = LabelInfo()
+        self = cls()
         self.class_map_length = struct.unpack(">i", buf.read(4))[0]
         self.header = std_msgs.Header._decode_one(buf)
         self.class_map = []

@@ -45,7 +45,7 @@ class String(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = String()
+        self = cls()
         __data_len = struct.unpack('>I', buf.read(4))[0]
         self.data = buf.read(__data_len)[:-1].decode('utf-8', 'replace')
         return self

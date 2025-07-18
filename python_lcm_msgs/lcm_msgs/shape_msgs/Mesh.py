@@ -57,7 +57,7 @@ class Mesh(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Mesh()
+        self = cls()
         self.triangles_length, self.vertices_length = struct.unpack(">ii", buf.read(8))
         self.triangles = []
         for i0 in range(self.triangles_length):

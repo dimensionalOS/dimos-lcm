@@ -49,7 +49,7 @@ class FrameTransforms(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = FrameTransforms()
+        self = cls()
         self.transforms_length = struct.unpack(">i", buf.read(4))[0]
         self.transforms = []
         for i0 in range(self.transforms_length):

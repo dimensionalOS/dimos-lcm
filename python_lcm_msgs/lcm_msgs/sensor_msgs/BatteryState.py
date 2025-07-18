@@ -112,7 +112,7 @@ class BatteryState(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = BatteryState()
+        self = cls()
         self.cell_voltage_length, self.cell_temperature_length = struct.unpack(">ii", buf.read(8))
         self.header = std_msgs.Header._decode_one(buf)
         self.voltage, self.temperature, self.current, self.charge, self.capacity, self.design_capacity, self.percentage, self.power_supply_status, self.power_supply_health, self.power_supply_technology = struct.unpack(">fffffffBBB", buf.read(31))

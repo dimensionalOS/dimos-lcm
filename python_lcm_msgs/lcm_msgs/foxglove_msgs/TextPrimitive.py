@@ -63,7 +63,7 @@ class TextPrimitive(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = TextPrimitive()
+        self = cls()
         self.pose = geometry_msgs.Pose._decode_one(buf)
         self.billboard = bool(struct.unpack('b', buf.read(1))[0])
         self.font_size = struct.unpack(">d", buf.read(8))[0]

@@ -50,7 +50,7 @@ class Vector3Stamped(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Vector3Stamped()
+        self = cls()
         self.header = std_msgs.Header._decode_one(buf)
         self.vector = Vector3._decode_one(buf)
         return self

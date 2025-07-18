@@ -58,7 +58,7 @@ class InteractiveMarkerInit(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = InteractiveMarkerInit()
+        self = cls()
         self.markers_length = struct.unpack(">i", buf.read(4))[0]
         __server_id_len = struct.unpack('>I', buf.read(4))[0]
         self.server_id = buf.read(__server_id_len)[:-1].decode('utf-8', 'replace')

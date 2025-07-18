@@ -8,8 +8,8 @@ from io import BytesIO
 import struct
 
 from . import *
-from .InteractiveMarkerPose import InteractiveMarkerPose
 from .InteractiveMarker import InteractiveMarker
+from .InteractiveMarkerPose import InteractiveMarkerPose
 class InteractiveMarkerUpdate(object):
 
     msg_name = "InteractiveMarkerUpdate"
@@ -80,7 +80,7 @@ class InteractiveMarkerUpdate(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = InteractiveMarkerUpdate()
+        self = cls()
         self.markers_length, self.poses_length, self.erases_length = struct.unpack(">iii", buf.read(12))
         __server_id_len = struct.unpack('>I', buf.read(4))[0]
         self.server_id = buf.read(__server_id_len)[:-1].decode('utf-8', 'replace')

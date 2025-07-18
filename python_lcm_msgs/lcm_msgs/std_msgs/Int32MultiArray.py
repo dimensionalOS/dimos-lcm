@@ -51,7 +51,7 @@ class Int32MultiArray(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Int32MultiArray()
+        self = cls()
         self.data_length = struct.unpack(">i", buf.read(4))[0]
         self.layout = MultiArrayLayout._decode_one(buf)
         self.data = struct.unpack('>%di' % self.data_length, buf.read(self.data_length * 4))

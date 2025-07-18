@@ -49,7 +49,7 @@ class FluidPressure(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = FluidPressure()
+        self = cls()
         self.header = std_msgs.Header._decode_one(buf)
         self.fluid_pressure, self.variance = struct.unpack(">dd", buf.read(16))
         return self

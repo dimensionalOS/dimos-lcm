@@ -51,7 +51,7 @@ class ChannelFloat32(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = ChannelFloat32()
+        self = cls()
         self.values_length = struct.unpack(">i", buf.read(4))[0]
         __name_len = struct.unpack('>I', buf.read(4))[0]
         self.name = buf.read(__name_len)[:-1].decode('utf-8', 'replace')

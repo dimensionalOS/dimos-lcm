@@ -66,7 +66,7 @@ class Image(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Image()
+        self = cls()
         self.data_length = struct.unpack(">i", buf.read(4))[0]
         self.header = std_msgs.Header._decode_one(buf)
         self.height, self.width = struct.unpack(">ii", buf.read(8))

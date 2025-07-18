@@ -59,7 +59,7 @@ class ArrowPrimitive(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = ArrowPrimitive()
+        self = cls()
         self.pose = geometry_msgs.Pose._decode_one(buf)
         self.shaft_length, self.shaft_diameter, self.head_length, self.head_diameter = struct.unpack(">dddd", buf.read(32))
         self.color = Color._decode_one(buf)

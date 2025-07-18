@@ -55,7 +55,7 @@ class PoseInFrame(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = PoseInFrame()
+        self = cls()
         self.timestamp = builtin_interfaces.Time._decode_one(buf)
         __frame_id_len = struct.unpack('>I', buf.read(4))[0]
         self.frame_id = buf.read(__frame_id_len)[:-1].decode('utf-8', 'replace')

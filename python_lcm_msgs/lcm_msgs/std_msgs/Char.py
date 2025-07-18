@@ -42,7 +42,7 @@ class Char(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Char()
+        self = cls()
         self.data = struct.unpack(">B", buf.read(1))[0]
         return self
 

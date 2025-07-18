@@ -65,7 +65,7 @@ class FrameTransform(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = FrameTransform()
+        self = cls()
         self.timestamp = builtin_interfaces.Time._decode_one(buf)
         __parent_frame_id_len = struct.unpack('>I', buf.read(4))[0]
         self.parent_frame_id = buf.read(__parent_frame_id_len)[:-1].decode('utf-8', 'replace')

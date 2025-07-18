@@ -54,7 +54,7 @@ class Header(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Header()
+        self = cls()
         self.seq = struct.unpack(">i", buf.read(4))[0]
         self.stamp = Time._decode_one(buf)
         __frame_id_len = struct.unpack('>I', buf.read(4))[0]

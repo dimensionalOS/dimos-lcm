@@ -49,7 +49,7 @@ class Polygon(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Polygon()
+        self = cls()
         self.points_length = struct.unpack(">i", buf.read(4))[0]
         self.points = []
         for i0 in range(self.points_length):

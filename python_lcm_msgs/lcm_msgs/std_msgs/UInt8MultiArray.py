@@ -51,7 +51,7 @@ class UInt8MultiArray(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = UInt8MultiArray()
+        self = cls()
         self.data_length = struct.unpack(">i", buf.read(4))[0]
         self.layout = MultiArrayLayout._decode_one(buf)
         self.data = buf.read(self.data_length)

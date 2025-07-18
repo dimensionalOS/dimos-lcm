@@ -60,7 +60,7 @@ class SolidPrimitive(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = SolidPrimitive()
+        self = cls()
         self.dimensions_length, self.type = struct.unpack(">iB", buf.read(5))
         self.dimensions = struct.unpack('>%dd' % self.dimensions_length, buf.read(self.dimensions_length * 8))
         return self
