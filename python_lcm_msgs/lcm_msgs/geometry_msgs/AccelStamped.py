@@ -26,7 +26,7 @@ class AccelStamped(object):
         # LCM Type: Accel
         self.accel = accel
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(AccelStamped._get_packed_fingerprint())
         self._encode_one(buf)
@@ -39,7 +39,7 @@ class AccelStamped(object):
         self.accel._encode_one(buf)
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

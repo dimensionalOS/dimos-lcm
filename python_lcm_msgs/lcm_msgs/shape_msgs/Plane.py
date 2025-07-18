@@ -21,7 +21,7 @@ class Plane(object):
         # LCM Type: double[4]
         self.coef = coef
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(Plane._get_packed_fingerprint())
         self._encode_one(buf)
@@ -31,7 +31,7 @@ class Plane(object):
         buf.write(struct.pack('>4d', *self.coef[:4]))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

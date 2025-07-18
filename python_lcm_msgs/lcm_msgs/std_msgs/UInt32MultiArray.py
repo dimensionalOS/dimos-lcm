@@ -27,7 +27,7 @@ class UInt32MultiArray(object):
         # LCM Type: int32_t[data_length]
         self.data = data
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(UInt32MultiArray._get_packed_fingerprint())
         self._encode_one(buf)
@@ -40,7 +40,7 @@ class UInt32MultiArray(object):
         buf.write(struct.pack('>%di' % self.data_length, *self.data[:self.data_length]))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

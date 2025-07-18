@@ -20,7 +20,7 @@ class Empty(object):
     def __init__(self):
         pass
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(Empty._get_packed_fingerprint())
         self._encode_one(buf)
@@ -30,7 +30,7 @@ class Empty(object):
         pass
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

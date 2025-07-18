@@ -26,7 +26,7 @@ class Illuminance(object):
         # LCM Type: double
         self.variance = variance
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(Illuminance._get_packed_fingerprint())
         self._encode_one(buf)
@@ -38,7 +38,7 @@ class Illuminance(object):
         buf.write(struct.pack(">dd", self.illuminance, self.variance))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

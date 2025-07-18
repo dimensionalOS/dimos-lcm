@@ -38,7 +38,7 @@ class TriangleListPrimitive(object):
         # LCM Type: int32_t[indices_length]
         self.indices = indices
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(TriangleListPrimitive._get_packed_fingerprint())
         self._encode_one(buf)
@@ -59,7 +59,7 @@ class TriangleListPrimitive(object):
         buf.write(struct.pack('>%di' % self.indices_length, *self.indices[:self.indices_length]))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

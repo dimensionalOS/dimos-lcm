@@ -21,7 +21,7 @@ class Bool(object):
         # LCM Type: boolean
         self.data = data
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(Bool._get_packed_fingerprint())
         self._encode_one(buf)
@@ -31,7 +31,7 @@ class Bool(object):
         buf.write(struct.pack(">b", self.data))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

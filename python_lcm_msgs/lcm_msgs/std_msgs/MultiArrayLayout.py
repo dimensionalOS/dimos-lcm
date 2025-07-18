@@ -27,7 +27,7 @@ class MultiArrayLayout(object):
         # LCM Type: int32_t
         self.data_offset = data_offset
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(MultiArrayLayout._get_packed_fingerprint())
         self._encode_one(buf)
@@ -41,7 +41,7 @@ class MultiArrayLayout(object):
         buf.write(struct.pack(">i", self.data_offset))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

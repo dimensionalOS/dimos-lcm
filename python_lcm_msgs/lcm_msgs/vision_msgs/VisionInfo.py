@@ -28,7 +28,7 @@ class VisionInfo(object):
         # LCM Type: int32_t
         self.database_version = database_version
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(VisionInfo._get_packed_fingerprint())
         self._encode_one(buf)
@@ -48,7 +48,7 @@ class VisionInfo(object):
         buf.write(struct.pack(">i", self.database_version))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

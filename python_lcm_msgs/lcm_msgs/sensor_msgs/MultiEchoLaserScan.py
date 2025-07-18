@@ -46,7 +46,7 @@ class MultiEchoLaserScan(object):
         # LCM Type: LaserEcho[intensities_length]
         self.intensities = intensities
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(MultiEchoLaserScan._get_packed_fingerprint())
         self._encode_one(buf)
@@ -65,7 +65,7 @@ class MultiEchoLaserScan(object):
             self.intensities[i0]._encode_one(buf)
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

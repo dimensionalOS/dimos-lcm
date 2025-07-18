@@ -38,7 +38,7 @@ class SolidPrimitive(object):
         # LCM Type: double[dimensions_length]
         self.dimensions = dimensions
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(SolidPrimitive._get_packed_fingerprint())
         self._encode_one(buf)
@@ -49,7 +49,7 @@ class SolidPrimitive(object):
         buf.write(struct.pack('>%dd' % self.dimensions_length, *self.dimensions[:self.dimensions_length]))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

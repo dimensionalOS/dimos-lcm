@@ -23,7 +23,7 @@ class Vector2(object):
         # LCM Type: double
         self.y = y
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(Vector2._get_packed_fingerprint())
         self._encode_one(buf)
@@ -33,7 +33,7 @@ class Vector2(object):
         buf.write(struct.pack(">dd", self.x, self.y))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

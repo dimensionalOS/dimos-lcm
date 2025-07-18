@@ -21,7 +21,7 @@ class MeshTriangle(object):
         # LCM Type: int32_t[3]
         self.vertex_indices = vertex_indices
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(MeshTriangle._get_packed_fingerprint())
         self._encode_one(buf)
@@ -31,7 +31,7 @@ class MeshTriangle(object):
         buf.write(struct.pack('>3i', *self.vertex_indices[:3]))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

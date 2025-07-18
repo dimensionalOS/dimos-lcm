@@ -28,7 +28,7 @@ class TransformStamped(object):
         # LCM Type: Transform
         self.transform = transform
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(TransformStamped._get_packed_fingerprint())
         self._encode_one(buf)
@@ -45,7 +45,7 @@ class TransformStamped(object):
         self.transform._encode_one(buf)
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

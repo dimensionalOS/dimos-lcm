@@ -27,7 +27,7 @@ class Int64MultiArray(object):
         # LCM Type: int64_t[data_length]
         self.data = data
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(Int64MultiArray._get_packed_fingerprint())
         self._encode_one(buf)
@@ -40,7 +40,7 @@ class Int64MultiArray(object):
         buf.write(struct.pack('>%dq' % self.data_length, *self.data[:self.data_length]))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

@@ -43,7 +43,7 @@ class InteractiveMarkerUpdate(object):
         # LCM Type: string[erases_length]
         self.erases = erases
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(InteractiveMarkerUpdate._get_packed_fingerprint())
         self._encode_one(buf)
@@ -69,7 +69,7 @@ class InteractiveMarkerUpdate(object):
             buf.write(b"\0")
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

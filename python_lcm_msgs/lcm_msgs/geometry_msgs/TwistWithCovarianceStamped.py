@@ -26,7 +26,7 @@ class TwistWithCovarianceStamped(object):
         # LCM Type: TwistWithCovariance
         self.twist = twist
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(TwistWithCovarianceStamped._get_packed_fingerprint())
         self._encode_one(buf)
@@ -39,7 +39,7 @@ class TwistWithCovarianceStamped(object):
         self.twist._encode_one(buf)
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

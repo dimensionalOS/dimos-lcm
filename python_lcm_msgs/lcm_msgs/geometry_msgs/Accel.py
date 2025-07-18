@@ -25,7 +25,7 @@ class Accel(object):
         # LCM Type: Vector3
         self.angular = angular
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(Accel._get_packed_fingerprint())
         self._encode_one(buf)
@@ -38,7 +38,7 @@ class Accel(object):
         self.angular._encode_one(buf)
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

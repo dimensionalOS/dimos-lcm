@@ -27,7 +27,7 @@ class Quaternion(object):
         # LCM Type: double
         self.w = w
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(Quaternion._get_packed_fingerprint())
         self._encode_one(buf)
@@ -37,7 +37,7 @@ class Quaternion(object):
         buf.write(struct.pack(">dddd", self.x, self.y, self.z, self.w))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

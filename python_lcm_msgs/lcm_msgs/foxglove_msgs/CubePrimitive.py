@@ -28,7 +28,7 @@ class CubePrimitive(object):
         # LCM Type: Color
         self.color = color
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(CubePrimitive._get_packed_fingerprint())
         self._encode_one(buf)
@@ -43,7 +43,7 @@ class CubePrimitive(object):
         self.color._encode_one(buf)
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

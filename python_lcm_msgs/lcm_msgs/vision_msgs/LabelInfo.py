@@ -30,7 +30,7 @@ class LabelInfo(object):
         # LCM Type: float
         self.threshold = threshold
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(LabelInfo._get_packed_fingerprint())
         self._encode_one(buf)
@@ -46,7 +46,7 @@ class LabelInfo(object):
         buf.write(struct.pack(">f", self.threshold))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

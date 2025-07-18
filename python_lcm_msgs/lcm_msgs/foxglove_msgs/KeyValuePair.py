@@ -23,7 +23,7 @@ class KeyValuePair(object):
         # LCM Type: string
         self.value = value
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(KeyValuePair._get_packed_fingerprint())
         self._encode_one(buf)
@@ -40,7 +40,7 @@ class KeyValuePair(object):
         buf.write(b"\0")
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

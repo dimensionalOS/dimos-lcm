@@ -44,7 +44,7 @@ class PointCloud2(object):
         # LCM Type: boolean
         self.is_dense = is_dense
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(PointCloud2._get_packed_fingerprint())
         self._encode_one(buf)
@@ -63,7 +63,7 @@ class PointCloud2(object):
         buf.write(struct.pack(">b", self.is_dense))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

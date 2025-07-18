@@ -31,7 +31,7 @@ class GridCells(object):
         # LCM Type: geometry_msgs.Point[cells_length]
         self.cells = cells
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(GridCells._get_packed_fingerprint())
         self._encode_one(buf)
@@ -47,7 +47,7 @@ class GridCells(object):
             self.cells[i0]._encode_one(buf)
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

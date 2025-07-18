@@ -35,7 +35,7 @@ class TextAnnotation(object):
         # LCM Type: Color
         self.background_color = background_color
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(TextAnnotation._get_packed_fingerprint())
         self._encode_one(buf)
@@ -57,7 +57,7 @@ class TextAnnotation(object):
         self.background_color._encode_one(buf)
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

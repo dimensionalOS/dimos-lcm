@@ -26,7 +26,7 @@ class PolygonStamped(object):
         # LCM Type: Polygon
         self.polygon = polygon
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(PolygonStamped._get_packed_fingerprint())
         self._encode_one(buf)
@@ -39,7 +39,7 @@ class PolygonStamped(object):
         self.polygon._encode_one(buf)
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

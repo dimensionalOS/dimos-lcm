@@ -35,7 +35,7 @@ class Imu(object):
         # LCM Type: double[9]
         self.linear_acceleration_covariance = linear_acceleration_covariance
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(Imu._get_packed_fingerprint())
         self._encode_one(buf)
@@ -55,7 +55,7 @@ class Imu(object):
         buf.write(struct.pack('>9d', *self.linear_acceleration_covariance[:9]))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

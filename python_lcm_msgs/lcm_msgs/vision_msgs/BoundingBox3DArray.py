@@ -28,7 +28,7 @@ class BoundingBox3DArray(object):
         # LCM Type: BoundingBox3D[boxes_length]
         self.boxes = boxes
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(BoundingBox3DArray._get_packed_fingerprint())
         self._encode_one(buf)
@@ -43,7 +43,7 @@ class BoundingBox3DArray(object):
             self.boxes[i0]._encode_one(buf)
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

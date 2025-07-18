@@ -25,7 +25,7 @@ class ChannelFloat32(object):
         # LCM Type: float[values_length]
         self.values = values
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(ChannelFloat32._get_packed_fingerprint())
         self._encode_one(buf)
@@ -40,7 +40,7 @@ class ChannelFloat32(object):
         buf.write(struct.pack('>%df' % self.values_length, *self.values[:self.values_length]))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

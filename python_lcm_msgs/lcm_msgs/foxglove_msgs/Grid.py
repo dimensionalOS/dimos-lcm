@@ -46,7 +46,7 @@ class Grid(object):
         # LCM Type: byte[data_length]
         self.data = data
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(Grid._get_packed_fingerprint())
         self._encode_one(buf)
@@ -72,7 +72,7 @@ class Grid(object):
         buf.write(bytearray(self.data[:self.data_length]))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

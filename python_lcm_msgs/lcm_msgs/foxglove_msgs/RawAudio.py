@@ -32,7 +32,7 @@ class RawAudio(object):
         # LCM Type: int32_t
         self.number_of_channels = number_of_channels
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(RawAudio._get_packed_fingerprint())
         self._encode_one(buf)
@@ -50,7 +50,7 @@ class RawAudio(object):
         buf.write(struct.pack(">ii", self.sample_rate, self.number_of_channels))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

@@ -39,7 +39,7 @@ class Log(object):
         # LCM Type: int32_t
         self.line = line
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(Log._get_packed_fingerprint())
         self._encode_one(buf)
@@ -64,7 +64,7 @@ class Log(object):
         buf.write(struct.pack(">i", self.line))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

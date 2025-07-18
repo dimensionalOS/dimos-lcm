@@ -31,7 +31,7 @@ class TF2Error(object):
         # LCM Type: string
         self.error_string = error_string
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(TF2Error._get_packed_fingerprint())
         self._encode_one(buf)
@@ -45,7 +45,7 @@ class TF2Error(object):
         buf.write(b"\0")
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

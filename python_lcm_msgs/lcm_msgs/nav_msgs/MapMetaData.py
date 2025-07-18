@@ -31,7 +31,7 @@ class MapMetaData(object):
         # LCM Type: geometry_msgs.Pose
         self.origin = origin
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(MapMetaData._get_packed_fingerprint())
         self._encode_one(buf)
@@ -45,7 +45,7 @@ class MapMetaData(object):
         self.origin._encode_one(buf)
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

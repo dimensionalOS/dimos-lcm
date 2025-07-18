@@ -27,7 +27,7 @@ class ColorRGBA(object):
         # LCM Type: float
         self.a = a
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(ColorRGBA._get_packed_fingerprint())
         self._encode_one(buf)
@@ -37,7 +37,7 @@ class ColorRGBA(object):
         buf.write(struct.pack(">ffff", self.r, self.g, self.b, self.a))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:
