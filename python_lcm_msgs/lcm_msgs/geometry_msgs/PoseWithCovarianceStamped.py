@@ -26,7 +26,7 @@ class PoseWithCovarianceStamped(object):
         # LCM Type: PoseWithCovariance
         self.pose = pose
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(PoseWithCovarianceStamped._get_packed_fingerprint())
         self._encode_one(buf)
@@ -39,7 +39,7 @@ class PoseWithCovarianceStamped(object):
         self.pose._encode_one(buf)
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

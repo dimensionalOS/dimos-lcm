@@ -10,8 +10,8 @@ import struct
 from lcm_msgs import geometry_msgs
 from lcm_msgs import std_msgs
 from . import *
-from .InteractiveMarkerControl import InteractiveMarkerControl
 from .MenuEntry import MenuEntry
+from .InteractiveMarkerControl import InteractiveMarkerControl
 class InteractiveMarker(object):
 
     msg_name = "visualization_msgs.InteractiveMarker"
@@ -42,7 +42,7 @@ class InteractiveMarker(object):
         # LCM Type: InteractiveMarkerControl[controls_length]
         self.controls = controls
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(InteractiveMarker._get_packed_fingerprint())
         self._encode_one(buf)
@@ -71,7 +71,7 @@ class InteractiveMarker(object):
             self.controls[i0]._encode_one(buf)
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

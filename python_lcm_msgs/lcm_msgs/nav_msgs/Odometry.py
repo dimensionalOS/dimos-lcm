@@ -29,7 +29,7 @@ class Odometry(object):
         # LCM Type: geometry_msgs.TwistWithCovariance
         self.twist = twist
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(Odometry._get_packed_fingerprint())
         self._encode_one(buf)
@@ -48,7 +48,7 @@ class Odometry(object):
         self.twist._encode_one(buf)
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

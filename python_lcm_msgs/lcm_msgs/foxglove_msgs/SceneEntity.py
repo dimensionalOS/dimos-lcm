@@ -10,14 +10,14 @@ import struct
 from . import *
 from lcm_msgs import builtin_interfaces
 from .TextPrimitive import TextPrimitive
-from .KeyValuePair import KeyValuePair
-from .ModelPrimitive import ModelPrimitive
+from .LinePrimitive import LinePrimitive
+from .TriangleListPrimitive import TriangleListPrimitive
 from .ArrowPrimitive import ArrowPrimitive
 from .SpherePrimitive import SpherePrimitive
-from .CylinderPrimitive import CylinderPrimitive
-from .LinePrimitive import LinePrimitive
+from .ModelPrimitive import ModelPrimitive
 from .CubePrimitive import CubePrimitive
-from .TriangleListPrimitive import TriangleListPrimitive
+from .KeyValuePair import KeyValuePair
+from .CylinderPrimitive import CylinderPrimitive
 class SceneEntity(object):
 
     msg_name = "foxglove_msgs.SceneEntity"
@@ -76,7 +76,7 @@ class SceneEntity(object):
         # LCM Type: ModelPrimitive[models_length]
         self.models = models
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(SceneEntity._get_packed_fingerprint())
         self._encode_one(buf)
@@ -126,7 +126,7 @@ class SceneEntity(object):
             self.models[i0]._encode_one(buf)
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

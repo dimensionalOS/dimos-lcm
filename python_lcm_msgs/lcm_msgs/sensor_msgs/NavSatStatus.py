@@ -32,7 +32,7 @@ class NavSatStatus(object):
         # LCM Type: int16_t
         self.service = service
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(NavSatStatus._get_packed_fingerprint())
         self._encode_one(buf)
@@ -42,7 +42,7 @@ class NavSatStatus(object):
         buf.write(struct.pack(">bh", self.status, self.service))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

@@ -24,7 +24,7 @@ class TFMessage(object):
         # LCM Type: geometry_msgs.TransformStamped[transforms_length]
         self.transforms = transforms
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(TFMessage._get_packed_fingerprint())
         self._encode_one(buf)
@@ -37,7 +37,7 @@ class TFMessage(object):
             self.transforms[i0]._encode_one(buf)
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

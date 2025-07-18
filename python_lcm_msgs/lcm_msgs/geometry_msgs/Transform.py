@@ -8,8 +8,8 @@ from io import BytesIO
 import struct
 
 from . import *
-from .Vector3 import Vector3
 from .Quaternion import Quaternion
+from .Vector3 import Vector3
 class Transform(object):
 
     msg_name = "geometry_msgs.Transform"
@@ -26,7 +26,7 @@ class Transform(object):
         # LCM Type: Quaternion
         self.rotation = rotation
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(Transform._get_packed_fingerprint())
         self._encode_one(buf)
@@ -39,7 +39,7 @@ class Transform(object):
         self.rotation._encode_one(buf)
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

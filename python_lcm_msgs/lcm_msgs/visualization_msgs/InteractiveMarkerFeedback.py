@@ -46,7 +46,7 @@ class InteractiveMarkerFeedback(object):
         # LCM Type: boolean
         self.mouse_point_valid = mouse_point_valid
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(InteractiveMarkerFeedback._get_packed_fingerprint())
         self._encode_one(buf)
@@ -76,7 +76,7 @@ class InteractiveMarkerFeedback(object):
         buf.write(struct.pack(">b", self.mouse_point_valid))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

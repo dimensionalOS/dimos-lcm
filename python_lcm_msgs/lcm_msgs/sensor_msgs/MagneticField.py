@@ -27,7 +27,7 @@ class MagneticField(object):
         # LCM Type: double[9]
         self.magnetic_field_covariance = magnetic_field_covariance
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(MagneticField._get_packed_fingerprint())
         self._encode_one(buf)
@@ -41,7 +41,7 @@ class MagneticField(object):
         buf.write(struct.pack('>9d', *self.magnetic_field_covariance[:9]))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

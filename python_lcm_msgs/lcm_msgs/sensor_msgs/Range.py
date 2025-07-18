@@ -35,7 +35,7 @@ class Range(object):
         # LCM Type: float
         self.range = range
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(Range._get_packed_fingerprint())
         self._encode_one(buf)
@@ -47,7 +47,7 @@ class Range(object):
         buf.write(struct.pack(">Bffff", self.radiation_type, self.field_of_view, self.min_range, self.max_range, self.range))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

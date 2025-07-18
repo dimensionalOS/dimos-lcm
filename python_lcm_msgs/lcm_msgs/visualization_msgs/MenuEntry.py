@@ -33,7 +33,7 @@ class MenuEntry(object):
         # LCM Type: byte
         self.command_type = command_type
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(MenuEntry._get_packed_fingerprint())
         self._encode_one(buf)
@@ -52,7 +52,7 @@ class MenuEntry(object):
         buf.write(struct.pack(">B", self.command_type))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

@@ -38,7 +38,7 @@ class JointTrajectoryPoint(object):
         # LCM Type: std_msgs.Duration
         self.time_from_start = time_from_start
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(JointTrajectoryPoint._get_packed_fingerprint())
         self._encode_one(buf)
@@ -54,7 +54,7 @@ class JointTrajectoryPoint(object):
         self.time_from_start._encode_one(buf)
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

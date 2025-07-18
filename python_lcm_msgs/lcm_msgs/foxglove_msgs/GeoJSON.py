@@ -21,7 +21,7 @@ class GeoJSON(object):
         # LCM Type: string
         self.geojson = geojson
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(GeoJSON._get_packed_fingerprint())
         self._encode_one(buf)
@@ -34,7 +34,7 @@ class GeoJSON(object):
         buf.write(b"\0")
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

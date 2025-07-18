@@ -37,7 +37,7 @@ class DisparityImage(object):
         # LCM Type: float
         self.delta_d = delta_d
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(DisparityImage._get_packed_fingerprint())
         self._encode_one(buf)
@@ -54,7 +54,7 @@ class DisparityImage(object):
         buf.write(struct.pack(">fff", self.min_disparity, self.max_disparity, self.delta_d))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

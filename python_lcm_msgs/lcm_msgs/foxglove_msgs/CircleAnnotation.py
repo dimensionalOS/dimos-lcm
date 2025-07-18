@@ -35,7 +35,7 @@ class CircleAnnotation(object):
         # LCM Type: Color
         self.outline_color = outline_color
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(CircleAnnotation._get_packed_fingerprint())
         self._encode_one(buf)
@@ -53,7 +53,7 @@ class CircleAnnotation(object):
         self.outline_color._encode_one(buf)
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

@@ -28,7 +28,7 @@ class DiagnosticArray(object):
         # LCM Type: DiagnosticStatus[status_length]
         self.status = status
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(DiagnosticArray._get_packed_fingerprint())
         self._encode_one(buf)
@@ -43,7 +43,7 @@ class DiagnosticArray(object):
             self.status[i0]._encode_one(buf)
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

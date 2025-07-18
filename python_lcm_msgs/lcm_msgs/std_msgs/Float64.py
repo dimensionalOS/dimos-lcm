@@ -21,7 +21,7 @@ class Float64(object):
         # LCM Type: double
         self.data = data
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(Float64._get_packed_fingerprint())
         self._encode_one(buf)
@@ -31,7 +31,7 @@ class Float64(object):
         buf.write(struct.pack(">d", self.data))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

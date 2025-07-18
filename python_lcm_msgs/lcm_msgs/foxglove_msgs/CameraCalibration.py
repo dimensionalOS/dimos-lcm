@@ -40,7 +40,7 @@ class CameraCalibration(object):
         # LCM Type: double[12]
         self.p = p
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(CameraCalibration._get_packed_fingerprint())
         self._encode_one(buf)
@@ -65,7 +65,7 @@ class CameraCalibration(object):
         buf.write(struct.pack('>12d', *self.p[:12]))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

@@ -23,7 +23,7 @@ class LaserEcho(object):
         # LCM Type: float[echoes_length]
         self.echoes = echoes
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(LaserEcho._get_packed_fingerprint())
         self._encode_one(buf)
@@ -34,7 +34,7 @@ class LaserEcho(object):
         buf.write(struct.pack('>%df' % self.echoes_length, *self.echoes[:self.echoes_length]))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

@@ -37,7 +37,7 @@ class Inertia(object):
         # LCM Type: double
         self.izz = izz
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(Inertia._get_packed_fingerprint())
         self._encode_one(buf)
@@ -50,7 +50,7 @@ class Inertia(object):
         buf.write(struct.pack(">dddddd", self.ixx, self.ixy, self.ixz, self.iyy, self.iyz, self.izz))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

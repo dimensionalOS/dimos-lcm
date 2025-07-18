@@ -25,7 +25,7 @@ class PoseWithCovariance(object):
         # LCM Type: double[36]
         self.covariance = covariance
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(PoseWithCovariance._get_packed_fingerprint())
         self._encode_one(buf)
@@ -37,7 +37,7 @@ class PoseWithCovariance(object):
         buf.write(struct.pack('>36d', *self.covariance[:36]))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

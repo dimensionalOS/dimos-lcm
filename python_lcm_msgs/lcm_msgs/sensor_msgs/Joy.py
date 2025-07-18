@@ -30,7 +30,7 @@ class Joy(object):
         # LCM Type: int32_t[buttons_length]
         self.buttons = buttons
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(Joy._get_packed_fingerprint())
         self._encode_one(buf)
@@ -44,7 +44,7 @@ class Joy(object):
         buf.write(struct.pack('>%di' % self.buttons_length, *self.buttons[:self.buttons_length]))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

@@ -26,7 +26,7 @@ class QuaternionStamped(object):
         # LCM Type: Quaternion
         self.quaternion = quaternion
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(QuaternionStamped._get_packed_fingerprint())
         self._encode_one(buf)
@@ -39,7 +39,7 @@ class QuaternionStamped(object):
         self.quaternion._encode_one(buf)
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

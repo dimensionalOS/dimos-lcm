@@ -72,7 +72,7 @@ class Marker(object):
         # LCM Type: boolean
         self.mesh_use_embedded_materials = mesh_use_embedded_materials
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(Marker._get_packed_fingerprint())
         self._encode_one(buf)
@@ -113,7 +113,7 @@ class Marker(object):
         buf.write(struct.pack(">b", self.mesh_use_embedded_materials))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

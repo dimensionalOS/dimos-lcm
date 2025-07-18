@@ -28,7 +28,7 @@ class GoalStatusArray(object):
         # LCM Type: GoalStatus[status_list_length]
         self.status_list = status_list
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(GoalStatusArray._get_packed_fingerprint())
         self._encode_one(buf)
@@ -43,7 +43,7 @@ class GoalStatusArray(object):
             self.status_list[i0]._encode_one(buf)
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

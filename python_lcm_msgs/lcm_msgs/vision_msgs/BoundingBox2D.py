@@ -27,7 +27,7 @@ class BoundingBox2D(object):
         # LCM Type: double
         self.size_y = size_y
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(BoundingBox2D._get_packed_fingerprint())
         self._encode_one(buf)
@@ -39,7 +39,7 @@ class BoundingBox2D(object):
         buf.write(struct.pack(">dd", self.size_x, self.size_y))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

@@ -25,7 +25,7 @@ class JoyFeedbackArray(object):
         # LCM Type: JoyFeedback[array_length]
         self.array = array
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(JoyFeedbackArray._get_packed_fingerprint())
         self._encode_one(buf)
@@ -38,7 +38,7 @@ class JoyFeedbackArray(object):
             self.array[i0]._encode_one(buf)
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

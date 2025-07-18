@@ -25,7 +25,7 @@ class Wrench(object):
         # LCM Type: Vector3
         self.torque = torque
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(Wrench._get_packed_fingerprint())
         self._encode_one(buf)
@@ -38,7 +38,7 @@ class Wrench(object):
         self.torque._encode_one(buf)
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

@@ -39,7 +39,7 @@ class LocationFix(object):
         # LCM Type: byte
         self.position_covariance_type = position_covariance_type
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(LocationFix._get_packed_fingerprint())
         self._encode_one(buf)
@@ -57,7 +57,7 @@ class LocationFix(object):
         buf.write(struct.pack(">B", self.position_covariance_type))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

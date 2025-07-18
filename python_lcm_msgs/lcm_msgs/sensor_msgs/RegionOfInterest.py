@@ -29,7 +29,7 @@ class RegionOfInterest(object):
         # LCM Type: boolean
         self.do_rectify = do_rectify
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(RegionOfInterest._get_packed_fingerprint())
         self._encode_one(buf)
@@ -39,7 +39,7 @@ class RegionOfInterest(object):
         buf.write(struct.pack(">iiiib", self.x_offset, self.y_offset, self.height, self.width, self.do_rectify))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

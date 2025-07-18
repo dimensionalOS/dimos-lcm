@@ -26,7 +26,7 @@ class Vector3Stamped(object):
         # LCM Type: Vector3
         self.vector = vector
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(Vector3Stamped._get_packed_fingerprint())
         self._encode_one(buf)
@@ -39,7 +39,7 @@ class Vector3Stamped(object):
         self.vector._encode_one(buf)
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

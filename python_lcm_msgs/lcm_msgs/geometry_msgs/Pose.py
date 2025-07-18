@@ -26,7 +26,7 @@ class Pose(object):
         # LCM Type: Quaternion
         self.orientation = orientation
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(Pose._get_packed_fingerprint())
         self._encode_one(buf)
@@ -39,7 +39,7 @@ class Pose(object):
         self.orientation._encode_one(buf)
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

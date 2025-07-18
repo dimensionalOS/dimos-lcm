@@ -59,7 +59,7 @@ class ImageMarker(object):
         # LCM Type: std_msgs.ColorRGBA[outline_colors_length]
         self.outline_colors = outline_colors
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(ImageMarker._get_packed_fingerprint())
         self._encode_one(buf)
@@ -92,7 +92,7 @@ class ImageMarker(object):
             self.outline_colors[i0]._encode_one(buf)
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

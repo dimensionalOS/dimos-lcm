@@ -8,8 +8,8 @@ from io import BytesIO
 import struct
 
 from . import *
-from .SceneEntity import SceneEntity
 from .SceneEntityDeletion import SceneEntityDeletion
+from .SceneEntity import SceneEntity
 class SceneUpdate(object):
 
     msg_name = "foxglove_msgs.SceneUpdate"
@@ -30,7 +30,7 @@ class SceneUpdate(object):
         # LCM Type: SceneEntity[entities_length]
         self.entities = entities
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(SceneUpdate._get_packed_fingerprint())
         self._encode_one(buf)
@@ -46,7 +46,7 @@ class SceneUpdate(object):
             self.entities[i0]._encode_one(buf)
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

@@ -39,7 +39,7 @@ class PointCloud(object):
         # LCM Type: byte[data_length]
         self.data = data
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(PointCloud._get_packed_fingerprint())
         self._encode_one(buf)
@@ -62,7 +62,7 @@ class PointCloud(object):
         buf.write(bytearray(self.data[:self.data_length]))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

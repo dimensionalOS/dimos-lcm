@@ -36,7 +36,7 @@ class PointField(object):
         # LCM Type: int32_t
         self.count = count
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(PointField._get_packed_fingerprint())
         self._encode_one(buf)
@@ -50,7 +50,7 @@ class PointField(object):
         buf.write(struct.pack(">iBi", self.offset, self.datatype, self.count))
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:

@@ -24,7 +24,7 @@ class BoundingBox3D(object):
         # LCM Type: geometry_msgs.Vector3
         self.size = size
 
-    def encode(self):
+    def lcm_encode(self):
         buf = BytesIO()
         buf.write(BoundingBox3D._get_packed_fingerprint())
         self._encode_one(buf)
@@ -37,7 +37,7 @@ class BoundingBox3D(object):
         self.size._encode_one(buf)
 
     @classmethod
-    def decode(cls, data: bytes):
+    def lcm_decode(cls, data: bytes):
         if hasattr(data, 'read'):
             buf = data
         else:
