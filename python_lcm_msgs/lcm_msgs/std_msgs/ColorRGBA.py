@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 class ColorRGBA(object):
 
@@ -16,6 +17,11 @@ class ColorRGBA(object):
     __typenames__ = ["float", "float", "float", "float"]
 
     __dimensions__ = [None, None, None, None]
+
+    r: 'float'
+    g: 'float'
+    b: 'float'
+    a: 'float'
 
     def __init__(self, r=0.0, g=0.0, b=0.0, a=0.0):
         # LCM Type: float
@@ -48,9 +54,22 @@ class ColorRGBA(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = ColorRGBA()
+        self = cls()
         self.r, self.g, self.b, self.a = struct.unpack(">ffff", buf.read(16))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

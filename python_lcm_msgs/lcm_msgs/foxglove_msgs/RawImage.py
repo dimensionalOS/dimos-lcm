@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import builtin_interfaces
 class RawImage(object):
@@ -17,6 +18,15 @@ class RawImage(object):
     __typenames__ = ["int32_t", "builtin_interfaces.Time", "string", "int32_t", "int32_t", "string", "int32_t", "byte"]
 
     __dimensions__ = [None, None, None, None, None, None, None, ["data_length"]]
+
+    data_length: 'int32_t'
+    timestamp: builtin_interfaces.Time
+    frame_id: 'string'
+    width: 'int32_t'
+    height: 'int32_t'
+    encoding: 'string'
+    step: 'int32_t'
+    data: 'byte'
 
     def __init__(self, data_length=0, timestamp=builtin_interfaces.Time(), frame_id="", width=0, height=0, encoding="", step=0, data=b""):
         # LCM Type: int32_t
@@ -70,9 +80,9 @@ class RawImage(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = RawImage()
+        self = cls()
         self.data_length = struct.unpack(">i", buf.read(4))[0]
-        self.timestamp = builtin_interfaces.Time._decode_one(buf)
+        self.timestamp = cls._get_field_type('timestamp')._decode_one(buf)
         __frame_id_len = struct.unpack('>I', buf.read(4))[0]
         self.frame_id = buf.read(__frame_id_len)[:-1].decode('utf-8', 'replace')
         self.width, self.height = struct.unpack(">ii", buf.read(8))
@@ -81,6 +91,19 @@ class RawImage(object):
         self.step = struct.unpack(">i", buf.read(4))[0]
         self.data = buf.read(self.data_length)
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

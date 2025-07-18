@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import geometry_msgs
 from . import *
@@ -19,6 +20,16 @@ class InteractiveMarkerControl(object):
     __typenames__ = ["int32_t", "string", "geometry_msgs.Quaternion", "byte", "byte", "boolean", "Marker", "boolean", "string"]
 
     __dimensions__ = [None, None, None, None, None, None, ["markers_length"], None, None]
+
+    markers_length: 'int32_t'
+    name: 'string'
+    orientation: geometry_msgs.Quaternion
+    orientation_mode: 'byte'
+    interaction_mode: 'byte'
+    always_visible: 'boolean'
+    markers: Marker
+    independent_marker_orientation: 'boolean'
+    description: 'string'
 
     INHERIT = 0
     FIXED = 1
@@ -90,20 +101,33 @@ class InteractiveMarkerControl(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = InteractiveMarkerControl()
+        self = cls()
         self.markers_length = struct.unpack(">i", buf.read(4))[0]
         __name_len = struct.unpack('>I', buf.read(4))[0]
         self.name = buf.read(__name_len)[:-1].decode('utf-8', 'replace')
-        self.orientation = geometry_msgs.Quaternion._decode_one(buf)
+        self.orientation = cls._get_field_type('orientation')._decode_one(buf)
         self.orientation_mode, self.interaction_mode = struct.unpack(">BB", buf.read(2))
         self.always_visible = bool(struct.unpack('b', buf.read(1))[0])
         self.markers = []
         for i0 in range(self.markers_length):
-            self.markers.append(Marker._decode_one(buf))
+            self.markers.append(cls._get_field_type('markers')._decode_one(buf))
         self.independent_marker_orientation = bool(struct.unpack('b', buf.read(1))[0])
         __description_len = struct.unpack('>I', buf.read(4))[0]
         self.description = buf.read(__description_len)[:-1].decode('utf-8', 'replace')
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

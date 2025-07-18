@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import std_msgs
 from . import *
@@ -19,6 +20,18 @@ class PointCloud2(object):
     __typenames__ = ["int32_t", "int32_t", "std_msgs.Header", "int32_t", "int32_t", "PointField", "boolean", "int32_t", "int32_t", "byte", "boolean"]
 
     __dimensions__ = [None, None, None, None, None, ["fields_length"], None, None, None, ["data_length"], None]
+
+    fields_length: 'int32_t'
+    data_length: 'int32_t'
+    header: std_msgs.Header
+    height: 'int32_t'
+    width: 'int32_t'
+    fields: PointField
+    is_bigendian: 'boolean'
+    point_step: 'int32_t'
+    row_step: 'int32_t'
+    data: 'byte'
+    is_dense: 'boolean'
 
     def __init__(self, fields_length=0, data_length=0, header=std_msgs.Header(), height=0, width=0, fields=[], is_bigendian=False, point_step=0, row_step=0, data=b"", is_dense=False):
         # LCM Type: int32_t
@@ -74,18 +87,31 @@ class PointCloud2(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = PointCloud2()
+        self = cls()
         self.fields_length, self.data_length = struct.unpack(">ii", buf.read(8))
-        self.header = std_msgs.Header._decode_one(buf)
+        self.header = cls._get_field_type('header')._decode_one(buf)
         self.height, self.width = struct.unpack(">ii", buf.read(8))
         self.fields = []
         for i0 in range(self.fields_length):
-            self.fields.append(PointField._decode_one(buf))
+            self.fields.append(cls._get_field_type('fields')._decode_one(buf))
         self.is_bigendian = bool(struct.unpack('b', buf.read(1))[0])
         self.point_step, self.row_step = struct.unpack(">ii", buf.read(8))
         self.data = buf.read(self.data_length)
         self.is_dense = bool(struct.unpack('b', buf.read(1))[0])
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

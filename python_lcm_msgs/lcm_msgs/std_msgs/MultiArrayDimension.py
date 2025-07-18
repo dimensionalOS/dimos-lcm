@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 class MultiArrayDimension(object):
 
@@ -16,6 +17,10 @@ class MultiArrayDimension(object):
     __typenames__ = ["string", "int32_t", "int32_t"]
 
     __dimensions__ = [None, None, None]
+
+    label: 'string'
+    size: 'int32_t'
+    stride: 'int32_t'
 
     def __init__(self, label="", size=0, stride=0):
         # LCM Type: string
@@ -50,11 +55,24 @@ class MultiArrayDimension(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = MultiArrayDimension()
+        self = cls()
         __label_len = struct.unpack('>I', buf.read(4))[0]
         self.label = buf.read(__label_len)[:-1].decode('utf-8', 'replace')
         self.size, self.stride = struct.unpack(">ii", buf.read(8))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

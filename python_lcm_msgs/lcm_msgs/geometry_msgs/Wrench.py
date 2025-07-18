@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from . import *
 from .Vector3 import Vector3
@@ -18,6 +19,9 @@ class Wrench(object):
     __typenames__ = ["Vector3", "Vector3"]
 
     __dimensions__ = [None, None]
+
+    force: Vector3
+    torque: Vector3
 
     def __init__(self, force=Vector3(), torque=Vector3()):
         # LCM Type: Vector3
@@ -49,10 +53,23 @@ class Wrench(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Wrench()
-        self.force = Vector3._decode_one(buf)
-        self.torque = Vector3._decode_one(buf)
+        self = cls()
+        self.force = cls._get_field_type('force')._decode_one(buf)
+        self.torque = cls._get_field_type('torque')._decode_one(buf)
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

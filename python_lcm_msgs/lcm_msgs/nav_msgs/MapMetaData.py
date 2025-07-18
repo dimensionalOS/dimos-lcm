@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import geometry_msgs
 from lcm_msgs import std_msgs
@@ -18,6 +19,12 @@ class MapMetaData(object):
     __typenames__ = ["std_msgs.Time", "float", "int32_t", "int32_t", "geometry_msgs.Pose"]
 
     __dimensions__ = [None, None, None, None, None]
+
+    map_load_time: std_msgs.Time
+    resolution: 'float'
+    width: 'int32_t'
+    height: 'int32_t'
+    origin: geometry_msgs.Pose
 
     def __init__(self, map_load_time=std_msgs.Time(), resolution=0.0, width=0, height=0, origin=geometry_msgs.Pose()):
         # LCM Type: std_msgs.Time
@@ -56,11 +63,24 @@ class MapMetaData(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = MapMetaData()
-        self.map_load_time = std_msgs.Time._decode_one(buf)
+        self = cls()
+        self.map_load_time = cls._get_field_type('map_load_time')._decode_one(buf)
         self.resolution, self.width, self.height = struct.unpack(">fii", buf.read(12))
-        self.origin = geometry_msgs.Pose._decode_one(buf)
+        self.origin = cls._get_field_type('origin')._decode_one(buf)
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

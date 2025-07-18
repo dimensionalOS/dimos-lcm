@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from . import *
 from lcm_msgs import builtin_interfaces
@@ -20,6 +21,16 @@ class PointsAnnotation(object):
     __typenames__ = ["int32_t", "int32_t", "builtin_interfaces.Time", "byte", "Point2", "Color", "Color", "Color", "double"]
 
     __dimensions__ = [None, None, None, None, ["points_length"], None, ["outline_colors_length"], None, None]
+
+    points_length: 'int32_t'
+    outline_colors_length: 'int32_t'
+    timestamp: builtin_interfaces.Time
+    type: 'byte'
+    points: Point2
+    outline_color: Color
+    outline_colors: Color
+    fill_color: Color
+    thickness: 'double'
 
     UNKNOWN = 0
     POINTS = 1
@@ -82,20 +93,33 @@ class PointsAnnotation(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = PointsAnnotation()
+        self = cls()
         self.points_length, self.outline_colors_length = struct.unpack(">ii", buf.read(8))
-        self.timestamp = builtin_interfaces.Time._decode_one(buf)
+        self.timestamp = cls._get_field_type('timestamp')._decode_one(buf)
         self.type = struct.unpack(">B", buf.read(1))[0]
         self.points = []
         for i0 in range(self.points_length):
-            self.points.append(Point2._decode_one(buf))
-        self.outline_color = Color._decode_one(buf)
+            self.points.append(cls._get_field_type('points')._decode_one(buf))
+        self.outline_color = cls._get_field_type('outline_color')._decode_one(buf)
         self.outline_colors = []
         for i0 in range(self.outline_colors_length):
-            self.outline_colors.append(Color._decode_one(buf))
-        self.fill_color = Color._decode_one(buf)
+            self.outline_colors.append(cls._get_field_type('outline_colors')._decode_one(buf))
+        self.fill_color = cls._get_field_type('fill_color')._decode_one(buf)
         self.thickness = struct.unpack(">d", buf.read(8))[0]
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

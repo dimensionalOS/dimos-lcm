@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from . import *
 from .Marker import Marker
@@ -18,6 +19,9 @@ class MarkerArray(object):
     __typenames__ = ["int32_t", "Marker"]
 
     __dimensions__ = [None, ["markers_length"]]
+
+    markers_length: 'int32_t'
+    markers: Marker
 
     def __init__(self, markers_length=0, markers=[]):
         # LCM Type: int32_t
@@ -49,12 +53,25 @@ class MarkerArray(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = MarkerArray()
+        self = cls()
         self.markers_length = struct.unpack(">i", buf.read(4))[0]
         self.markers = []
         for i0 in range(self.markers_length):
-            self.markers.append(Marker._decode_one(buf))
+            self.markers.append(cls._get_field_type('markers')._decode_one(buf))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

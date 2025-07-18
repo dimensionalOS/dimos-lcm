@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from . import *
 from .KeyValue import KeyValue
@@ -18,6 +19,13 @@ class DiagnosticStatus(object):
     __typenames__ = ["int32_t", "int8_t", "string", "string", "string", "KeyValue"]
 
     __dimensions__ = [None, None, None, None, None, ["values_length"]]
+
+    values_length: 'int32_t'
+    level: 'int8_t'
+    name: 'string'
+    message: 'string'
+    hardware_id: 'string'
+    values: KeyValue
 
     OK = 0
     WARN = 1
@@ -74,7 +82,7 @@ class DiagnosticStatus(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = DiagnosticStatus()
+        self = cls()
         self.values_length, self.level = struct.unpack(">ib", buf.read(5))
         __name_len = struct.unpack('>I', buf.read(4))[0]
         self.name = buf.read(__name_len)[:-1].decode('utf-8', 'replace')
@@ -84,8 +92,21 @@ class DiagnosticStatus(object):
         self.hardware_id = buf.read(__hardware_id_len)[:-1].decode('utf-8', 'replace')
         self.values = []
         for i0 in range(self.values_length):
-            self.values.append(KeyValue._decode_one(buf))
+            self.values.append(cls._get_field_type('values')._decode_one(buf))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

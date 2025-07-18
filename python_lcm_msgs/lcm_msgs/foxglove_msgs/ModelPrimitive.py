@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import geometry_msgs
 from . import *
@@ -19,6 +20,15 @@ class ModelPrimitive(object):
     __typenames__ = ["int32_t", "geometry_msgs.Pose", "geometry_msgs.Vector3", "Color", "boolean", "string", "string", "byte"]
 
     __dimensions__ = [None, None, None, None, None, None, None, ["data_length"]]
+
+    data_length: 'int32_t'
+    pose: geometry_msgs.Pose
+    scale: geometry_msgs.Vector3
+    color: Color
+    override_color: 'boolean'
+    url: 'string'
+    media_type: 'string'
+    data: 'byte'
 
     def __init__(self, data_length=0, pose=geometry_msgs.Pose(), scale=geometry_msgs.Vector3(), color=Color(), override_color=False, url="", media_type="", data=b""):
         # LCM Type: int32_t
@@ -75,11 +85,11 @@ class ModelPrimitive(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = ModelPrimitive()
+        self = cls()
         self.data_length = struct.unpack(">i", buf.read(4))[0]
-        self.pose = geometry_msgs.Pose._decode_one(buf)
-        self.scale = geometry_msgs.Vector3._decode_one(buf)
-        self.color = Color._decode_one(buf)
+        self.pose = cls._get_field_type('pose')._decode_one(buf)
+        self.scale = cls._get_field_type('scale')._decode_one(buf)
+        self.color = cls._get_field_type('color')._decode_one(buf)
         self.override_color = bool(struct.unpack('b', buf.read(1))[0])
         __url_len = struct.unpack('>I', buf.read(4))[0]
         self.url = buf.read(__url_len)[:-1].decode('utf-8', 'replace')
@@ -87,6 +97,19 @@ class ModelPrimitive(object):
         self.media_type = buf.read(__media_type_len)[:-1].decode('utf-8', 'replace')
         self.data = buf.read(self.data_length)
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

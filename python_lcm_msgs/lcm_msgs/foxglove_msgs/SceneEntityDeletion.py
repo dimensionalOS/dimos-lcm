@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import builtin_interfaces
 class SceneEntityDeletion(object):
@@ -17,6 +18,10 @@ class SceneEntityDeletion(object):
     __typenames__ = ["builtin_interfaces.Time", "byte", "string"]
 
     __dimensions__ = [None, None, None]
+
+    timestamp: builtin_interfaces.Time
+    type: 'byte'
+    id: 'string'
 
     MATCHING_ID = 0
     ALL = 1
@@ -56,12 +61,25 @@ class SceneEntityDeletion(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = SceneEntityDeletion()
-        self.timestamp = builtin_interfaces.Time._decode_one(buf)
+        self = cls()
+        self.timestamp = cls._get_field_type('timestamp')._decode_one(buf)
         self.type = struct.unpack(">B", buf.read(1))[0]
         __id_len = struct.unpack('>I', buf.read(4))[0]
         self.id = buf.read(__id_len)[:-1].decode('utf-8', 'replace')
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

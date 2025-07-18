@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import geometry_msgs
 from lcm_msgs import builtin_interfaces
@@ -18,6 +19,12 @@ class FrameTransform(object):
     __typenames__ = ["builtin_interfaces.Time", "string", "string", "geometry_msgs.Vector3", "geometry_msgs.Quaternion"]
 
     __dimensions__ = [None, None, None, None, None]
+
+    timestamp: builtin_interfaces.Time
+    parent_frame_id: 'string'
+    child_frame_id: 'string'
+    translation: geometry_msgs.Vector3
+    rotation: geometry_msgs.Quaternion
 
     def __init__(self, timestamp=builtin_interfaces.Time(), parent_frame_id="", child_frame_id="", translation=geometry_msgs.Vector3(), rotation=geometry_msgs.Quaternion()):
         # LCM Type: builtin_interfaces.Time
@@ -65,15 +72,28 @@ class FrameTransform(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = FrameTransform()
-        self.timestamp = builtin_interfaces.Time._decode_one(buf)
+        self = cls()
+        self.timestamp = cls._get_field_type('timestamp')._decode_one(buf)
         __parent_frame_id_len = struct.unpack('>I', buf.read(4))[0]
         self.parent_frame_id = buf.read(__parent_frame_id_len)[:-1].decode('utf-8', 'replace')
         __child_frame_id_len = struct.unpack('>I', buf.read(4))[0]
         self.child_frame_id = buf.read(__child_frame_id_len)[:-1].decode('utf-8', 'replace')
-        self.translation = geometry_msgs.Vector3._decode_one(buf)
-        self.rotation = geometry_msgs.Quaternion._decode_one(buf)
+        self.translation = cls._get_field_type('translation')._decode_one(buf)
+        self.rotation = cls._get_field_type('rotation')._decode_one(buf)
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

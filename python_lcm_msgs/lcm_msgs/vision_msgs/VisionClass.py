@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 class VisionClass(object):
 
@@ -16,6 +17,9 @@ class VisionClass(object):
     __typenames__ = ["int16_t", "string"]
 
     __dimensions__ = [None, None]
+
+    class_id: 'int16_t'
+    class_name: 'string'
 
     def __init__(self, class_id=0, class_name=""):
         # LCM Type: int16_t
@@ -48,11 +52,24 @@ class VisionClass(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = VisionClass()
+        self = cls()
         self.class_id = struct.unpack(">h", buf.read(2))[0]
         __class_name_len = struct.unpack('>I', buf.read(4))[0]
         self.class_name = buf.read(__class_name_len)[:-1].decode('utf-8', 'replace')
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

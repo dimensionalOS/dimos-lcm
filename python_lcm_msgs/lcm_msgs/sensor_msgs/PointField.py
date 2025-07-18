@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 class PointField(object):
 
@@ -16,6 +17,11 @@ class PointField(object):
     __typenames__ = ["string", "int32_t", "byte", "int32_t"]
 
     __dimensions__ = [None, None, None, None]
+
+    name: 'string'
+    offset: 'int32_t'
+    datatype: 'byte'
+    count: 'int32_t'
 
     INT8 = 1
     UINT8 = 2
@@ -61,11 +67,24 @@ class PointField(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = PointField()
+        self = cls()
         __name_len = struct.unpack('>I', buf.read(4))[0]
         self.name = buf.read(__name_len)[:-1].decode('utf-8', 'replace')
         self.offset, self.datatype, self.count = struct.unpack(">iBi", buf.read(9))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

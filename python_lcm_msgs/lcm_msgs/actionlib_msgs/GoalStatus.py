@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from . import *
 from .GoalID import GoalID
@@ -18,6 +19,10 @@ class GoalStatus(object):
     __typenames__ = ["GoalID", "byte", "string"]
 
     __dimensions__ = [None, None, None]
+
+    goal_id: GoalID
+    status: 'byte'
+    text: 'string'
 
     PENDING = 0
     ACTIVE = 1
@@ -65,12 +70,25 @@ class GoalStatus(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = GoalStatus()
-        self.goal_id = GoalID._decode_one(buf)
+        self = cls()
+        self.goal_id = cls._get_field_type('goal_id')._decode_one(buf)
         self.status = struct.unpack(">B", buf.read(1))[0]
         __text_len = struct.unpack('>I', buf.read(4))[0]
         self.text = buf.read(__text_len)[:-1].decode('utf-8', 'replace')
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):
