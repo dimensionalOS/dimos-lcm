@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import geometry_msgs
 from lcm_msgs import std_msgs
@@ -18,6 +19,10 @@ class MagneticField(object):
     __typenames__ = ["std_msgs.Header", "geometry_msgs.Vector3", "double"]
 
     __dimensions__ = [None, None, [9]]
+
+    header: std_msgs.Header
+    magnetic_field: geometry_msgs.Vector3
+    magnetic_field_covariance: 'double'
 
     def __init__(self, header=std_msgs.Header(), magnetic_field=geometry_msgs.Vector3(), magnetic_field_covariance=[ 0.0 for dim0 in range(9) ]):
         # LCM Type: std_msgs.Header
@@ -52,11 +57,24 @@ class MagneticField(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = MagneticField()
-        self.header = std_msgs.Header._decode_one(buf)
-        self.magnetic_field = geometry_msgs.Vector3._decode_one(buf)
+        self = cls()
+        self.header = cls._get_field_type('header')._decode_one(buf)
+        self.magnetic_field = cls._get_field_type('magnetic_field')._decode_one(buf)
         self.magnetic_field_covariance = struct.unpack('>9d', buf.read(72))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

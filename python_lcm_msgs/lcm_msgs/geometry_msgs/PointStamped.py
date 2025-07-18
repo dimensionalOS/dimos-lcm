@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from . import *
 from lcm_msgs import std_msgs
@@ -19,6 +20,9 @@ class PointStamped(object):
     __typenames__ = ["std_msgs.Header", "Point"]
 
     __dimensions__ = [None, None]
+
+    header: std_msgs.Header
+    point: Point
 
     def __init__(self, header=std_msgs.Header(), point=Point()):
         # LCM Type: std_msgs.Header
@@ -50,10 +54,23 @@ class PointStamped(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = PointStamped()
-        self.header = std_msgs.Header._decode_one(buf)
-        self.point = Point._decode_one(buf)
+        self = cls()
+        self.header = cls._get_field_type('header')._decode_one(buf)
+        self.point = cls._get_field_type('point')._decode_one(buf)
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

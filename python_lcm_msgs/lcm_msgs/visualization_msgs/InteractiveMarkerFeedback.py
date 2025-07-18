@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import geometry_msgs
 from lcm_msgs import std_msgs
@@ -18,6 +19,16 @@ class InteractiveMarkerFeedback(object):
     __typenames__ = ["std_msgs.Header", "string", "string", "string", "byte", "geometry_msgs.Pose", "int32_t", "geometry_msgs.Point", "boolean"]
 
     __dimensions__ = [None, None, None, None, None, None, None, None, None]
+
+    header: std_msgs.Header
+    client_id: 'string'
+    marker_name: 'string'
+    control_name: 'string'
+    event_type: 'byte'
+    pose: geometry_msgs.Pose
+    menu_entry_id: 'int32_t'
+    mouse_point: geometry_msgs.Point
+    mouse_point_valid: 'boolean'
 
     KEEP_ALIVE = 0
     POSE_UPDATE = 1
@@ -87,8 +98,8 @@ class InteractiveMarkerFeedback(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = InteractiveMarkerFeedback()
-        self.header = std_msgs.Header._decode_one(buf)
+        self = cls()
+        self.header = cls._get_field_type('header')._decode_one(buf)
         __client_id_len = struct.unpack('>I', buf.read(4))[0]
         self.client_id = buf.read(__client_id_len)[:-1].decode('utf-8', 'replace')
         __marker_name_len = struct.unpack('>I', buf.read(4))[0]
@@ -96,11 +107,24 @@ class InteractiveMarkerFeedback(object):
         __control_name_len = struct.unpack('>I', buf.read(4))[0]
         self.control_name = buf.read(__control_name_len)[:-1].decode('utf-8', 'replace')
         self.event_type = struct.unpack(">B", buf.read(1))[0]
-        self.pose = geometry_msgs.Pose._decode_one(buf)
+        self.pose = cls._get_field_type('pose')._decode_one(buf)
         self.menu_entry_id = struct.unpack(">i", buf.read(4))[0]
-        self.mouse_point = geometry_msgs.Point._decode_one(buf)
+        self.mouse_point = cls._get_field_type('mouse_point')._decode_one(buf)
         self.mouse_point_valid = bool(struct.unpack('b', buf.read(1))[0])
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

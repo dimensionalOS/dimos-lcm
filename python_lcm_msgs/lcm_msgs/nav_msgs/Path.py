@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import geometry_msgs
 from lcm_msgs import std_msgs
@@ -18,6 +19,10 @@ class Path(object):
     __typenames__ = ["int32_t", "std_msgs.Header", "geometry_msgs.PoseStamped"]
 
     __dimensions__ = [None, None, ["poses_length"]]
+
+    poses_length: 'int32_t'
+    header: std_msgs.Header
+    poses: geometry_msgs.PoseStamped
 
     def __init__(self, poses_length=0, header=std_msgs.Header(), poses=[]):
         # LCM Type: int32_t
@@ -53,13 +58,26 @@ class Path(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Path()
+        self = cls()
         self.poses_length = struct.unpack(">i", buf.read(4))[0]
-        self.header = std_msgs.Header._decode_one(buf)
+        self.header = cls._get_field_type('header')._decode_one(buf)
         self.poses = []
         for i0 in range(self.poses_length):
-            self.poses.append(geometry_msgs.PoseStamped._decode_one(buf))
+            self.poses.append(cls._get_field_type('poses')._decode_one(buf))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

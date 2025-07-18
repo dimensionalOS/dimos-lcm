@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from . import *
 from .InteractiveMarker import InteractiveMarker
@@ -18,6 +19,11 @@ class InteractiveMarkerInit(object):
     __typenames__ = ["int32_t", "string", "int64_t", "InteractiveMarker"]
 
     __dimensions__ = [None, None, None, ["markers_length"]]
+
+    markers_length: 'int32_t'
+    server_id: 'string'
+    seq_num: 'int64_t'
+    markers: InteractiveMarker
 
     def __init__(self, markers_length=0, server_id="", seq_num=0, markers=[]):
         # LCM Type: int32_t
@@ -58,15 +64,28 @@ class InteractiveMarkerInit(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = InteractiveMarkerInit()
+        self = cls()
         self.markers_length = struct.unpack(">i", buf.read(4))[0]
         __server_id_len = struct.unpack('>I', buf.read(4))[0]
         self.server_id = buf.read(__server_id_len)[:-1].decode('utf-8', 'replace')
         self.seq_num = struct.unpack(">q", buf.read(8))[0]
         self.markers = []
         for i0 in range(self.markers_length):
-            self.markers.append(InteractiveMarker._decode_one(buf))
+            self.markers.append(cls._get_field_type('markers')._decode_one(buf))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

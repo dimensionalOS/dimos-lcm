@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from . import *
 from .Twist import Twist
@@ -18,6 +19,9 @@ class TwistWithCovariance(object):
     __typenames__ = ["Twist", "double"]
 
     __dimensions__ = [None, [36]]
+
+    twist: Twist
+    covariance: 'double'
 
     def __init__(self, twist=Twist(), covariance=[ 0.0 for dim0 in range(36) ]):
         # LCM Type: Twist
@@ -48,10 +52,23 @@ class TwistWithCovariance(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = TwistWithCovariance()
-        self.twist = Twist._decode_one(buf)
+        self = cls()
+        self.twist = cls._get_field_type('twist')._decode_one(buf)
         self.covariance = struct.unpack('>36d', buf.read(288))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

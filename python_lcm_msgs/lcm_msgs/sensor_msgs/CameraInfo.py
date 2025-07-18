@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import std_msgs
 from . import *
@@ -19,6 +20,19 @@ class CameraInfo(object):
     __typenames__ = ["int32_t", "std_msgs.Header", "int32_t", "int32_t", "string", "double", "double", "double", "double", "int32_t", "int32_t", "RegionOfInterest"]
 
     __dimensions__ = [None, None, None, None, None, ["D_length"], [9], [9], [12], None, None, None]
+
+    D_length: 'int32_t'
+    header: std_msgs.Header
+    height: 'int32_t'
+    width: 'int32_t'
+    distortion_model: 'string'
+    D: 'double'
+    K: 'double'
+    R: 'double'
+    P: 'double'
+    binning_x: 'int32_t'
+    binning_y: 'int32_t'
+    roi: RegionOfInterest
 
     def __init__(self, D_length=0, header=std_msgs.Header(), height=0, width=0, distortion_model="", D=[], K=[ 0.0 for dim0 in range(9) ], R=[ 0.0 for dim0 in range(9) ], P=[ 0.0 for dim0 in range(12) ], binning_x=0, binning_y=0, roi=RegionOfInterest()):
         # LCM Type: int32_t
@@ -81,9 +95,9 @@ class CameraInfo(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = CameraInfo()
+        self = cls()
         self.D_length = struct.unpack(">i", buf.read(4))[0]
-        self.header = std_msgs.Header._decode_one(buf)
+        self.header = cls._get_field_type('header')._decode_one(buf)
         self.height, self.width = struct.unpack(">ii", buf.read(8))
         __distortion_model_len = struct.unpack('>I', buf.read(4))[0]
         self.distortion_model = buf.read(__distortion_model_len)[:-1].decode('utf-8', 'replace')
@@ -92,8 +106,21 @@ class CameraInfo(object):
         self.R = struct.unpack('>9d', buf.read(72))
         self.P = struct.unpack('>12d', buf.read(96))
         self.binning_x, self.binning_y = struct.unpack(">ii", buf.read(8))
-        self.roi = RegionOfInterest._decode_one(buf)
+        self.roi = cls._get_field_type('roi')._decode_one(buf)
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

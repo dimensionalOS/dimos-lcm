@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import std_msgs
 class Image(object):
@@ -17,6 +18,15 @@ class Image(object):
     __typenames__ = ["int32_t", "std_msgs.Header", "int32_t", "int32_t", "string", "byte", "int32_t", "byte"]
 
     __dimensions__ = [None, None, None, None, None, None, None, ["data_length"]]
+
+    data_length: 'int32_t'
+    header: std_msgs.Header
+    height: 'int32_t'
+    width: 'int32_t'
+    encoding: 'string'
+    is_bigendian: 'byte'
+    step: 'int32_t'
+    data: 'byte'
 
     def __init__(self, data_length=0, header=std_msgs.Header(), height=0, width=0, encoding="", is_bigendian=0, step=0, data=b""):
         # LCM Type: int32_t
@@ -66,15 +76,28 @@ class Image(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Image()
+        self = cls()
         self.data_length = struct.unpack(">i", buf.read(4))[0]
-        self.header = std_msgs.Header._decode_one(buf)
+        self.header = cls._get_field_type('header')._decode_one(buf)
         self.height, self.width = struct.unpack(">ii", buf.read(8))
         __encoding_len = struct.unpack('>I', buf.read(4))[0]
         self.encoding = buf.read(__encoding_len)[:-1].decode('utf-8', 'replace')
         self.is_bigendian, self.step = struct.unpack(">Bi", buf.read(5))
         self.data = buf.read(self.data_length)
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 class NavSatStatus(object):
 
@@ -16,6 +17,9 @@ class NavSatStatus(object):
     __typenames__ = ["int8_t", "int16_t"]
 
     __dimensions__ = [None, None]
+
+    status: 'int8_t'
+    service: 'int16_t'
 
     STATUS_NO_FIX = -1
     STATUS_FIX = 0
@@ -53,9 +57,22 @@ class NavSatStatus(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = NavSatStatus()
+        self = cls()
         self.status, self.service = struct.unpack(">bh", buf.read(3))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 class JoyFeedback(object):
 
@@ -16,6 +17,10 @@ class JoyFeedback(object):
     __typenames__ = ["byte", "byte", "float"]
 
     __dimensions__ = [None, None, None]
+
+    type: 'byte'
+    id: 'byte'
+    intensity: 'float'
 
     TYPE_LED = 0
     TYPE_RUMBLE = 1
@@ -50,9 +55,22 @@ class JoyFeedback(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = JoyFeedback()
+        self = cls()
         self.type, self.id, self.intensity = struct.unpack(">BBf", buf.read(6))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

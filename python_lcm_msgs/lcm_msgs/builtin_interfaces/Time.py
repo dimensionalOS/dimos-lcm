@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 class Time(object):
 
@@ -16,6 +17,9 @@ class Time(object):
     __typenames__ = ["int32_t", "int32_t"]
 
     __dimensions__ = [None, None]
+
+    sec: 'int32_t'
+    nanosec: 'int32_t'
 
     def __init__(self, sec=0, nanosec=0):
         # LCM Type: int32_t
@@ -44,9 +48,22 @@ class Time(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Time()
+        self = cls()
         self.sec, self.nanosec = struct.unpack(">ii", buf.read(8))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 class Color(object):
 
@@ -16,6 +17,11 @@ class Color(object):
     __typenames__ = ["double", "double", "double", "double"]
 
     __dimensions__ = [None, None, None, None]
+
+    r: 'double'
+    g: 'double'
+    b: 'double'
+    a: 'double'
 
     def __init__(self, r=0.0, g=0.0, b=0.0, a=0.0):
         # LCM Type: double
@@ -48,9 +54,22 @@ class Color(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Color()
+        self = cls()
         self.r, self.g, self.b, self.a = struct.unpack(">dddd", buf.read(32))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

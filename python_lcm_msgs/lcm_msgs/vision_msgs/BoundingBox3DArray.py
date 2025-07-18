@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from . import *
 from lcm_msgs import std_msgs
@@ -19,6 +20,10 @@ class BoundingBox3DArray(object):
     __typenames__ = ["int32_t", "std_msgs.Header", "BoundingBox3D"]
 
     __dimensions__ = [None, None, ["boxes_length"]]
+
+    boxes_length: 'int32_t'
+    header: std_msgs.Header
+    boxes: BoundingBox3D
 
     def __init__(self, boxes_length=0, header=std_msgs.Header(), boxes=[]):
         # LCM Type: int32_t
@@ -54,13 +59,26 @@ class BoundingBox3DArray(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = BoundingBox3DArray()
+        self = cls()
         self.boxes_length = struct.unpack(">i", buf.read(4))[0]
-        self.header = std_msgs.Header._decode_one(buf)
+        self.header = cls._get_field_type('header')._decode_one(buf)
         self.boxes = []
         for i0 in range(self.boxes_length):
-            self.boxes.append(BoundingBox3D._decode_one(buf))
+            self.boxes.append(cls._get_field_type('boxes')._decode_one(buf))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

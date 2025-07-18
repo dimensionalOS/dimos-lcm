@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import std_msgs
 from lcm_msgs import sensor_msgs
@@ -18,6 +19,15 @@ class DisparityImage(object):
     __typenames__ = ["std_msgs.Header", "sensor_msgs.Image", "float", "float", "sensor_msgs.RegionOfInterest", "float", "float", "float"]
 
     __dimensions__ = [None, None, None, None, None, None, None, None]
+
+    header: std_msgs.Header
+    image: sensor_msgs.Image
+    f: 'float'
+    T: 'float'
+    valid_window: sensor_msgs.RegionOfInterest
+    min_disparity: 'float'
+    max_disparity: 'float'
+    delta_d: 'float'
 
     def __init__(self, header=std_msgs.Header(), image=sensor_msgs.Image(), f=0.0, T=0.0, valid_window=sensor_msgs.RegionOfInterest(), min_disparity=0.0, max_disparity=0.0, delta_d=0.0):
         # LCM Type: std_msgs.Header
@@ -65,13 +75,26 @@ class DisparityImage(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = DisparityImage()
-        self.header = std_msgs.Header._decode_one(buf)
-        self.image = sensor_msgs.Image._decode_one(buf)
+        self = cls()
+        self.header = cls._get_field_type('header')._decode_one(buf)
+        self.image = cls._get_field_type('image')._decode_one(buf)
         self.f, self.T = struct.unpack(">ff", buf.read(8))
-        self.valid_window = sensor_msgs.RegionOfInterest._decode_one(buf)
+        self.valid_window = cls._get_field_type('valid_window')._decode_one(buf)
         self.min_disparity, self.max_disparity, self.delta_d = struct.unpack(">fff", buf.read(12))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

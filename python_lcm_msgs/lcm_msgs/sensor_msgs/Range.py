@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import std_msgs
 class Range(object):
@@ -17,6 +18,13 @@ class Range(object):
     __typenames__ = ["std_msgs.Header", "byte", "float", "float", "float", "float"]
 
     __dimensions__ = [None, None, None, None, None, None]
+
+    header: std_msgs.Header
+    radiation_type: 'byte'
+    field_of_view: 'float'
+    min_range: 'float'
+    max_range: 'float'
+    range: 'float'
 
     ULTRASOUND = 0
     INFRARED = 1
@@ -58,10 +66,23 @@ class Range(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Range()
-        self.header = std_msgs.Header._decode_one(buf)
+        self = cls()
+        self.header = cls._get_field_type('header')._decode_one(buf)
         self.radiation_type, self.field_of_view, self.min_range, self.max_range, self.range = struct.unpack(">Bffff", buf.read(17))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

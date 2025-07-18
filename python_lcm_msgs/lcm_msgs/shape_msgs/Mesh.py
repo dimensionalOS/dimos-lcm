@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from . import *
 from lcm_msgs import geometry_msgs
@@ -19,6 +20,11 @@ class Mesh(object):
     __typenames__ = ["int32_t", "int32_t", "MeshTriangle", "geometry_msgs.Point"]
 
     __dimensions__ = [None, None, ["triangles_length"], ["vertices_length"]]
+
+    triangles_length: 'int32_t'
+    vertices_length: 'int32_t'
+    triangles: MeshTriangle
+    vertices: geometry_msgs.Point
 
     def __init__(self, triangles_length=0, vertices_length=0, triangles=[], vertices=[]):
         # LCM Type: int32_t
@@ -57,15 +63,28 @@ class Mesh(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Mesh()
+        self = cls()
         self.triangles_length, self.vertices_length = struct.unpack(">ii", buf.read(8))
         self.triangles = []
         for i0 in range(self.triangles_length):
-            self.triangles.append(MeshTriangle._decode_one(buf))
+            self.triangles.append(cls._get_field_type('triangles')._decode_one(buf))
         self.vertices = []
         for i0 in range(self.vertices_length):
-            self.vertices.append(geometry_msgs.Point._decode_one(buf))
+            self.vertices.append(cls._get_field_type('vertices')._decode_one(buf))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

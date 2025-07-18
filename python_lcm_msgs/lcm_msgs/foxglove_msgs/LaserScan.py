@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import geometry_msgs
 from lcm_msgs import builtin_interfaces
@@ -18,6 +19,16 @@ class LaserScan(object):
     __typenames__ = ["int32_t", "int32_t", "builtin_interfaces.Time", "string", "geometry_msgs.Pose", "double", "double", "double", "double"]
 
     __dimensions__ = [None, None, None, None, None, None, None, ["ranges_length"], ["intensities_length"]]
+
+    ranges_length: 'int32_t'
+    intensities_length: 'int32_t'
+    timestamp: builtin_interfaces.Time
+    frame_id: 'string'
+    pose: geometry_msgs.Pose
+    start_angle: 'double'
+    end_angle: 'double'
+    ranges: 'double'
+    intensities: 'double'
 
     def __init__(self, ranges_length=0, intensities_length=0, timestamp=builtin_interfaces.Time(), frame_id="", pose=geometry_msgs.Pose(), start_angle=0.0, end_angle=0.0, ranges=[], intensities=[]):
         # LCM Type: int32_t
@@ -71,16 +82,29 @@ class LaserScan(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = LaserScan()
+        self = cls()
         self.ranges_length, self.intensities_length = struct.unpack(">ii", buf.read(8))
-        self.timestamp = builtin_interfaces.Time._decode_one(buf)
+        self.timestamp = cls._get_field_type('timestamp')._decode_one(buf)
         __frame_id_len = struct.unpack('>I', buf.read(4))[0]
         self.frame_id = buf.read(__frame_id_len)[:-1].decode('utf-8', 'replace')
-        self.pose = geometry_msgs.Pose._decode_one(buf)
+        self.pose = cls._get_field_type('pose')._decode_one(buf)
         self.start_angle, self.end_angle = struct.unpack(">dd", buf.read(16))
         self.ranges = struct.unpack('>%dd' % self.ranges_length, buf.read(self.ranges_length * 8))
         self.intensities = struct.unpack('>%dd' % self.intensities_length, buf.read(self.intensities_length * 8))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

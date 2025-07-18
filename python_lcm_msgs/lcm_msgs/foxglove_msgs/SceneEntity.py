@@ -6,18 +6,19 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from . import *
 from lcm_msgs import builtin_interfaces
-from .TextPrimitive import TextPrimitive
+from .KeyValuePair import KeyValuePair
+from .ArrowPrimitive import ArrowPrimitive
 from .LinePrimitive import LinePrimitive
 from .TriangleListPrimitive import TriangleListPrimitive
-from .ArrowPrimitive import ArrowPrimitive
-from .SpherePrimitive import SpherePrimitive
-from .ModelPrimitive import ModelPrimitive
+from .TextPrimitive import TextPrimitive
 from .CubePrimitive import CubePrimitive
-from .KeyValuePair import KeyValuePair
+from .SpherePrimitive import SpherePrimitive
 from .CylinderPrimitive import CylinderPrimitive
+from .ModelPrimitive import ModelPrimitive
 class SceneEntity(object):
 
     msg_name = "foxglove_msgs.SceneEntity"
@@ -27,6 +28,30 @@ class SceneEntity(object):
     __typenames__ = ["int32_t", "int32_t", "int32_t", "int32_t", "int32_t", "int32_t", "int32_t", "int32_t", "int32_t", "builtin_interfaces.Time", "string", "string", "builtin_interfaces.Duration", "boolean", "KeyValuePair", "ArrowPrimitive", "CubePrimitive", "SpherePrimitive", "CylinderPrimitive", "LinePrimitive", "TriangleListPrimitive", "TextPrimitive", "ModelPrimitive"]
 
     __dimensions__ = [None, None, None, None, None, None, None, None, None, None, None, None, None, None, ["metadata_length"], ["arrows_length"], ["cubes_length"], ["spheres_length"], ["cylinders_length"], ["lines_length"], ["triangles_length"], ["texts_length"], ["models_length"]]
+
+    metadata_length: 'int32_t'
+    arrows_length: 'int32_t'
+    cubes_length: 'int32_t'
+    spheres_length: 'int32_t'
+    cylinders_length: 'int32_t'
+    lines_length: 'int32_t'
+    triangles_length: 'int32_t'
+    texts_length: 'int32_t'
+    models_length: 'int32_t'
+    timestamp: builtin_interfaces.Time
+    frame_id: 'string'
+    id: 'string'
+    lifetime: builtin_interfaces.Duration
+    frame_locked: 'boolean'
+    metadata: KeyValuePair
+    arrows: ArrowPrimitive
+    cubes: CubePrimitive
+    spheres: SpherePrimitive
+    cylinders: CylinderPrimitive
+    lines: LinePrimitive
+    triangles: TriangleListPrimitive
+    texts: TextPrimitive
+    models: ModelPrimitive
 
     def __init__(self, metadata_length=0, arrows_length=0, cubes_length=0, spheres_length=0, cylinders_length=0, lines_length=0, triangles_length=0, texts_length=0, models_length=0, timestamp=builtin_interfaces.Time(), frame_id="", id="", lifetime=builtin_interfaces.Duration(), frame_locked=False, metadata=[], arrows=[], cubes=[], spheres=[], cylinders=[], lines=[], triangles=[], texts=[], models=[]):
         # LCM Type: int32_t
@@ -137,43 +162,56 @@ class SceneEntity(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = SceneEntity()
+        self = cls()
         self.metadata_length, self.arrows_length, self.cubes_length, self.spheres_length, self.cylinders_length, self.lines_length, self.triangles_length, self.texts_length, self.models_length = struct.unpack(">iiiiiiiii", buf.read(36))
-        self.timestamp = builtin_interfaces.Time._decode_one(buf)
+        self.timestamp = cls._get_field_type('timestamp')._decode_one(buf)
         __frame_id_len = struct.unpack('>I', buf.read(4))[0]
         self.frame_id = buf.read(__frame_id_len)[:-1].decode('utf-8', 'replace')
         __id_len = struct.unpack('>I', buf.read(4))[0]
         self.id = buf.read(__id_len)[:-1].decode('utf-8', 'replace')
-        self.lifetime = builtin_interfaces.Duration._decode_one(buf)
+        self.lifetime = cls._get_field_type('lifetime')._decode_one(buf)
         self.frame_locked = bool(struct.unpack('b', buf.read(1))[0])
         self.metadata = []
         for i0 in range(self.metadata_length):
-            self.metadata.append(KeyValuePair._decode_one(buf))
+            self.metadata.append(cls._get_field_type('metadata')._decode_one(buf))
         self.arrows = []
         for i0 in range(self.arrows_length):
-            self.arrows.append(ArrowPrimitive._decode_one(buf))
+            self.arrows.append(cls._get_field_type('arrows')._decode_one(buf))
         self.cubes = []
         for i0 in range(self.cubes_length):
-            self.cubes.append(CubePrimitive._decode_one(buf))
+            self.cubes.append(cls._get_field_type('cubes')._decode_one(buf))
         self.spheres = []
         for i0 in range(self.spheres_length):
-            self.spheres.append(SpherePrimitive._decode_one(buf))
+            self.spheres.append(cls._get_field_type('spheres')._decode_one(buf))
         self.cylinders = []
         for i0 in range(self.cylinders_length):
-            self.cylinders.append(CylinderPrimitive._decode_one(buf))
+            self.cylinders.append(cls._get_field_type('cylinders')._decode_one(buf))
         self.lines = []
         for i0 in range(self.lines_length):
-            self.lines.append(LinePrimitive._decode_one(buf))
+            self.lines.append(cls._get_field_type('lines')._decode_one(buf))
         self.triangles = []
         for i0 in range(self.triangles_length):
-            self.triangles.append(TriangleListPrimitive._decode_one(buf))
+            self.triangles.append(cls._get_field_type('triangles')._decode_one(buf))
         self.texts = []
         for i0 in range(self.texts_length):
-            self.texts.append(TextPrimitive._decode_one(buf))
+            self.texts.append(cls._get_field_type('texts')._decode_one(buf))
         self.models = []
         for i0 in range(self.models_length):
-            self.models.append(ModelPrimitive._decode_one(buf))
+            self.models.append(cls._get_field_type('models')._decode_one(buf))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

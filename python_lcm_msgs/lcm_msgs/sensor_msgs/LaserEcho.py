@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 class LaserEcho(object):
 
@@ -16,6 +17,9 @@ class LaserEcho(object):
     __typenames__ = ["int32_t", "float"]
 
     __dimensions__ = [None, ["echoes_length"]]
+
+    echoes_length: 'int32_t'
+    echoes: 'float'
 
     def __init__(self, echoes_length=0, echoes=[]):
         # LCM Type: int32_t
@@ -45,10 +49,23 @@ class LaserEcho(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = LaserEcho()
+        self = cls()
         self.echoes_length = struct.unpack(">i", buf.read(4))[0]
         self.echoes = struct.unpack('>%df' % self.echoes_length, buf.read(self.echoes_length * 4))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

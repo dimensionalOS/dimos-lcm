@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 class SolidPrimitive(object):
 
@@ -16,6 +17,10 @@ class SolidPrimitive(object):
     __typenames__ = ["int32_t", "byte", "double"]
 
     __dimensions__ = [None, None, ["dimensions_length"]]
+
+    dimensions_length: 'int32_t'
+    type: 'byte'
+    dimensions: 'double'
 
     BOX = 1
     SPHERE = 2
@@ -60,10 +65,23 @@ class SolidPrimitive(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = SolidPrimitive()
+        self = cls()
         self.dimensions_length, self.type = struct.unpack(">iB", buf.read(5))
         self.dimensions = struct.unpack('>%dd' % self.dimensions_length, buf.read(self.dimensions_length * 8))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

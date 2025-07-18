@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 class Quaternion(object):
 
@@ -16,6 +17,11 @@ class Quaternion(object):
     __typenames__ = ["double", "double", "double", "double"]
 
     __dimensions__ = [None, None, None, None]
+
+    x: 'double'
+    y: 'double'
+    z: 'double'
+    w: 'double'
 
     def __init__(self, x=0.0, y=0.0, z=0.0, w=0.0):
         # LCM Type: double
@@ -48,9 +54,22 @@ class Quaternion(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Quaternion()
+        self = cls()
         self.x, self.y, self.z, self.w = struct.unpack(">dddd", buf.read(32))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

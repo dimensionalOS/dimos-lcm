@@ -6,11 +6,12 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from . import *
 from lcm_msgs import builtin_interfaces
-from .Color import Color
 from .Point2 import Point2
+from .Color import Color
 class CircleAnnotation(object):
 
     msg_name = "foxglove_msgs.CircleAnnotation"
@@ -20,6 +21,13 @@ class CircleAnnotation(object):
     __typenames__ = ["builtin_interfaces.Time", "Point2", "double", "double", "Color", "Color"]
 
     __dimensions__ = [None, None, None, None, None, None]
+
+    timestamp: builtin_interfaces.Time
+    position: Point2
+    diameter: 'double'
+    thickness: 'double'
+    fill_color: Color
+    outline_color: Color
 
     def __init__(self, timestamp=builtin_interfaces.Time(), position=Point2(), diameter=0.0, thickness=0.0, fill_color=Color(), outline_color=Color()):
         # LCM Type: builtin_interfaces.Time
@@ -64,13 +72,26 @@ class CircleAnnotation(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = CircleAnnotation()
-        self.timestamp = builtin_interfaces.Time._decode_one(buf)
-        self.position = Point2._decode_one(buf)
+        self = cls()
+        self.timestamp = cls._get_field_type('timestamp')._decode_one(buf)
+        self.position = cls._get_field_type('position')._decode_one(buf)
         self.diameter, self.thickness = struct.unpack(">dd", buf.read(16))
-        self.fill_color = Color._decode_one(buf)
-        self.outline_color = Color._decode_one(buf)
+        self.fill_color = cls._get_field_type('fill_color')._decode_one(buf)
+        self.outline_color = cls._get_field_type('outline_color')._decode_one(buf)
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 class MeshTriangle(object):
 
@@ -16,6 +17,8 @@ class MeshTriangle(object):
     __typenames__ = ["int32_t"]
 
     __dimensions__ = [[3]]
+
+    vertex_indices: 'int32_t'
 
     def __init__(self, vertex_indices=[ 0 for dim0 in range(3) ]):
         # LCM Type: int32_t[3]
@@ -42,9 +45,22 @@ class MeshTriangle(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = MeshTriangle()
+        self = cls()
         self.vertex_indices = struct.unpack('>3i', buf.read(12))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

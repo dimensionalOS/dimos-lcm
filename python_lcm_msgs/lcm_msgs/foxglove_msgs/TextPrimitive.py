@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import geometry_msgs
 from . import *
@@ -19,6 +20,13 @@ class TextPrimitive(object):
     __typenames__ = ["geometry_msgs.Pose", "boolean", "double", "boolean", "Color", "string"]
 
     __dimensions__ = [None, None, None, None, None, None]
+
+    pose: geometry_msgs.Pose
+    billboard: 'boolean'
+    font_size: 'double'
+    scale_invariant: 'boolean'
+    color: Color
+    text: 'string'
 
     def __init__(self, pose=geometry_msgs.Pose(), billboard=False, font_size=0.0, scale_invariant=False, color=Color(), text=""):
         # LCM Type: geometry_msgs.Pose
@@ -63,15 +71,28 @@ class TextPrimitive(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = TextPrimitive()
-        self.pose = geometry_msgs.Pose._decode_one(buf)
+        self = cls()
+        self.pose = cls._get_field_type('pose')._decode_one(buf)
         self.billboard = bool(struct.unpack('b', buf.read(1))[0])
         self.font_size = struct.unpack(">d", buf.read(8))[0]
         self.scale_invariant = bool(struct.unpack('b', buf.read(1))[0])
-        self.color = Color._decode_one(buf)
+        self.color = cls._get_field_type('color')._decode_one(buf)
         __text_len = struct.unpack('>I', buf.read(4))[0]
         self.text = buf.read(__text_len)[:-1].decode('utf-8', 'replace')
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import std_msgs
 class JointTrajectoryPoint(object):
@@ -17,6 +18,16 @@ class JointTrajectoryPoint(object):
     __typenames__ = ["int32_t", "int32_t", "int32_t", "int32_t", "double", "double", "double", "double", "std_msgs.Duration"]
 
     __dimensions__ = [None, None, None, None, ["positions_length"], ["velocities_length"], ["accelerations_length"], ["effort_length"], None]
+
+    positions_length: 'int32_t'
+    velocities_length: 'int32_t'
+    accelerations_length: 'int32_t'
+    effort_length: 'int32_t'
+    positions: 'double'
+    velocities: 'double'
+    accelerations: 'double'
+    effort: 'double'
+    time_from_start: std_msgs.Duration
 
     def __init__(self, positions_length=0, velocities_length=0, accelerations_length=0, effort_length=0, positions=[], velocities=[], accelerations=[], effort=[], time_from_start=std_msgs.Duration()):
         # LCM Type: int32_t
@@ -65,14 +76,27 @@ class JointTrajectoryPoint(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = JointTrajectoryPoint()
+        self = cls()
         self.positions_length, self.velocities_length, self.accelerations_length, self.effort_length = struct.unpack(">iiii", buf.read(16))
         self.positions = struct.unpack('>%dd' % self.positions_length, buf.read(self.positions_length * 8))
         self.velocities = struct.unpack('>%dd' % self.velocities_length, buf.read(self.velocities_length * 8))
         self.accelerations = struct.unpack('>%dd' % self.accelerations_length, buf.read(self.accelerations_length * 8))
         self.effort = struct.unpack('>%dd' % self.effort_length, buf.read(self.effort_length * 8))
-        self.time_from_start = std_msgs.Duration._decode_one(buf)
+        self.time_from_start = cls._get_field_type('time_from_start')._decode_one(buf)
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

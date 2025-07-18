@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 class ObjectHypothesis(object):
 
@@ -16,6 +17,9 @@ class ObjectHypothesis(object):
     __typenames__ = ["string", "double"]
 
     __dimensions__ = [None, None]
+
+    class_id: 'string'
+    score: 'double'
 
     def __init__(self, class_id="", score=0.0):
         # LCM Type: string
@@ -48,11 +52,24 @@ class ObjectHypothesis(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = ObjectHypothesis()
+        self = cls()
         __class_id_len = struct.unpack('>I', buf.read(4))[0]
         self.class_id = buf.read(__class_id_len)[:-1].decode('utf-8', 'replace')
         self.score = struct.unpack(">d", buf.read(8))[0]
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

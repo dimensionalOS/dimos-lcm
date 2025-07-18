@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import geometry_msgs
 from lcm_msgs import std_msgs
@@ -18,6 +19,16 @@ class MultiDOFJointState(object):
     __typenames__ = ["int32_t", "int32_t", "int32_t", "int32_t", "std_msgs.Header", "string", "geometry_msgs.Transform", "geometry_msgs.Twist", "geometry_msgs.Wrench"]
 
     __dimensions__ = [None, None, None, None, None, ["joint_names_length"], ["transforms_length"], ["twist_length"], ["wrench_length"]]
+
+    joint_names_length: 'int32_t'
+    transforms_length: 'int32_t'
+    twist_length: 'int32_t'
+    wrench_length: 'int32_t'
+    header: std_msgs.Header
+    joint_names: 'string'
+    transforms: geometry_msgs.Transform
+    twist: geometry_msgs.Twist
+    wrench: geometry_msgs.Wrench
 
     def __init__(self, joint_names_length=0, transforms_length=0, twist_length=0, wrench_length=0, header=std_msgs.Header(), joint_names=[], transforms=[], twist=[], wrench=[]):
         # LCM Type: int32_t
@@ -76,23 +87,36 @@ class MultiDOFJointState(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = MultiDOFJointState()
+        self = cls()
         self.joint_names_length, self.transforms_length, self.twist_length, self.wrench_length = struct.unpack(">iiii", buf.read(16))
-        self.header = std_msgs.Header._decode_one(buf)
+        self.header = cls._get_field_type('header')._decode_one(buf)
         self.joint_names = []
         for i0 in range(self.joint_names_length):
             __joint_names_len = struct.unpack('>I', buf.read(4))[0]
             self.joint_names.append(buf.read(__joint_names_len)[:-1].decode('utf-8', 'replace'))
         self.transforms = []
         for i0 in range(self.transforms_length):
-            self.transforms.append(geometry_msgs.Transform._decode_one(buf))
+            self.transforms.append(cls._get_field_type('transforms')._decode_one(buf))
         self.twist = []
         for i0 in range(self.twist_length):
-            self.twist.append(geometry_msgs.Twist._decode_one(buf))
+            self.twist.append(cls._get_field_type('twist')._decode_one(buf))
         self.wrench = []
         for i0 in range(self.wrench_length):
-            self.wrench.append(geometry_msgs.Wrench._decode_one(buf))
+            self.wrench.append(cls._get_field_type('wrench')._decode_one(buf))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):
