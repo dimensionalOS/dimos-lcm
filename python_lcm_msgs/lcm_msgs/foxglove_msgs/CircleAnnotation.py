@@ -64,7 +64,7 @@ class CircleAnnotation(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = CircleAnnotation()
+        self = cls()
         self.timestamp = builtin_interfaces.Time._decode_one(buf)
         self.position = Point2._decode_one(buf)
         self.diameter, self.thickness = struct.unpack(">dd", buf.read(16))

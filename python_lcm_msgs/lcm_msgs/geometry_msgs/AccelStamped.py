@@ -50,7 +50,7 @@ class AccelStamped(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = AccelStamped()
+        self = cls()
         self.header = std_msgs.Header._decode_one(buf)
         self.accel = Accel._decode_one(buf)
         return self

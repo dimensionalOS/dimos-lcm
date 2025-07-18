@@ -63,7 +63,7 @@ class MenuEntry(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = MenuEntry()
+        self = cls()
         self.id, self.parent_id = struct.unpack(">ii", buf.read(8))
         __title_len = struct.unpack('>I', buf.read(4))[0]
         self.title = buf.read(__title_len)[:-1].decode('utf-8', 'replace')

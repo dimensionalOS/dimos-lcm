@@ -87,7 +87,7 @@ class InteractiveMarkerFeedback(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = InteractiveMarkerFeedback()
+        self = cls()
         self.header = std_msgs.Header._decode_one(buf)
         __client_id_len = struct.unpack('>I', buf.read(4))[0]
         self.client_id = buf.read(__client_id_len)[:-1].decode('utf-8', 'replace')

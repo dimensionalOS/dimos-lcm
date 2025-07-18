@@ -74,7 +74,7 @@ class DiagnosticStatus(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = DiagnosticStatus()
+        self = cls()
         self.values_length, self.level = struct.unpack(">ib", buf.read(5))
         __name_len = struct.unpack('>I', buf.read(4))[0]
         self.name = buf.read(__name_len)[:-1].decode('utf-8', 'replace')

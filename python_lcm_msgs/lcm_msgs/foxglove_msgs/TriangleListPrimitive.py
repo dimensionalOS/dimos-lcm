@@ -70,7 +70,7 @@ class TriangleListPrimitive(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = TriangleListPrimitive()
+        self = cls()
         self.points_length, self.colors_length, self.indices_length = struct.unpack(">iii", buf.read(12))
         self.pose = geometry_msgs.Pose._decode_one(buf)
         self.points = []

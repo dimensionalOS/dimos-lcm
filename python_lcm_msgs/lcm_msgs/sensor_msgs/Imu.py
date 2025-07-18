@@ -66,7 +66,7 @@ class Imu(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Imu()
+        self = cls()
         self.header = std_msgs.Header._decode_one(buf)
         self.orientation = geometry_msgs.Quaternion._decode_one(buf)
         self.orientation_covariance = struct.unpack('>9d', buf.read(72))

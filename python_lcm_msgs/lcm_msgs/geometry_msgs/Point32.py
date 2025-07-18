@@ -46,7 +46,7 @@ class Point32(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Point32()
+        self = cls()
         self.x, self.y, self.z = struct.unpack(">fff", buf.read(12))
         return self
 

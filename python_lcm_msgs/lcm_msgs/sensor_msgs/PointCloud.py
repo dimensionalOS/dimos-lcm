@@ -62,7 +62,7 @@ class PointCloud(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = PointCloud()
+        self = cls()
         self.points_length, self.channels_length = struct.unpack(">ii", buf.read(8))
         self.header = std_msgs.Header._decode_one(buf)
         self.points = []

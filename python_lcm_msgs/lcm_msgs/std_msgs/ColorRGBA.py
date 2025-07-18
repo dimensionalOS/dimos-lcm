@@ -48,7 +48,7 @@ class ColorRGBA(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = ColorRGBA()
+        self = cls()
         self.r, self.g, self.b, self.a = struct.unpack(">ffff", buf.read(16))
         return self
 

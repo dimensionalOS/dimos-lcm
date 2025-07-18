@@ -50,7 +50,7 @@ class TwistWithCovarianceStamped(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = TwistWithCovarianceStamped()
+        self = cls()
         self.header = std_msgs.Header._decode_one(buf)
         self.twist = TwistWithCovariance._decode_one(buf)
         return self

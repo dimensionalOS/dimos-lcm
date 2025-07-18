@@ -76,7 +76,7 @@ class MultiEchoLaserScan(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = MultiEchoLaserScan()
+        self = cls()
         self.ranges_length, self.intensities_length = struct.unpack(">ii", buf.read(8))
         self.header = std_msgs.Header._decode_one(buf)
         self.angle_min, self.angle_max, self.angle_increment, self.time_increment, self.scan_time, self.range_min, self.range_max = struct.unpack(">fffffff", buf.read(28))

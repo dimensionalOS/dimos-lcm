@@ -48,7 +48,7 @@ class BoundingBox3D(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = BoundingBox3D()
+        self = cls()
         self.center = geometry_msgs.Pose._decode_one(buf)
         self.size = geometry_msgs.Vector3._decode_one(buf)
         return self

@@ -9,15 +9,15 @@ import struct
 
 from . import *
 from lcm_msgs import builtin_interfaces
-from .TextPrimitive import TextPrimitive
-from .LinePrimitive import LinePrimitive
-from .TriangleListPrimitive import TriangleListPrimitive
-from .ArrowPrimitive import ArrowPrimitive
-from .SpherePrimitive import SpherePrimitive
-from .ModelPrimitive import ModelPrimitive
-from .CubePrimitive import CubePrimitive
-from .KeyValuePair import KeyValuePair
 from .CylinderPrimitive import CylinderPrimitive
+from .LinePrimitive import LinePrimitive
+from .KeyValuePair import KeyValuePair
+from .TextPrimitive import TextPrimitive
+from .TriangleListPrimitive import TriangleListPrimitive
+from .SpherePrimitive import SpherePrimitive
+from .CubePrimitive import CubePrimitive
+from .ModelPrimitive import ModelPrimitive
+from .ArrowPrimitive import ArrowPrimitive
 class SceneEntity(object):
 
     msg_name = "foxglove_msgs.SceneEntity"
@@ -137,7 +137,7 @@ class SceneEntity(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = SceneEntity()
+        self = cls()
         self.metadata_length, self.arrows_length, self.cubes_length, self.spheres_length, self.cylinders_length, self.lines_length, self.triangles_length, self.texts_length, self.models_length = struct.unpack(">iiiiiiiii", buf.read(36))
         self.timestamp = builtin_interfaces.Time._decode_one(buf)
         __frame_id_len = struct.unpack('>I', buf.read(4))[0]

@@ -54,7 +54,7 @@ class PoseArray(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = PoseArray()
+        self = cls()
         self.poses_length = struct.unpack(">i", buf.read(4))[0]
         self.header = std_msgs.Header._decode_one(buf)
         self.poses = []

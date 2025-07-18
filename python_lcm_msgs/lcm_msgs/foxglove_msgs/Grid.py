@@ -10,8 +10,8 @@ import struct
 from lcm_msgs import geometry_msgs
 from . import *
 from lcm_msgs import builtin_interfaces
-from .Vector2 import Vector2
 from .PackedElementField import PackedElementField
+from .Vector2 import Vector2
 class Grid(object):
 
     msg_name = "foxglove_msgs.Grid"
@@ -83,7 +83,7 @@ class Grid(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Grid()
+        self = cls()
         self.fields_length, self.data_length = struct.unpack(">ii", buf.read(8))
         self.timestamp = builtin_interfaces.Time._decode_one(buf)
         __frame_id_len = struct.unpack('>I', buf.read(4))[0]

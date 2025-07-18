@@ -44,7 +44,7 @@ class Vector2(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Vector2()
+        self = cls()
         self.x, self.y = struct.unpack(">dd", buf.read(16))
         return self
 

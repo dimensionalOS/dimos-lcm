@@ -57,7 +57,7 @@ class SceneUpdate(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = SceneUpdate()
+        self = cls()
         self.deletions_length, self.entities_length = struct.unpack(">ii", buf.read(8))
         self.deletions = []
         for i0 in range(self.deletions_length):

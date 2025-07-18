@@ -75,7 +75,7 @@ class ModelPrimitive(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = ModelPrimitive()
+        self = cls()
         self.data_length = struct.unpack(">i", buf.read(4))[0]
         self.pose = geometry_msgs.Pose._decode_one(buf)
         self.scale = geometry_msgs.Vector3._decode_one(buf)

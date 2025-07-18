@@ -50,7 +50,7 @@ class AccelWithCovarianceStamped(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = AccelWithCovarianceStamped()
+        self = cls()
         self.header = std_msgs.Header._decode_one(buf)
         self.accel = AccelWithCovariance._decode_one(buf)
         return self

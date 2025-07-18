@@ -53,7 +53,7 @@ class NavSatStatus(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = NavSatStatus()
+        self = cls()
         self.status, self.service = struct.unpack(">bh", buf.read(3))
         return self
 

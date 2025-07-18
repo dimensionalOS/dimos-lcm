@@ -9,8 +9,8 @@ import struct
 
 from . import *
 from lcm_msgs import std_msgs
-from .ObjectHypothesisWithPose import ObjectHypothesisWithPose
 from .BoundingBox3D import BoundingBox3D
+from .ObjectHypothesisWithPose import ObjectHypothesisWithPose
 class Detection3D(object):
 
     msg_name = "vision_msgs.Detection3D"
@@ -65,7 +65,7 @@ class Detection3D(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Detection3D()
+        self = cls()
         self.results_length = struct.unpack(">i", buf.read(4))[0]
         self.header = std_msgs.Header._decode_one(buf)
         self.results = []

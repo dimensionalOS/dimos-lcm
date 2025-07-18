@@ -9,8 +9,8 @@ import struct
 
 from . import *
 from lcm_msgs import builtin_interfaces
-from .Point2 import Point2
 from .Color import Color
+from .Point2 import Point2
 class PointsAnnotation(object):
 
     msg_name = "foxglove_msgs.PointsAnnotation"
@@ -82,7 +82,7 @@ class PointsAnnotation(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = PointsAnnotation()
+        self = cls()
         self.points_length, self.outline_colors_length = struct.unpack(">ii", buf.read(8))
         self.timestamp = builtin_interfaces.Time._decode_one(buf)
         self.type = struct.unpack(">B", buf.read(1))[0]

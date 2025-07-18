@@ -58,7 +58,7 @@ class Range(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Range()
+        self = cls()
         self.header = std_msgs.Header._decode_one(buf)
         self.radiation_type, self.field_of_view, self.min_range, self.max_range, self.range = struct.unpack(">Bffff", buf.read(17))
         return self

@@ -48,7 +48,7 @@ class TwistWithCovariance(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = TwistWithCovariance()
+        self = cls()
         self.twist = Twist._decode_one(buf)
         self.covariance = struct.unpack('>36d', buf.read(288))
         return self

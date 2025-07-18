@@ -49,7 +49,7 @@ class Twist(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Twist()
+        self = cls()
         self.linear = Vector3._decode_one(buf)
         self.angular = Vector3._decode_one(buf)
         return self

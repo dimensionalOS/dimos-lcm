@@ -60,7 +60,7 @@ class PackedElementField(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = PackedElementField()
+        self = cls()
         __name_len = struct.unpack('>I', buf.read(4))[0]
         self.name = buf.read(__name_len)[:-1].decode('utf-8', 'replace')
         self.offset, self.type = struct.unpack(">iB", buf.read(5))

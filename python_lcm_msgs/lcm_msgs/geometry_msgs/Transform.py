@@ -8,8 +8,8 @@ from io import BytesIO
 import struct
 
 from . import *
-from .Quaternion import Quaternion
 from .Vector3 import Vector3
+from .Quaternion import Quaternion
 class Transform(object):
 
     msg_name = "geometry_msgs.Transform"
@@ -50,7 +50,7 @@ class Transform(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Transform()
+        self = cls()
         self.translation = Vector3._decode_one(buf)
         self.rotation = Quaternion._decode_one(buf)
         return self

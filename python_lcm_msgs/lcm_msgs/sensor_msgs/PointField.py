@@ -61,7 +61,7 @@ class PointField(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = PointField()
+        self = cls()
         __name_len = struct.unpack('>I', buf.read(4))[0]
         self.name = buf.read(__name_len)[:-1].decode('utf-8', 'replace')
         self.offset, self.datatype, self.count = struct.unpack(">iBi", buf.read(9))

@@ -55,7 +55,7 @@ class Joy(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Joy()
+        self = cls()
         self.axes_length, self.buttons_length = struct.unpack(">ii", buf.read(8))
         self.header = std_msgs.Header._decode_one(buf)
         self.axes = struct.unpack('>%df' % self.axes_length, buf.read(self.axes_length * 4))

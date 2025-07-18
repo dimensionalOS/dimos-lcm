@@ -71,7 +71,7 @@ class LaserScan(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = LaserScan()
+        self = cls()
         self.ranges_length, self.intensities_length = struct.unpack(">ii", buf.read(8))
         self.timestamp = builtin_interfaces.Time._decode_one(buf)
         __frame_id_len = struct.unpack('>I', buf.read(4))[0]

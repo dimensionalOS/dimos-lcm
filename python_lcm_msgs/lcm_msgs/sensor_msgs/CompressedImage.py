@@ -56,7 +56,7 @@ class CompressedImage(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = CompressedImage()
+        self = cls()
         self.data_length = struct.unpack(">i", buf.read(4))[0]
         self.header = std_msgs.Header._decode_one(buf)
         __format_len = struct.unpack('>I', buf.read(4))[0]

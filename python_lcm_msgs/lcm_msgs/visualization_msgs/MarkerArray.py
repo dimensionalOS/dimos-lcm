@@ -49,7 +49,7 @@ class MarkerArray(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = MarkerArray()
+        self = cls()
         self.markers_length = struct.unpack(">i", buf.read(4))[0]
         self.markers = []
         for i0 in range(self.markers_length):

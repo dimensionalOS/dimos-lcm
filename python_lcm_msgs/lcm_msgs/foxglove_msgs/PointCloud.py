@@ -73,7 +73,7 @@ class PointCloud(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = PointCloud()
+        self = cls()
         self.fields_length, self.data_length = struct.unpack(">ii", buf.read(8))
         self.timestamp = builtin_interfaces.Time._decode_one(buf)
         __frame_id_len = struct.unpack('>I', buf.read(4))[0]

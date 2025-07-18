@@ -59,7 +59,7 @@ class VisionInfo(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = VisionInfo()
+        self = cls()
         self.header = std_msgs.Header._decode_one(buf)
         __method_len = struct.unpack('>I', buf.read(4))[0]
         self.method = buf.read(__method_len)[:-1].decode('utf-8', 'replace')

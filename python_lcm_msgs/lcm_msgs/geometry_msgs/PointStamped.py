@@ -50,7 +50,7 @@ class PointStamped(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = PointStamped()
+        self = cls()
         self.header = std_msgs.Header._decode_one(buf)
         self.point = Point._decode_one(buf)
         return self

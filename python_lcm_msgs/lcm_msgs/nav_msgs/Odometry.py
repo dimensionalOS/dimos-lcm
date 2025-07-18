@@ -59,7 +59,7 @@ class Odometry(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Odometry()
+        self = cls()
         self.header = std_msgs.Header._decode_one(buf)
         __child_frame_id_len = struct.unpack('>I', buf.read(4))[0]
         self.child_frame_id = buf.read(__child_frame_id_len)[:-1].decode('utf-8', 'replace')

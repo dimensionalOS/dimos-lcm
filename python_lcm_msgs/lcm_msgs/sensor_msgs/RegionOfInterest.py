@@ -50,7 +50,7 @@ class RegionOfInterest(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = RegionOfInterest()
+        self = cls()
         self.x_offset, self.y_offset, self.height, self.width = struct.unpack(">iiii", buf.read(16))
         self.do_rectify = bool(struct.unpack('b', buf.read(1))[0])
         return self

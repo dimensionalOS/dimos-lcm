@@ -42,7 +42,7 @@ class MeshTriangle(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = MeshTriangle()
+        self = cls()
         self.vertex_indices = struct.unpack('>3i', buf.read(12))
         return self
 

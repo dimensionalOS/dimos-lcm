@@ -50,7 +50,7 @@ class TwistStamped(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = TwistStamped()
+        self = cls()
         self.header = std_msgs.Header._decode_one(buf)
         self.twist = Twist._decode_one(buf)
         return self

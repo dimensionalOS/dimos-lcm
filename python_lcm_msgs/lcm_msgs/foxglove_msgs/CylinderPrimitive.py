@@ -59,7 +59,7 @@ class CylinderPrimitive(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = CylinderPrimitive()
+        self = cls()
         self.pose = geometry_msgs.Pose._decode_one(buf)
         self.size = geometry_msgs.Vector3._decode_one(buf)
         self.bottom_scale, self.top_scale = struct.unpack(">dd", buf.read(16))

@@ -69,7 +69,7 @@ class JointState(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = JointState()
+        self = cls()
         self.name_length, self.position_length, self.velocity_length, self.effort_length = struct.unpack(">iiii", buf.read(16))
         self.header = std_msgs.Header._decode_one(buf)
         self.name = []

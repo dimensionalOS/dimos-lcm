@@ -76,7 +76,7 @@ class MultiDOFJointState(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = MultiDOFJointState()
+        self = cls()
         self.joint_names_length, self.transforms_length, self.twist_length, self.wrench_length = struct.unpack(">iiii", buf.read(16))
         self.header = std_msgs.Header._decode_one(buf)
         self.joint_names = []

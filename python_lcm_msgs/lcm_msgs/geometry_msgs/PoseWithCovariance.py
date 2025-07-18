@@ -48,7 +48,7 @@ class PoseWithCovariance(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = PoseWithCovariance()
+        self = cls()
         self.pose = Pose._decode_one(buf)
         self.covariance = struct.unpack('>36d', buf.read(288))
         return self

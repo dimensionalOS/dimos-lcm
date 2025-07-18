@@ -48,7 +48,7 @@ class Quaternion(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Quaternion()
+        self = cls()
         self.x, self.y, self.z, self.w = struct.unpack(">dddd", buf.read(32))
         return self
 

@@ -44,7 +44,7 @@ class Time(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Time()
+        self = cls()
         self.sec, self.nanosec = struct.unpack(">ii", buf.read(8))
         return self
 

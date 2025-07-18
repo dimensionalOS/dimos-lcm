@@ -42,7 +42,7 @@ class Int64(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Int64()
+        self = cls()
         self.data = struct.unpack(">q", buf.read(8))[0]
         return self
 

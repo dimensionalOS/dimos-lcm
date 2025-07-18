@@ -74,7 +74,7 @@ class PointCloud2(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = PointCloud2()
+        self = cls()
         self.fields_length, self.data_length = struct.unpack(">ii", buf.read(8))
         self.header = std_msgs.Header._decode_one(buf)
         self.height, self.width = struct.unpack(">ii", buf.read(8))

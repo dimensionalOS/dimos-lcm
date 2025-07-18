@@ -81,7 +81,7 @@ class LinePrimitive(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = LinePrimitive()
+        self = cls()
         self.points_length, self.colors_length, self.indices_length, self.type = struct.unpack(">iiiB", buf.read(13))
         self.pose = geometry_msgs.Pose._decode_one(buf)
         self.thickness = struct.unpack(">d", buf.read(8))[0]

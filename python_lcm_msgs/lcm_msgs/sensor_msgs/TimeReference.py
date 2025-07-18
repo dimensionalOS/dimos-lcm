@@ -54,7 +54,7 @@ class TimeReference(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = TimeReference()
+        self = cls()
         self.header = std_msgs.Header._decode_one(buf)
         self.time_ref = std_msgs.Time._decode_one(buf)
         __source_len = struct.unpack('>I', buf.read(4))[0]

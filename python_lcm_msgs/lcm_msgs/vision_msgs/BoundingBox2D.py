@@ -50,7 +50,7 @@ class BoundingBox2D(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = BoundingBox2D()
+        self = cls()
         self.center = Pose2D._decode_one(buf)
         self.size_x, self.size_y = struct.unpack(">dd", buf.read(16))
         return self

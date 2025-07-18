@@ -52,7 +52,7 @@ class MagneticField(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = MagneticField()
+        self = cls()
         self.header = std_msgs.Header._decode_one(buf)
         self.magnetic_field = geometry_msgs.Vector3._decode_one(buf)
         self.magnetic_field_covariance = struct.unpack('>9d', buf.read(72))

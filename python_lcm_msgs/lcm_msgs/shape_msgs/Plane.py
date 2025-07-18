@@ -42,7 +42,7 @@ class Plane(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Plane()
+        self = cls()
         self.coef = struct.unpack('>4d', buf.read(32))
         return self
 

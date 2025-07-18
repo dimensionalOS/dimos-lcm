@@ -82,7 +82,7 @@ class InteractiveMarker(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = InteractiveMarker()
+        self = cls()
         self.menu_entries_length, self.controls_length = struct.unpack(">ii", buf.read(8))
         self.header = std_msgs.Header._decode_one(buf)
         self.pose = geometry_msgs.Pose._decode_one(buf)

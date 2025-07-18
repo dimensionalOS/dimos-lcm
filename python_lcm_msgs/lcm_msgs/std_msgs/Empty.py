@@ -41,7 +41,7 @@ class Empty(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Empty()
+        self = cls()
         return self
 
     @classmethod
