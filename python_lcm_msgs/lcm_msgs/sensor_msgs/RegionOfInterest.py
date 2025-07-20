@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 class RegionOfInterest(object):
 
@@ -16,6 +17,12 @@ class RegionOfInterest(object):
     __typenames__ = ["int32_t", "int32_t", "int32_t", "int32_t", "boolean"]
 
     __dimensions__ = [None, None, None, None, None]
+
+    x_offset: 'int32_t'
+    y_offset: 'int32_t'
+    height: 'int32_t'
+    width: 'int32_t'
+    do_rectify: 'boolean'
 
     def __init__(self, x_offset=0, y_offset=0, height=0, width=0, do_rectify=False):
         # LCM Type: int32_t
@@ -50,10 +57,23 @@ class RegionOfInterest(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = RegionOfInterest()
+        self = cls()
         self.x_offset, self.y_offset, self.height, self.width = struct.unpack(">iiii", buf.read(16))
         self.do_rectify = bool(struct.unpack('b', buf.read(1))[0])
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

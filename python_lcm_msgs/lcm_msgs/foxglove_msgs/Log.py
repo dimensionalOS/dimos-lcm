@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import builtin_interfaces
 class Log(object):
@@ -17,6 +18,13 @@ class Log(object):
     __typenames__ = ["builtin_interfaces.Time", "byte", "string", "string", "string", "int32_t"]
 
     __dimensions__ = [None, None, None, None, None, None]
+
+    timestamp: builtin_interfaces.Time
+    level: 'byte'
+    message: 'string'
+    name: 'string'
+    file: 'string'
+    line: 'int32_t'
 
     UNKNOWN = 0
     DEBUG = 1
@@ -75,8 +83,8 @@ class Log(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Log()
-        self.timestamp = builtin_interfaces.Time._decode_one(buf)
+        self = cls()
+        self.timestamp = cls._get_field_type('timestamp')._decode_one(buf)
         self.level = struct.unpack(">B", buf.read(1))[0]
         __message_len = struct.unpack('>I', buf.read(4))[0]
         self.message = buf.read(__message_len)[:-1].decode('utf-8', 'replace')
@@ -86,6 +94,19 @@ class Log(object):
         self.file = buf.read(__file_len)[:-1].decode('utf-8', 'replace')
         self.line = struct.unpack(">i", buf.read(4))[0]
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

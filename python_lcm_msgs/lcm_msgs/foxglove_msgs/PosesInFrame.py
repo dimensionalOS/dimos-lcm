@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import geometry_msgs
 from lcm_msgs import builtin_interfaces
@@ -18,6 +19,11 @@ class PosesInFrame(object):
     __typenames__ = ["int32_t", "builtin_interfaces.Time", "string", "geometry_msgs.Pose"]
 
     __dimensions__ = [None, None, None, ["poses_length"]]
+
+    poses_length: 'int32_t'
+    timestamp: builtin_interfaces.Time
+    frame_id: 'string'
+    poses: geometry_msgs.Pose
 
     def __init__(self, poses_length=0, timestamp=builtin_interfaces.Time(), frame_id="", poses=[]):
         # LCM Type: int32_t
@@ -59,15 +65,28 @@ class PosesInFrame(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = PosesInFrame()
+        self = cls()
         self.poses_length = struct.unpack(">i", buf.read(4))[0]
-        self.timestamp = builtin_interfaces.Time._decode_one(buf)
+        self.timestamp = cls._get_field_type('timestamp')._decode_one(buf)
         __frame_id_len = struct.unpack('>I', buf.read(4))[0]
         self.frame_id = buf.read(__frame_id_len)[:-1].decode('utf-8', 'replace')
         self.poses = []
         for i0 in range(self.poses_length):
-            self.poses.append(geometry_msgs.Pose._decode_one(buf))
+            self.poses.append(cls._get_field_type('poses')._decode_one(buf))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

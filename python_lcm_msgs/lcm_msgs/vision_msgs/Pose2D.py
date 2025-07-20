@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from . import *
 from .Point2D import Point2D
@@ -18,6 +19,9 @@ class Pose2D(object):
     __typenames__ = ["Point2D", "double"]
 
     __dimensions__ = [None, None]
+
+    position: Point2D
+    theta: 'double'
 
     def __init__(self, position=Point2D(), theta=0.0):
         # LCM Type: Point2D
@@ -48,10 +52,23 @@ class Pose2D(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Pose2D()
-        self.position = Point2D._decode_one(buf)
+        self = cls()
+        self.position = cls._get_field_type('position')._decode_one(buf)
         self.theta = struct.unpack(">d", buf.read(8))[0]
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

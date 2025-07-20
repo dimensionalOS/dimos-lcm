@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import geometry_msgs
 from lcm_msgs import std_msgs
@@ -18,6 +19,12 @@ class GridCells(object):
     __typenames__ = ["int32_t", "std_msgs.Header", "float", "float", "geometry_msgs.Point"]
 
     __dimensions__ = [None, None, None, None, ["cells_length"]]
+
+    cells_length: 'int32_t'
+    header: std_msgs.Header
+    cell_width: 'float'
+    cell_height: 'float'
+    cells: geometry_msgs.Point
 
     def __init__(self, cells_length=0, header=std_msgs.Header(), cell_width=0.0, cell_height=0.0, cells=[]):
         # LCM Type: int32_t
@@ -58,14 +65,27 @@ class GridCells(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = GridCells()
+        self = cls()
         self.cells_length = struct.unpack(">i", buf.read(4))[0]
-        self.header = std_msgs.Header._decode_one(buf)
+        self.header = cls._get_field_type('header')._decode_one(buf)
         self.cell_width, self.cell_height = struct.unpack(">ff", buf.read(8))
         self.cells = []
         for i0 in range(self.cells_length):
-            self.cells.append(geometry_msgs.Point._decode_one(buf))
+            self.cells.append(cls._get_field_type('cells')._decode_one(buf))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

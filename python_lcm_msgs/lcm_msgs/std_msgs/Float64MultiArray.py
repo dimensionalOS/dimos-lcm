@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from . import *
 from .MultiArrayLayout import MultiArrayLayout
@@ -18,6 +19,10 @@ class Float64MultiArray(object):
     __typenames__ = ["int32_t", "MultiArrayLayout", "double"]
 
     __dimensions__ = [None, None, ["data_length"]]
+
+    data_length: 'int32_t'
+    layout: MultiArrayLayout
+    data: 'double'
 
     def __init__(self, data_length=0, layout=MultiArrayLayout(), data=[]):
         # LCM Type: int32_t
@@ -51,11 +56,24 @@ class Float64MultiArray(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Float64MultiArray()
+        self = cls()
         self.data_length = struct.unpack(">i", buf.read(4))[0]
-        self.layout = MultiArrayLayout._decode_one(buf)
+        self.layout = cls._get_field_type('layout')._decode_one(buf)
         self.data = struct.unpack('>%dd' % self.data_length, buf.read(self.data_length * 8))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):
