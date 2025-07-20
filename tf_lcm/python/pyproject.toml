@@ -3,18 +3,19 @@ requires = ["setuptools>=42.0", "wheel", "cmake>=3.10", "ninja", "pip>=21.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "tf_lcm_py"
+name = "dimos-tf"
 version = "0.1.0"
-description = "Python bindings for tf_lcm, a LCM-based transform library"
+description = "Transform library for Dimensional OS using LCM (requires system LCM: apt install liblcm-dev)"
 readme = "README.md"
-requires-python = ">=3.6"
+requires-python = ">=3.8"
 license = {text = "MIT"}
 authors = [
-    {name = "Dimensional AI", email = "info@dimensional.ai"}
+    {name = "Dimensional Team", email = "build@dimensionalOS.com"}
 ]
 dependencies = [
     "numpy>=1.16.0",
     "lcm>=1.5.0",
+    "dimos-lcm",  # For the LCM message definitions
 ]
 
 [project.urls]
@@ -22,9 +23,9 @@ dependencies = [
 "Bug Tracker" = "https://github.com/dimensionalai/tf_lcm/issues"
 
 [tool.setuptools]
-packages = ["tf_lcm_py"]
-package-dir = {"" = "."}
-package-data = {"tf_lcm_py" = ["*.so", "*.pyd", "_tf_lcm_py.*.so", "_tf_lcm_py.*.pyd"]}
+packages = ["dimos_tf", "dimos_tf.tf"]
+package-dir = {"dimos_tf": ".", "dimos_tf.tf": "tf_lcm_py"}
+package-data = {"dimos_tf.tf": ["*.so", "*.pyd", "_tf_lcm_py*.so", "_tf_lcm_py*.pyd", "*.py"]}
 include-package-data = true
 
 # Use a direct build mode

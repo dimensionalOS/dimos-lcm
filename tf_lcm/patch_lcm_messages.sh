@@ -5,7 +5,19 @@
 # Don't exit on error to handle issues gracefully
 set +e
 
-CPP_MSGS_DIR="/home/yashas/Documents/dimensional/lcm_dimos_msgs/cpp_lcm_msgs"
+# Use environment variable or relative path
+if [ -z "$CPP_MSGS_DIR" ]; then
+    # Default to relative path from tf_lcm directory
+    SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+    CPP_MSGS_DIR="$SCRIPT_DIR/../cpp_lcm_msgs"
+fi
+
+# Check if directory exists
+if [ ! -d "$CPP_MSGS_DIR" ]; then
+    echo "Warning: cpp_lcm_msgs directory not found at $CPP_MSGS_DIR"
+    echo "Skipping LCM message patching."
+    exit 0
+fi
 
 echo "Scanning for LCM message files with potential function pointer conversion issues..."
 

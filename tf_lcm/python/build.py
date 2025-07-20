@@ -146,6 +146,15 @@ def main():
         "-DBUILD_PYTHON_BINDINGS=ON",
     ]
     
+    # Try to find pip-installed LCM
+    try:
+        import lcm
+        lcm_path = os.path.dirname(lcm.__file__)
+        cmake_args.append(f"-DLCM_PYTHON_PATH={lcm_path}")
+        print(f"Found pip-installed LCM at: {lcm_path}")
+    except ImportError:
+        print("Warning: LCM Python module not found, CMake will try pkg-config")
+    
     # Add any platform-specific flags
     if sys.platform == 'darwin':  # macOS
         # Set deployment target to ensure compatibility

@@ -37,7 +37,29 @@ class CMakeBuild(build_ext):
         for ext in self.extensions:
             self.build_extension(ext)
 
+    def run_patch_script(self):
+        """Run the LCM message patch script if needed"""
+        # Find the patch script
+        source_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        patch_script = os.path.join(source_dir, "patch_lcm_messages.sh")
+        
+        if os.path.exists(patch_script):
+            print("Running LCM message patch script...")
+            # Make sure it's executable
+            os.chmod(patch_script, 0o755)
+            try:
+                subprocess.check_call([patch_script], cwd=source_dir)
+                print("Patch script completed successfully")
+            except subprocess.CalledProcessError as e:
+                print(f"Warning: Patch script failed with error: {e}")
+                print("Continuing anyway...")
+        else:
+            print(f"Warning: Patch script not found at {patch_script}")
+    
     def build_extension(self, ext):
+        # Run patch script first
+        self.run_patch_script()
+        
         # Define build directory
         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
         
@@ -130,10 +152,11 @@ else:
 
 # Simplified setup call
 setup(
-    name="tf_lcm_py",
-    packages=["tf_lcm_py"],
-    package_data=package_data,
-    ext_modules=[CMakeExtension("tf_lcm_py._tf_lcm_py")],
+    name="dimos-tf",
+    packages=["dimos_tf", "dimos_tf.tf"],
+    package_dir={"dimos_tf": ".", "dimos_tf.tf": "tf_lcm_py"},
+    package_data={"dimos_tf.tf": ['*.so', '*.pyd', '_tf_lcm_py*.so', '*.py']},
+    ext_modules=[CMakeExtension("dimos_tf.tf._tf_lcm_py")],
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
 )
