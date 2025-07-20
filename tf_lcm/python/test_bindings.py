@@ -12,12 +12,12 @@ from datetime import datetime
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # Import tf_lcm module
-import tf_lcm_py
+import dimos_tf
 
 # Import LCM message types
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from lcm_msgs.geometry_msgs import TransformStamped, Transform, Vector3, Quaternion
-from lcm_msgs.std_msgs import Header
+from dimos_lcm.geometry_msgs import TransformStamped, Transform, Vector3, Quaternion
+from dimos_lcm.std_msgs import Header
 
 def create_test_transform(frame_id, child_frame_id):
     """Create a test transform"""
@@ -59,7 +59,7 @@ def main():
     print("Testing tf_lcm Python bindings")
     
     # Create an LCM instance
-    lcm_instance = tf_lcm_py.LCM()
+    lcm_instance = dimos_tf.LCM()
     if not lcm_instance.good():
         print("Failed to initialize LCM")
         return 1
@@ -70,11 +70,11 @@ def main():
     handler_thread.start()
     
     print("Step 1: Create buffer and listener")
-    buffer = tf_lcm_py.Buffer(10.0)  # 10 seconds buffer
-    listener = tf_lcm_py.TransformListener(lcm_instance, buffer)
+    buffer = dimos_tf.Buffer(10.0)  # 10 seconds buffer
+    listener = dimos_tf.TransformListener(lcm_instance, buffer)
     
     print("Step 2: Create broadcaster")
-    broadcaster = tf_lcm_py.TransformBroadcaster()
+    broadcaster = dimos_tf.TransformBroadcaster()
     
     # Create a test transform
     transform = create_test_transform("world", "base_link")
@@ -102,11 +102,11 @@ def main():
     # Import the lcm_msgs module for type conversions
     import sys
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    import lcm_msgs
+    import dimos_lcm
     
     try:
         # Pass the lcm_msgs module explicitly to help with type conversion
-        result = buffer.lookup_transform("world", "base_link", now, lcm_module=lcm_msgs)
+        result = buffer.lookup_transform("world", "base_link", now, lcm_module=dimos_lcm)
         print("Successfully looked up transform:")
         print(f"Translation: ({result.transform.translation.x}, {result.transform.translation.y}, {result.transform.translation.z})")
         print(f"Rotation: ({result.transform.rotation.x}, {result.transform.rotation.y}, {result.transform.rotation.z}, {result.transform.rotation.w})")
