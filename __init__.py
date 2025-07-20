@@ -28,7 +28,3 @@ def _setup_lcm_msgs_path():
 
 
 _setup_lcm_msgs_path()
-
-from . import foxglove_bridge
-
-__all__ = ["foxglove_bridge"]
