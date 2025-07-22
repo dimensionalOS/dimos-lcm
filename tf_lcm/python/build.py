@@ -132,6 +132,17 @@ def main():
     print(f"Package directory: {package_dir}")
     print(f"Building version-specific extension module for Python {py_version}")
     
+    # Step 0: Run patch script if needed
+    print("\nStep 0: Running LCM message patch script...")
+    patch_script = os.path.join(source_dir, "patch_lcm_messages.sh")
+    if os.path.exists(patch_script):
+        try:
+            os.chmod(patch_script, 0o755)
+            subprocess.check_call(["bash", patch_script], cwd=source_dir)
+            print("Patch script completed successfully")
+        except subprocess.CalledProcessError as e:
+            print(f"Warning: Patch script failed: {e}")
+    
     # Step 1: Build the extension module using CMake
     print("\nStep 1: Building extension module with CMake...")
     cmake_exe = find_cmake()
