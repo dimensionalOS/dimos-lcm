@@ -27,6 +27,4 @@ def _setup_lcm_msgs_path():
                 sys.path.insert(0, lcm_module_dir)
 
 
-from . import foxglove_bridge
-
 _setup_lcm_msgs_path()
