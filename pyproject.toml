@@ -62,6 +62,7 @@ packages = [
     "*.sh", 
     "ros_msgs/**/*", 
     "lcm_files/**/*", 
-    "python_lcm_msgs/**/*"
+    "python_lcm_msgs/**/*",
+    "foxglove_bridge/**/*"
 ]
 
