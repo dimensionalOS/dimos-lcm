@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import builtin_interfaces
 class RawAudio(object):
@@ -17,6 +18,13 @@ class RawAudio(object):
     __typenames__ = ["int32_t", "builtin_interfaces.Time", "byte", "string", "int32_t", "int32_t"]
 
     __dimensions__ = [None, None, ["data_length"], None, None, None]
+
+    data_length: 'int32_t'
+    timestamp: builtin_interfaces.Time
+    data: 'byte'
+    format: 'string'
+    sample_rate: 'int32_t'
+    number_of_channels: 'int32_t'
 
     def __init__(self, data_length=0, timestamp=builtin_interfaces.Time(), data=b"", format="", sample_rate=0, number_of_channels=0):
         # LCM Type: int32_t
@@ -61,14 +69,27 @@ class RawAudio(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = RawAudio()
+        self = cls()
         self.data_length = struct.unpack(">i", buf.read(4))[0]
-        self.timestamp = builtin_interfaces.Time._decode_one(buf)
+        self.timestamp = cls._get_field_type('timestamp')._decode_one(buf)
         self.data = buf.read(self.data_length)
         __format_len = struct.unpack('>I', buf.read(4))[0]
         self.format = buf.read(__format_len)[:-1].decode('utf-8', 'replace')
         self.sample_rate, self.number_of_channels = struct.unpack(">ii", buf.read(8))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

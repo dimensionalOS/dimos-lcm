@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import std_msgs
 class BatteryState(object):
@@ -17,6 +18,25 @@ class BatteryState(object):
     __typenames__ = ["int32_t", "int32_t", "std_msgs.Header", "float", "float", "float", "float", "float", "float", "float", "byte", "byte", "byte", "boolean", "float", "float", "string", "string"]
 
     __dimensions__ = [None, None, None, None, None, None, None, None, None, None, None, None, None, None, ["cell_voltage_length"], ["cell_temperature_length"], None, None]
+
+    cell_voltage_length: 'int32_t'
+    cell_temperature_length: 'int32_t'
+    header: std_msgs.Header
+    voltage: 'float'
+    temperature: 'float'
+    current: 'float'
+    charge: 'float'
+    capacity: 'float'
+    design_capacity: 'float'
+    percentage: 'float'
+    power_supply_status: 'byte'
+    power_supply_health: 'byte'
+    power_supply_technology: 'byte'
+    present: 'boolean'
+    cell_voltage: 'float'
+    cell_temperature: 'float'
+    location: 'string'
+    serial_number: 'string'
 
     POWER_SUPPLY_STATUS_UNKNOWN = 0
     POWER_SUPPLY_STATUS_CHARGING = 1
@@ -112,9 +132,9 @@ class BatteryState(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = BatteryState()
+        self = cls()
         self.cell_voltage_length, self.cell_temperature_length = struct.unpack(">ii", buf.read(8))
-        self.header = std_msgs.Header._decode_one(buf)
+        self.header = cls._get_field_type('header')._decode_one(buf)
         self.voltage, self.temperature, self.current, self.charge, self.capacity, self.design_capacity, self.percentage, self.power_supply_status, self.power_supply_health, self.power_supply_technology = struct.unpack(">fffffffBBB", buf.read(31))
         self.present = bool(struct.unpack('b', buf.read(1))[0])
         self.cell_voltage = struct.unpack('>%df' % self.cell_voltage_length, buf.read(self.cell_voltage_length * 4))
@@ -124,6 +144,19 @@ class BatteryState(object):
         __serial_number_len = struct.unpack('>I', buf.read(4))[0]
         self.serial_number = buf.read(__serial_number_len)[:-1].decode('utf-8', 'replace')
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

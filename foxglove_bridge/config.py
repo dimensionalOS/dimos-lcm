@@ -3,14 +3,18 @@ Configuration constants and settings for the LCM-Foxglove bridge.
 """
 
 import logging
+import os
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("lcm_foxglove_bridge")
 
-# Directory paths
-ROS_MSGS_DIR = "ros_msgs"
-LCM_PYTHON_MODULES_PATH = "python_lcm_msgs/lcm_msgs"
+# Get the directory where this config.py file is located
+_CONFIG_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Directory paths - now using absolute paths relative to config.py location
+ROS_MSGS_DIR = os.path.abspath(os.path.join(_CONFIG_DIR, "..", "ros_msgs"))
+LCM_PYTHON_MODULES_PATH = os.path.abspath(os.path.join(_CONFIG_DIR, "..", "python_lcm_msgs", "lcm_msgs"))
 
 # Thread pool settings
 DEFAULT_THREAD_POOL_SIZE = 8

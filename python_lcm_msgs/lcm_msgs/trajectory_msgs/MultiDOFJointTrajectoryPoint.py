@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import geometry_msgs
 from lcm_msgs import std_msgs
@@ -18,6 +19,14 @@ class MultiDOFJointTrajectoryPoint(object):
     __typenames__ = ["int32_t", "int32_t", "int32_t", "geometry_msgs.Transform", "geometry_msgs.Twist", "geometry_msgs.Twist", "std_msgs.Duration"]
 
     __dimensions__ = [None, None, None, ["transforms_length"], ["velocities_length"], ["accelerations_length"], None]
+
+    transforms_length: 'int32_t'
+    velocities_length: 'int32_t'
+    accelerations_length: 'int32_t'
+    transforms: geometry_msgs.Transform
+    velocities: geometry_msgs.Twist
+    accelerations: geometry_msgs.Twist
+    time_from_start: std_msgs.Duration
 
     def __init__(self, transforms_length=0, velocities_length=0, accelerations_length=0, transforms=[], velocities=[], accelerations=[], time_from_start=std_msgs.Duration()):
         # LCM Type: int32_t
@@ -67,19 +76,32 @@ class MultiDOFJointTrajectoryPoint(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = MultiDOFJointTrajectoryPoint()
+        self = cls()
         self.transforms_length, self.velocities_length, self.accelerations_length = struct.unpack(">iii", buf.read(12))
         self.transforms = []
         for i0 in range(self.transforms_length):
-            self.transforms.append(geometry_msgs.Transform._decode_one(buf))
+            self.transforms.append(cls._get_field_type('transforms')._decode_one(buf))
         self.velocities = []
         for i0 in range(self.velocities_length):
-            self.velocities.append(geometry_msgs.Twist._decode_one(buf))
+            self.velocities.append(cls._get_field_type('velocities')._decode_one(buf))
         self.accelerations = []
         for i0 in range(self.accelerations_length):
-            self.accelerations.append(geometry_msgs.Twist._decode_one(buf))
-        self.time_from_start = std_msgs.Duration._decode_one(buf)
+            self.accelerations.append(cls._get_field_type('accelerations')._decode_one(buf))
+        self.time_from_start = cls._get_field_type('time_from_start')._decode_one(buf)
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

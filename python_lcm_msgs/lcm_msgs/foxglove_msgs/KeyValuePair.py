@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 class KeyValuePair(object):
 
@@ -16,6 +17,9 @@ class KeyValuePair(object):
     __typenames__ = ["string", "string"]
 
     __dimensions__ = [None, None]
+
+    key: 'string'
+    value: 'string'
 
     def __init__(self, key="", value=""):
         # LCM Type: string
@@ -51,12 +55,25 @@ class KeyValuePair(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = KeyValuePair()
+        self = cls()
         __key_len = struct.unpack('>I', buf.read(4))[0]
         self.key = buf.read(__key_len)[:-1].decode('utf-8', 'replace')
         __value_len = struct.unpack('>I', buf.read(4))[0]
         self.value = buf.read(__value_len)[:-1].decode('utf-8', 'replace')
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

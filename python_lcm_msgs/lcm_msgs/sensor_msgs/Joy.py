@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import std_msgs
 class Joy(object):
@@ -17,6 +18,12 @@ class Joy(object):
     __typenames__ = ["int32_t", "int32_t", "std_msgs.Header", "float", "int32_t"]
 
     __dimensions__ = [None, None, None, ["axes_length"], ["buttons_length"]]
+
+    axes_length: 'int32_t'
+    buttons_length: 'int32_t'
+    header: std_msgs.Header
+    axes: 'float'
+    buttons: 'int32_t'
 
     def __init__(self, axes_length=0, buttons_length=0, header=std_msgs.Header(), axes=[], buttons=[]):
         # LCM Type: int32_t
@@ -55,12 +62,25 @@ class Joy(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Joy()
+        self = cls()
         self.axes_length, self.buttons_length = struct.unpack(">ii", buf.read(8))
-        self.header = std_msgs.Header._decode_one(buf)
+        self.header = cls._get_field_type('header')._decode_one(buf)
         self.axes = struct.unpack('>%df' % self.axes_length, buf.read(self.axes_length * 4))
         self.buttons = struct.unpack('>%di' % self.buttons_length, buf.read(self.buttons_length * 4))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):
