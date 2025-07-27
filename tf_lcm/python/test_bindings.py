@@ -13,7 +13,7 @@ from datetime import datetime
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # Import tf_lcm module
-import tf_lcm_py
+import dimos_tf
 
 # Import LCM message types
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -63,7 +63,7 @@ def main():
     print("Testing tf_lcm Python bindings")
 
     # Create an LCM instance
-    lcm_instance = tf_lcm_py.LCM()
+    lcm_instance = dimos_tf.LCM()
     if not lcm_instance.good():
         print("Failed to initialize LCM")
         return 1

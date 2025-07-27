@@ -5,7 +5,12 @@
 # Don't exit on error to handle issues gracefully
 set +e
 
-CPP_MSGS_DIR="/home/yashas/Documents/dimensional/lcm_dimos_msgs/cpp_lcm_msgs"
+# Use environment variable or relative path
+if [ -z "$CPP_MSGS_DIR" ]; then
+    # Default to relative path from tf_lcm directory
+    SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+    CPP_MSGS_DIR="$SCRIPT_DIR/../cpp_lcm_msgs"
+fi
 
 echo "Scanning for LCM message files with potential function pointer conversion issues..."
 
@@ -29,7 +34,8 @@ for file in $CPP_FILES; do
       
       # Use sed to replace the problematic line with a properly casted version
       # For Linux compatibility: Add explicit (void*) cast to getHash function pointer
-      sed -i 's/\(const __lcm_hash_ptr cp = { p, \)\([A-Za-z0-9:]*\)::getHash\( *\)\}/\1(void*)\2::getHash\3}/g' "$file"
+      # Pattern matches: (int64_t(*)())ClassName::getHash and replaces with (void*)(int64_t(*)())ClassName::getHash
+      sed -i 's/(int64_t(\*)())\([A-Za-z_:]*\)::getHash/(void*)(int64_t(*)())\1::getHash/g' "$file"
       
       # Check if the file was actually changed
       if ! cmp -s "$file" "${file}.bak"; then
