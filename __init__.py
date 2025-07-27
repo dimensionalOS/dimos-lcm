@@ -10,6 +10,7 @@ __version__ = "0.1.0"
 import os
 import sys
 
+
 # Setup lcm_msgs path for backwards compatibility with seperate python_lcm_msgs package
 def _setup_lcm_msgs_path():
     """Setup lcm_msgs path so internal imports work correctly"""
@@ -25,8 +26,9 @@ def _setup_lcm_msgs_path():
             if lcm_module_dir not in sys.path:
                 sys.path.insert(0, lcm_module_dir)
 
+
 _setup_lcm_msgs_path()
 
-from . import lcm_foxglove_bridge
+from . import foxglove_bridge
 
-__all__ = ["lcm_foxglove_bridge"] 
+__all__ = ["foxglove_bridge"]

@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from . import *
 from .Pose2D import Pose2D
@@ -18,6 +19,10 @@ class BoundingBox2D(object):
     __typenames__ = ["Pose2D", "double", "double"]
 
     __dimensions__ = [None, None, None]
+
+    center: Pose2D
+    size_x: 'double'
+    size_y: 'double'
 
     def __init__(self, center=Pose2D(), size_x=0.0, size_y=0.0):
         # LCM Type: Pose2D
@@ -50,10 +55,23 @@ class BoundingBox2D(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = BoundingBox2D()
-        self.center = Pose2D._decode_one(buf)
+        self = cls()
+        self.center = cls._get_field_type('center')._decode_one(buf)
         self.size_x, self.size_y = struct.unpack(">dd", buf.read(16))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

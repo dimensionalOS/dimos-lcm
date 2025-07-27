@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import std_msgs
 from . import *
@@ -19,6 +20,19 @@ class MultiEchoLaserScan(object):
     __typenames__ = ["int32_t", "int32_t", "std_msgs.Header", "float", "float", "float", "float", "float", "float", "float", "LaserEcho", "LaserEcho"]
 
     __dimensions__ = [None, None, None, None, None, None, None, None, None, None, ["ranges_length"], ["intensities_length"]]
+
+    ranges_length: 'int32_t'
+    intensities_length: 'int32_t'
+    header: std_msgs.Header
+    angle_min: 'float'
+    angle_max: 'float'
+    angle_increment: 'float'
+    time_increment: 'float'
+    scan_time: 'float'
+    range_min: 'float'
+    range_max: 'float'
+    ranges: LaserEcho
+    intensities: LaserEcho
 
     def __init__(self, ranges_length=0, intensities_length=0, header=std_msgs.Header(), angle_min=0.0, angle_max=0.0, angle_increment=0.0, time_increment=0.0, scan_time=0.0, range_min=0.0, range_max=0.0, ranges=[], intensities=[]):
         # LCM Type: int32_t
@@ -76,17 +90,30 @@ class MultiEchoLaserScan(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = MultiEchoLaserScan()
+        self = cls()
         self.ranges_length, self.intensities_length = struct.unpack(">ii", buf.read(8))
-        self.header = std_msgs.Header._decode_one(buf)
+        self.header = cls._get_field_type('header')._decode_one(buf)
         self.angle_min, self.angle_max, self.angle_increment, self.time_increment, self.scan_time, self.range_min, self.range_max = struct.unpack(">fffffff", buf.read(28))
         self.ranges = []
         for i0 in range(self.ranges_length):
-            self.ranges.append(LaserEcho._decode_one(buf))
+            self.ranges.append(cls._get_field_type('ranges')._decode_one(buf))
         self.intensities = []
         for i0 in range(self.intensities_length):
-            self.intensities.append(LaserEcho._decode_one(buf))
+            self.intensities.append(cls._get_field_type('intensities')._decode_one(buf))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

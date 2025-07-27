@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import builtin_interfaces
 class CameraCalibration(object):
@@ -17,6 +18,17 @@ class CameraCalibration(object):
     __typenames__ = ["int32_t", "builtin_interfaces.Time", "string", "int32_t", "int32_t", "string", "double", "double", "double", "double"]
 
     __dimensions__ = [None, None, None, None, None, None, ["d_length"], [9], [9], [12]]
+
+    d_length: 'int32_t'
+    timestamp: builtin_interfaces.Time
+    frame_id: 'string'
+    width: 'int32_t'
+    height: 'int32_t'
+    distortion_model: 'string'
+    d: 'double'
+    k: 'double'
+    r: 'double'
+    p: 'double'
 
     def __init__(self, d_length=0, timestamp=builtin_interfaces.Time(), frame_id="", width=0, height=0, distortion_model="", d=[], k=[ 0.0 for dim0 in range(9) ], r=[ 0.0 for dim0 in range(9) ], p=[ 0.0 for dim0 in range(12) ]):
         # LCM Type: int32_t
@@ -76,9 +88,9 @@ class CameraCalibration(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = CameraCalibration()
+        self = cls()
         self.d_length = struct.unpack(">i", buf.read(4))[0]
-        self.timestamp = builtin_interfaces.Time._decode_one(buf)
+        self.timestamp = cls._get_field_type('timestamp')._decode_one(buf)
         __frame_id_len = struct.unpack('>I', buf.read(4))[0]
         self.frame_id = buf.read(__frame_id_len)[:-1].decode('utf-8', 'replace')
         self.width, self.height = struct.unpack(">ii", buf.read(8))
@@ -89,6 +101,19 @@ class CameraCalibration(object):
         self.r = struct.unpack('>9d', buf.read(72))
         self.p = struct.unpack('>12d', buf.read(96))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

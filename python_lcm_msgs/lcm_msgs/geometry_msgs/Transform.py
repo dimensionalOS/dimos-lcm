@@ -6,10 +6,11 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from . import *
-from .Quaternion import Quaternion
 from .Vector3 import Vector3
+from .Quaternion import Quaternion
 class Transform(object):
 
     msg_name = "geometry_msgs.Transform"
@@ -19,6 +20,9 @@ class Transform(object):
     __typenames__ = ["Vector3", "Quaternion"]
 
     __dimensions__ = [None, None]
+
+    translation: Vector3
+    rotation: Quaternion
 
     def __init__(self, translation=Vector3(), rotation=Quaternion()):
         # LCM Type: Vector3
@@ -50,10 +54,23 @@ class Transform(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Transform()
-        self.translation = Vector3._decode_one(buf)
-        self.rotation = Quaternion._decode_one(buf)
+        self = cls()
+        self.translation = cls._get_field_type('translation')._decode_one(buf)
+        self.rotation = cls._get_field_type('rotation')._decode_one(buf)
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

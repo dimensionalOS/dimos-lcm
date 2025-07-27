@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import std_msgs
 class TimeReference(object):
@@ -17,6 +18,10 @@ class TimeReference(object):
     __typenames__ = ["std_msgs.Header", "std_msgs.Time", "string"]
 
     __dimensions__ = [None, None, None]
+
+    header: std_msgs.Header
+    time_ref: std_msgs.Time
+    source: 'string'
 
     def __init__(self, header=std_msgs.Header(), time_ref=std_msgs.Time(), source=""):
         # LCM Type: std_msgs.Header
@@ -54,12 +59,25 @@ class TimeReference(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = TimeReference()
-        self.header = std_msgs.Header._decode_one(buf)
-        self.time_ref = std_msgs.Time._decode_one(buf)
+        self = cls()
+        self.header = cls._get_field_type('header')._decode_one(buf)
+        self.time_ref = cls._get_field_type('time_ref')._decode_one(buf)
         __source_len = struct.unpack('>I', buf.read(4))[0]
         self.source = buf.read(__source_len)[:-1].decode('utf-8', 'replace')
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

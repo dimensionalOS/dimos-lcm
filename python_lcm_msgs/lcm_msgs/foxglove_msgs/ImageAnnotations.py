@@ -6,10 +6,11 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from . import *
-from .PointsAnnotation import PointsAnnotation
 from .CircleAnnotation import CircleAnnotation
+from .PointsAnnotation import PointsAnnotation
 from .TextAnnotation import TextAnnotation
 class ImageAnnotations(object):
 
@@ -20,6 +21,13 @@ class ImageAnnotations(object):
     __typenames__ = ["int32_t", "int32_t", "int32_t", "CircleAnnotation", "PointsAnnotation", "TextAnnotation"]
 
     __dimensions__ = [None, None, None, ["circles_length"], ["points_length"], ["texts_length"]]
+
+    circles_length: 'int32_t'
+    points_length: 'int32_t'
+    texts_length: 'int32_t'
+    circles: CircleAnnotation
+    points: PointsAnnotation
+    texts: TextAnnotation
 
     def __init__(self, circles_length=0, points_length=0, texts_length=0, circles=[], points=[], texts=[]):
         # LCM Type: int32_t
@@ -65,18 +73,31 @@ class ImageAnnotations(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = ImageAnnotations()
+        self = cls()
         self.circles_length, self.points_length, self.texts_length = struct.unpack(">iii", buf.read(12))
         self.circles = []
         for i0 in range(self.circles_length):
-            self.circles.append(CircleAnnotation._decode_one(buf))
+            self.circles.append(cls._get_field_type('circles')._decode_one(buf))
         self.points = []
         for i0 in range(self.points_length):
-            self.points.append(PointsAnnotation._decode_one(buf))
+            self.points.append(cls._get_field_type('points')._decode_one(buf))
         self.texts = []
         for i0 in range(self.texts_length):
-            self.texts.append(TextAnnotation._decode_one(buf))
+            self.texts.append(cls._get_field_type('texts')._decode_one(buf))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

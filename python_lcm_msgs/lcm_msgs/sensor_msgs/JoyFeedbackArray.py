@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from . import *
 from .JoyFeedback import JoyFeedback
@@ -18,6 +19,9 @@ class JoyFeedbackArray(object):
     __typenames__ = ["int32_t", "JoyFeedback"]
 
     __dimensions__ = [None, ["array_length"]]
+
+    array_length: 'int32_t'
+    array: JoyFeedback
 
     def __init__(self, array_length=0, array=[]):
         # LCM Type: int32_t
@@ -49,12 +53,25 @@ class JoyFeedbackArray(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = JoyFeedbackArray()
+        self = cls()
         self.array_length = struct.unpack(">i", buf.read(4))[0]
         self.array = []
         for i0 in range(self.array_length):
-            self.array.append(JoyFeedback._decode_one(buf))
+            self.array.append(cls._get_field_type('array')._decode_one(buf))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import std_msgs
 class Illuminance(object):
@@ -17,6 +18,10 @@ class Illuminance(object):
     __typenames__ = ["std_msgs.Header", "double", "double"]
 
     __dimensions__ = [None, None, None]
+
+    header: std_msgs.Header
+    illuminance: 'double'
+    variance: 'double'
 
     def __init__(self, header=std_msgs.Header(), illuminance=0.0, variance=0.0):
         # LCM Type: std_msgs.Header
@@ -49,10 +54,23 @@ class Illuminance(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Illuminance()
-        self.header = std_msgs.Header._decode_one(buf)
+        self = cls()
+        self.header = cls._get_field_type('header')._decode_one(buf)
         self.illuminance, self.variance = struct.unpack(">dd", buf.read(16))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

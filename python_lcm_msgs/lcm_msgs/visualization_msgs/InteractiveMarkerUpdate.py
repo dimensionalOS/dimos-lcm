@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from . import *
 from .InteractiveMarkerPose import InteractiveMarkerPose
@@ -19,6 +20,16 @@ class InteractiveMarkerUpdate(object):
     __typenames__ = ["int32_t", "int32_t", "int32_t", "string", "int64_t", "byte", "InteractiveMarker", "InteractiveMarkerPose", "string"]
 
     __dimensions__ = [None, None, None, None, None, None, ["markers_length"], ["poses_length"], ["erases_length"]]
+
+    markers_length: 'int32_t'
+    poses_length: 'int32_t'
+    erases_length: 'int32_t'
+    server_id: 'string'
+    seq_num: 'int64_t'
+    type: 'byte'
+    markers: InteractiveMarker
+    poses: InteractiveMarkerPose
+    erases: 'string'
 
     KEEP_ALIVE = 0
     UPDATE = 1
@@ -80,22 +91,35 @@ class InteractiveMarkerUpdate(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = InteractiveMarkerUpdate()
+        self = cls()
         self.markers_length, self.poses_length, self.erases_length = struct.unpack(">iii", buf.read(12))
         __server_id_len = struct.unpack('>I', buf.read(4))[0]
         self.server_id = buf.read(__server_id_len)[:-1].decode('utf-8', 'replace')
         self.seq_num, self.type = struct.unpack(">qB", buf.read(9))
         self.markers = []
         for i0 in range(self.markers_length):
-            self.markers.append(InteractiveMarker._decode_one(buf))
+            self.markers.append(cls._get_field_type('markers')._decode_one(buf))
         self.poses = []
         for i0 in range(self.poses_length):
-            self.poses.append(InteractiveMarkerPose._decode_one(buf))
+            self.poses.append(cls._get_field_type('poses')._decode_one(buf))
         self.erases = []
         for i0 in range(self.erases_length):
             __erases_len = struct.unpack('>I', buf.read(4))[0]
             self.erases.append(buf.read(__erases_len)[:-1].decode('utf-8', 'replace'))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

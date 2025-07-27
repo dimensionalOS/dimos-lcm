@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import geometry_msgs
 from lcm_msgs import std_msgs
@@ -18,6 +19,22 @@ class ImageMarker(object):
     __typenames__ = ["int32_t", "int32_t", "std_msgs.Header", "string", "int32_t", "int32_t", "int32_t", "geometry_msgs.Point", "float", "std_msgs.ColorRGBA", "byte", "std_msgs.ColorRGBA", "std_msgs.Duration", "geometry_msgs.Point", "std_msgs.ColorRGBA"]
 
     __dimensions__ = [None, None, None, None, None, None, None, None, None, None, None, None, None, ["points_length"], ["outline_colors_length"]]
+
+    points_length: 'int32_t'
+    outline_colors_length: 'int32_t'
+    header: std_msgs.Header
+    ns: 'string'
+    id: 'int32_t'
+    type: 'int32_t'
+    action: 'int32_t'
+    position: geometry_msgs.Point
+    scale: 'float'
+    outline_color: std_msgs.ColorRGBA
+    filled: 'byte'
+    fill_color: std_msgs.ColorRGBA
+    lifetime: std_msgs.Duration
+    points: geometry_msgs.Point
+    outline_colors: std_msgs.ColorRGBA
 
     CIRCLE = 0
     LINE_STRIP = 1
@@ -103,25 +120,38 @@ class ImageMarker(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = ImageMarker()
+        self = cls()
         self.points_length, self.outline_colors_length = struct.unpack(">ii", buf.read(8))
-        self.header = std_msgs.Header._decode_one(buf)
+        self.header = cls._get_field_type('header')._decode_one(buf)
         __ns_len = struct.unpack('>I', buf.read(4))[0]
         self.ns = buf.read(__ns_len)[:-1].decode('utf-8', 'replace')
         self.id, self.type, self.action = struct.unpack(">iii", buf.read(12))
-        self.position = geometry_msgs.Point._decode_one(buf)
+        self.position = cls._get_field_type('position')._decode_one(buf)
         self.scale = struct.unpack(">f", buf.read(4))[0]
-        self.outline_color = std_msgs.ColorRGBA._decode_one(buf)
+        self.outline_color = cls._get_field_type('outline_color')._decode_one(buf)
         self.filled = struct.unpack(">B", buf.read(1))[0]
-        self.fill_color = std_msgs.ColorRGBA._decode_one(buf)
-        self.lifetime = std_msgs.Duration._decode_one(buf)
+        self.fill_color = cls._get_field_type('fill_color')._decode_one(buf)
+        self.lifetime = cls._get_field_type('lifetime')._decode_one(buf)
         self.points = []
         for i0 in range(self.points_length):
-            self.points.append(geometry_msgs.Point._decode_one(buf))
+            self.points.append(cls._get_field_type('points')._decode_one(buf))
         self.outline_colors = []
         for i0 in range(self.outline_colors_length):
-            self.outline_colors.append(std_msgs.ColorRGBA._decode_one(buf))
+            self.outline_colors.append(cls._get_field_type('outline_colors')._decode_one(buf))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

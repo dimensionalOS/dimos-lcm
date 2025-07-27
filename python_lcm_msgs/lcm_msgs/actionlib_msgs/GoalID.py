@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import std_msgs
 class GoalID(object):
@@ -17,6 +18,9 @@ class GoalID(object):
     __typenames__ = ["std_msgs.Time", "string"]
 
     __dimensions__ = [None, None]
+
+    stamp: std_msgs.Time
+    id: 'string'
 
     def __init__(self, stamp=std_msgs.Time(), id=""):
         # LCM Type: std_msgs.Time
@@ -50,11 +54,24 @@ class GoalID(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = GoalID()
-        self.stamp = std_msgs.Time._decode_one(buf)
+        self = cls()
+        self.stamp = cls._get_field_type('stamp')._decode_one(buf)
         __id_len = struct.unpack('>I', buf.read(4))[0]
         self.id = buf.read(__id_len)[:-1].decode('utf-8', 'replace')
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import std_msgs
 class JointState(object):
@@ -17,6 +18,16 @@ class JointState(object):
     __typenames__ = ["int32_t", "int32_t", "int32_t", "int32_t", "std_msgs.Header", "string", "double", "double", "double"]
 
     __dimensions__ = [None, None, None, None, None, ["name_length"], ["position_length"], ["velocity_length"], ["effort_length"]]
+
+    name_length: 'int32_t'
+    position_length: 'int32_t'
+    velocity_length: 'int32_t'
+    effort_length: 'int32_t'
+    header: std_msgs.Header
+    name: 'string'
+    position: 'double'
+    velocity: 'double'
+    effort: 'double'
 
     def __init__(self, name_length=0, position_length=0, velocity_length=0, effort_length=0, header=std_msgs.Header(), name=[], position=[], velocity=[], effort=[]):
         # LCM Type: int32_t
@@ -69,9 +80,9 @@ class JointState(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = JointState()
+        self = cls()
         self.name_length, self.position_length, self.velocity_length, self.effort_length = struct.unpack(">iiii", buf.read(16))
-        self.header = std_msgs.Header._decode_one(buf)
+        self.header = cls._get_field_type('header')._decode_one(buf)
         self.name = []
         for i0 in range(self.name_length):
             __name_len = struct.unpack('>I', buf.read(4))[0]
@@ -80,6 +91,19 @@ class JointState(object):
         self.velocity = struct.unpack('>%dd' % self.velocity_length, buf.read(self.velocity_length * 8))
         self.effort = struct.unpack('>%dd' % self.effort_length, buf.read(self.effort_length * 8))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

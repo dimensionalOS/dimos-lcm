@@ -114,25 +114,36 @@ def fix_file_imports(file_path):
                 
                 # Find a good spot to insert the import - after other imports but before class definition
                 import_section_end = 0
-                for match in re.finditer(r'import.*?\n', content):
+                
+                # Look for the last import or from statement before the class definition
+                for match in re.finditer(r'^(import|from)\s+.*?\n', content, re.MULTILINE):
                     end_pos = match.end()
                     if end_pos > import_section_end:
                         import_section_end = end_pos
                 
-                # If we found imports, add after them, otherwise add near the top
+                # If we found imports, add after them
                 if import_section_end > 0:
                     content = content[:import_section_end] + import_line + content[import_section_end:]
                 else:
-                    # Add after docstring or at line 10 if no better spot found
-                    docstring_end = content.find('"""', content.find('"""') + 3) + 3
-                    if docstring_end > 6:  # If we found the end of the docstring
-                        content = content[:docstring_end] + "\n" + import_line + content[docstring_end:]
+                    # Otherwise, find the class definition and add before it
+                    class_match = re.search(r'^class\s+\w+', content, re.MULTILINE)
+                    if class_match:
+                        # Add imports right before the class definition with proper spacing
+                        class_start = class_match.start()
+                        # Find the start of the line
+                        line_start = content.rfind('\n', 0, class_start) + 1
+                        content = content[:line_start] + import_line + '\n' + content[line_start:]
                     else:
-                        # Insert around line 10 as a fallback
-                        lines = content.split('\n')
-                        insert_pos = min(10, len(lines) - 1)
-                        lines.insert(insert_pos, import_line.strip())
-                        content = '\n'.join(lines)
+                        # Last resort: add after docstring
+                        docstring_end = content.find('"""', content.find('"""') + 3) + 3
+                        if docstring_end > 6:
+                            content = content[:docstring_end] + "\n\n" + import_line + content[docstring_end:]
+                        else:
+                            # Give up and add at line 10
+                            lines = content.split('\n')
+                            insert_pos = min(10, len(lines) - 1)
+                            lines.insert(insert_pos, import_line.strip())
+                            content = '\n'.join(lines)
                 
                 updated = True
                 print(f"Added import for {class_name} in {file_path}")

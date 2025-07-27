@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 class PackedElementField(object):
 
@@ -16,6 +17,10 @@ class PackedElementField(object):
     __typenames__ = ["string", "int32_t", "byte"]
 
     __dimensions__ = [None, None, None]
+
+    name: 'string'
+    offset: 'int32_t'
+    type: 'byte'
 
     UNKNOWN = 0
     UINT8 = 1
@@ -60,11 +65,24 @@ class PackedElementField(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = PackedElementField()
+        self = cls()
         __name_len = struct.unpack('>I', buf.read(4))[0]
         self.name = buf.read(__name_len)[:-1].decode('utf-8', 'replace')
         self.offset, self.type = struct.unpack(">iB", buf.read(5))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

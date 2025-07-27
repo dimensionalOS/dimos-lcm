@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from . import *
 from lcm_msgs import std_msgs
@@ -19,6 +20,12 @@ class MultiDOFJointTrajectory(object):
     __typenames__ = ["int32_t", "int32_t", "std_msgs.Header", "string", "MultiDOFJointTrajectoryPoint"]
 
     __dimensions__ = [None, None, None, ["joint_names_length"], ["points_length"]]
+
+    joint_names_length: 'int32_t'
+    points_length: 'int32_t'
+    header: std_msgs.Header
+    joint_names: 'string'
+    points: MultiDOFJointTrajectoryPoint
 
     def __init__(self, joint_names_length=0, points_length=0, header=std_msgs.Header(), joint_names=[], points=[]):
         # LCM Type: int32_t
@@ -63,17 +70,30 @@ class MultiDOFJointTrajectory(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = MultiDOFJointTrajectory()
+        self = cls()
         self.joint_names_length, self.points_length = struct.unpack(">ii", buf.read(8))
-        self.header = std_msgs.Header._decode_one(buf)
+        self.header = cls._get_field_type('header')._decode_one(buf)
         self.joint_names = []
         for i0 in range(self.joint_names_length):
             __joint_names_len = struct.unpack('>I', buf.read(4))[0]
             self.joint_names.append(buf.read(__joint_names_len)[:-1].decode('utf-8', 'replace'))
         self.points = []
         for i0 in range(self.points_length):
-            self.points.append(MultiDOFJointTrajectoryPoint._decode_one(buf))
+            self.points.append(cls._get_field_type('points')._decode_one(buf))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):
