@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from . import *
 from lcm_msgs import std_msgs
@@ -19,6 +20,10 @@ class TransformStamped(object):
     __typenames__ = ["std_msgs.Header", "string", "Transform"]
 
     __dimensions__ = [None, None, None]
+
+    header: std_msgs.Header
+    child_frame_id: 'string'
+    transform: Transform
 
     def __init__(self, header=std_msgs.Header(), child_frame_id="", transform=Transform()):
         # LCM Type: std_msgs.Header
@@ -56,12 +61,25 @@ class TransformStamped(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = TransformStamped()
-        self.header = std_msgs.Header._decode_one(buf)
+        self = cls()
+        self.header = cls._get_field_type('header')._decode_one(buf)
         __child_frame_id_len = struct.unpack('>I', buf.read(4))[0]
         self.child_frame_id = buf.read(__child_frame_id_len)[:-1].decode('utf-8', 'replace')
-        self.transform = Transform._decode_one(buf)
+        self.transform = cls._get_field_type('transform')._decode_one(buf)
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

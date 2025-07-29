@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from . import *
 from .MultiArrayDimension import MultiArrayDimension
@@ -18,6 +19,10 @@ class MultiArrayLayout(object):
     __typenames__ = ["int32_t", "MultiArrayDimension", "int32_t"]
 
     __dimensions__ = [None, ["dim_length"], None]
+
+    dim_length: 'int32_t'
+    dim: MultiArrayDimension
+    data_offset: 'int32_t'
 
     def __init__(self, dim_length=0, dim=[], data_offset=0):
         # LCM Type: int32_t
@@ -52,13 +57,26 @@ class MultiArrayLayout(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = MultiArrayLayout()
+        self = cls()
         self.dim_length = struct.unpack(">i", buf.read(4))[0]
         self.dim = []
         for i0 in range(self.dim_length):
-            self.dim.append(MultiArrayDimension._decode_one(buf))
+            self.dim.append(cls._get_field_type('dim')._decode_one(buf))
         self.data_offset = struct.unpack(">i", buf.read(4))[0]
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

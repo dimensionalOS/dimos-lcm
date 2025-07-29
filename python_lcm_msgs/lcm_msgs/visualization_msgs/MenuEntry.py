@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 class MenuEntry(object):
 
@@ -16,6 +17,12 @@ class MenuEntry(object):
     __typenames__ = ["int32_t", "int32_t", "string", "string", "byte"]
 
     __dimensions__ = [None, None, None, None, None]
+
+    id: 'int32_t'
+    parent_id: 'int32_t'
+    title: 'string'
+    command: 'string'
+    command_type: 'byte'
 
     FEEDBACK = 0
     ROSRUN = 1
@@ -63,7 +70,7 @@ class MenuEntry(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = MenuEntry()
+        self = cls()
         self.id, self.parent_id = struct.unpack(">ii", buf.read(8))
         __title_len = struct.unpack('>I', buf.read(4))[0]
         self.title = buf.read(__title_len)[:-1].decode('utf-8', 'replace')
@@ -71,6 +78,19 @@ class MenuEntry(object):
         self.command = buf.read(__command_len)[:-1].decode('utf-8', 'replace')
         self.command_type = struct.unpack(">B", buf.read(1))[0]
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

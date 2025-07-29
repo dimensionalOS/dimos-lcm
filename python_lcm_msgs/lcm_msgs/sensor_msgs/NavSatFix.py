@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import std_msgs
 from . import *
@@ -19,6 +20,14 @@ class NavSatFix(object):
     __typenames__ = ["std_msgs.Header", "NavSatStatus", "double", "double", "double", "double", "byte"]
 
     __dimensions__ = [None, None, None, None, None, [9], None]
+
+    header: std_msgs.Header
+    status: NavSatStatus
+    latitude: 'double'
+    longitude: 'double'
+    altitude: 'double'
+    position_covariance: 'double'
+    position_covariance_type: 'byte'
 
     COVARIANCE_TYPE_UNKNOWN = 0
     COVARIANCE_TYPE_APPROXIMATED = 1
@@ -68,13 +77,26 @@ class NavSatFix(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = NavSatFix()
-        self.header = std_msgs.Header._decode_one(buf)
-        self.status = NavSatStatus._decode_one(buf)
+        self = cls()
+        self.header = cls._get_field_type('header')._decode_one(buf)
+        self.status = cls._get_field_type('status')._decode_one(buf)
         self.latitude, self.longitude, self.altitude = struct.unpack(">ddd", buf.read(24))
         self.position_covariance = struct.unpack('>9d', buf.read(72))
         self.position_covariance_type = struct.unpack(">B", buf.read(1))[0]
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

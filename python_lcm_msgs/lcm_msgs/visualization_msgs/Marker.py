@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import geometry_msgs
 from lcm_msgs import std_msgs
@@ -18,6 +19,24 @@ class Marker(object):
     __typenames__ = ["int32_t", "int32_t", "std_msgs.Header", "string", "int32_t", "int32_t", "int32_t", "geometry_msgs.Pose", "geometry_msgs.Vector3", "std_msgs.ColorRGBA", "std_msgs.Duration", "boolean", "geometry_msgs.Point", "std_msgs.ColorRGBA", "string", "string", "boolean"]
 
     __dimensions__ = [None, None, None, None, None, None, None, None, None, None, None, None, ["points_length"], ["colors_length"], None, None, None]
+
+    points_length: 'int32_t'
+    colors_length: 'int32_t'
+    header: std_msgs.Header
+    ns: 'string'
+    id: 'int32_t'
+    type: 'int32_t'
+    action: 'int32_t'
+    pose: geometry_msgs.Pose
+    scale: geometry_msgs.Vector3
+    color: std_msgs.ColorRGBA
+    lifetime: std_msgs.Duration
+    frame_locked: 'boolean'
+    points: geometry_msgs.Point
+    colors: std_msgs.ColorRGBA
+    text: 'string'
+    mesh_resource: 'string'
+    mesh_use_embedded_materials: 'boolean'
 
     ARROW = 0
     CUBE = 1
@@ -124,29 +143,42 @@ class Marker(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Marker()
+        self = cls()
         self.points_length, self.colors_length = struct.unpack(">ii", buf.read(8))
-        self.header = std_msgs.Header._decode_one(buf)
+        self.header = cls._get_field_type('header')._decode_one(buf)
         __ns_len = struct.unpack('>I', buf.read(4))[0]
         self.ns = buf.read(__ns_len)[:-1].decode('utf-8', 'replace')
         self.id, self.type, self.action = struct.unpack(">iii", buf.read(12))
-        self.pose = geometry_msgs.Pose._decode_one(buf)
-        self.scale = geometry_msgs.Vector3._decode_one(buf)
-        self.color = std_msgs.ColorRGBA._decode_one(buf)
-        self.lifetime = std_msgs.Duration._decode_one(buf)
+        self.pose = cls._get_field_type('pose')._decode_one(buf)
+        self.scale = cls._get_field_type('scale')._decode_one(buf)
+        self.color = cls._get_field_type('color')._decode_one(buf)
+        self.lifetime = cls._get_field_type('lifetime')._decode_one(buf)
         self.frame_locked = bool(struct.unpack('b', buf.read(1))[0])
         self.points = []
         for i0 in range(self.points_length):
-            self.points.append(geometry_msgs.Point._decode_one(buf))
+            self.points.append(cls._get_field_type('points')._decode_one(buf))
         self.colors = []
         for i0 in range(self.colors_length):
-            self.colors.append(std_msgs.ColorRGBA._decode_one(buf))
+            self.colors.append(cls._get_field_type('colors')._decode_one(buf))
         __text_len = struct.unpack('>I', buf.read(4))[0]
         self.text = buf.read(__text_len)[:-1].decode('utf-8', 'replace')
         __mesh_resource_len = struct.unpack('>I', buf.read(4))[0]
         self.mesh_resource = buf.read(__mesh_resource_len)[:-1].decode('utf-8', 'replace')
         self.mesh_use_embedded_materials = bool(struct.unpack('b', buf.read(1))[0])
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

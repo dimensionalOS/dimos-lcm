@@ -5,7 +5,7 @@ This package provides a modular implementation of the LCM to Foxglove bridge,
 split into logical components for better maintainability and organization.
 """
 
-from .bridge import LcmFoxgloveBridge
-from .models import TopicInfo, LcmMessage
+from .bridge import FoxgloveBridge
+from .models import LcmMessage, TopicInfo
 
-__all__ = ['LcmFoxgloveBridge', 'TopicInfo', 'LcmMessage']
+__all__ = ["FoxgloveBridge", "TopicInfo", "LcmMessage"]

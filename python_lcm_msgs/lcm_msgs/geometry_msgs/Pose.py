@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from . import *
 from .Point import Point
@@ -19,6 +20,9 @@ class Pose(object):
     __typenames__ = ["Point", "Quaternion"]
 
     __dimensions__ = [None, None]
+
+    position: Point
+    orientation: Quaternion
 
     def __init__(self, position=Point(), orientation=Quaternion()):
         # LCM Type: Point
@@ -50,10 +54,23 @@ class Pose(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Pose()
-        self.position = Point._decode_one(buf)
-        self.orientation = Quaternion._decode_one(buf)
+        self = cls()
+        self.position = cls._get_field_type('position')._decode_one(buf)
+        self.orientation = cls._get_field_type('orientation')._decode_one(buf)
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

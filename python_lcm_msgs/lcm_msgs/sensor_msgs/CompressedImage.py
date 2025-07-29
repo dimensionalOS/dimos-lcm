@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import std_msgs
 class CompressedImage(object):
@@ -17,6 +18,11 @@ class CompressedImage(object):
     __typenames__ = ["int32_t", "std_msgs.Header", "string", "byte"]
 
     __dimensions__ = [None, None, None, ["data_length"]]
+
+    data_length: 'int32_t'
+    header: std_msgs.Header
+    format: 'string'
+    data: 'byte'
 
     def __init__(self, data_length=0, header=std_msgs.Header(), format="", data=b""):
         # LCM Type: int32_t
@@ -56,13 +62,26 @@ class CompressedImage(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = CompressedImage()
+        self = cls()
         self.data_length = struct.unpack(">i", buf.read(4))[0]
-        self.header = std_msgs.Header._decode_one(buf)
+        self.header = cls._get_field_type('header')._decode_one(buf)
         __format_len = struct.unpack('>I', buf.read(4))[0]
         self.format = buf.read(__format_len)[:-1].decode('utf-8', 'replace')
         self.data = buf.read(self.data_length)
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

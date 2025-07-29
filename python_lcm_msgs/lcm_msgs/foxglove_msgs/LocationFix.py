@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import builtin_interfaces
 class LocationFix(object):
@@ -17,6 +18,14 @@ class LocationFix(object):
     __typenames__ = ["builtin_interfaces.Time", "string", "double", "double", "double", "double", "byte"]
 
     __dimensions__ = [None, None, None, None, None, [9], None]
+
+    timestamp: builtin_interfaces.Time
+    frame_id: 'string'
+    latitude: 'double'
+    longitude: 'double'
+    altitude: 'double'
+    position_covariance: 'double'
+    position_covariance_type: 'byte'
 
     UNKNOWN = 0
     APPROXIMATED = 1
@@ -68,14 +77,27 @@ class LocationFix(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = LocationFix()
-        self.timestamp = builtin_interfaces.Time._decode_one(buf)
+        self = cls()
+        self.timestamp = cls._get_field_type('timestamp')._decode_one(buf)
         __frame_id_len = struct.unpack('>I', buf.read(4))[0]
         self.frame_id = buf.read(__frame_id_len)[:-1].decode('utf-8', 'replace')
         self.latitude, self.longitude, self.altitude = struct.unpack(">ddd", buf.read(24))
         self.position_covariance = struct.unpack('>9d', buf.read(72))
         self.position_covariance_type = struct.unpack(">B", buf.read(1))[0]
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

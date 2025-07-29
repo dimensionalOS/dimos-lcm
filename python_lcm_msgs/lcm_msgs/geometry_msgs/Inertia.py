@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from . import *
 from .Vector3 import Vector3
@@ -18,6 +19,15 @@ class Inertia(object):
     __typenames__ = ["double", "Vector3", "double", "double", "double", "double", "double", "double"]
 
     __dimensions__ = [None, None, None, None, None, None, None, None]
+
+    m: 'double'
+    com: Vector3
+    ixx: 'double'
+    ixy: 'double'
+    ixz: 'double'
+    iyy: 'double'
+    iyz: 'double'
+    izz: 'double'
 
     def __init__(self, m=0.0, com=Vector3(), ixx=0.0, ixy=0.0, ixz=0.0, iyy=0.0, iyz=0.0, izz=0.0):
         # LCM Type: double
@@ -61,11 +71,24 @@ class Inertia(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Inertia()
+        self = cls()
         self.m = struct.unpack(">d", buf.read(8))[0]
-        self.com = Vector3._decode_one(buf)
+        self.com = cls._get_field_type('com')._decode_one(buf)
         self.ixx, self.ixy, self.ixz, self.iyy, self.iyz, self.izz = struct.unpack(">dddddd", buf.read(48))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

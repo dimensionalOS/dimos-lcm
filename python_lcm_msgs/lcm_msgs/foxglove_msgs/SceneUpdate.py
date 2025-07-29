@@ -6,10 +6,11 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from . import *
-from .SceneEntityDeletion import SceneEntityDeletion
 from .SceneEntity import SceneEntity
+from .SceneEntityDeletion import SceneEntityDeletion
 class SceneUpdate(object):
 
     msg_name = "foxglove_msgs.SceneUpdate"
@@ -19,6 +20,11 @@ class SceneUpdate(object):
     __typenames__ = ["int32_t", "int32_t", "SceneEntityDeletion", "SceneEntity"]
 
     __dimensions__ = [None, None, ["deletions_length"], ["entities_length"]]
+
+    deletions_length: 'int32_t'
+    entities_length: 'int32_t'
+    deletions: SceneEntityDeletion
+    entities: SceneEntity
 
     def __init__(self, deletions_length=0, entities_length=0, deletions=[], entities=[]):
         # LCM Type: int32_t
@@ -57,15 +63,28 @@ class SceneUpdate(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = SceneUpdate()
+        self = cls()
         self.deletions_length, self.entities_length = struct.unpack(">ii", buf.read(8))
         self.deletions = []
         for i0 in range(self.deletions_length):
-            self.deletions.append(SceneEntityDeletion._decode_one(buf))
+            self.deletions.append(cls._get_field_type('deletions')._decode_one(buf))
         self.entities = []
         for i0 in range(self.entities_length):
-            self.entities.append(SceneEntity._decode_one(buf))
+            self.entities.append(cls._get_field_type('entities')._decode_one(buf))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

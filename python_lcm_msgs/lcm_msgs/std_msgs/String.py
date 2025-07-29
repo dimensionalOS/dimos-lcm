@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 class String(object):
 
@@ -16,6 +17,8 @@ class String(object):
     __typenames__ = ["string"]
 
     __dimensions__ = [None]
+
+    data: 'string'
 
     def __init__(self, data=""):
         # LCM Type: string
@@ -45,10 +48,23 @@ class String(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = String()
+        self = cls()
         __data_len = struct.unpack('>I', buf.read(4))[0]
         self.data = buf.read(__data_len)[:-1].decode('utf-8', 'replace')
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

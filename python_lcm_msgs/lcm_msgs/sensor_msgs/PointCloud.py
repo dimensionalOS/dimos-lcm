@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import geometry_msgs
 from lcm_msgs import std_msgs
@@ -20,6 +21,12 @@ class PointCloud(object):
     __typenames__ = ["int32_t", "int32_t", "std_msgs.Header", "geometry_msgs.Point32", "ChannelFloat32"]
 
     __dimensions__ = [None, None, None, ["points_length"], ["channels_length"]]
+
+    points_length: 'int32_t'
+    channels_length: 'int32_t'
+    header: std_msgs.Header
+    points: geometry_msgs.Point32
+    channels: ChannelFloat32
 
     def __init__(self, points_length=0, channels_length=0, header=std_msgs.Header(), points=[], channels=[]):
         # LCM Type: int32_t
@@ -62,16 +69,29 @@ class PointCloud(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = PointCloud()
+        self = cls()
         self.points_length, self.channels_length = struct.unpack(">ii", buf.read(8))
-        self.header = std_msgs.Header._decode_one(buf)
+        self.header = cls._get_field_type('header')._decode_one(buf)
         self.points = []
         for i0 in range(self.points_length):
-            self.points.append(geometry_msgs.Point32._decode_one(buf))
+            self.points.append(cls._get_field_type('points')._decode_one(buf))
         self.channels = []
         for i0 in range(self.channels_length):
-            self.channels.append(ChannelFloat32._decode_one(buf))
+            self.channels.append(cls._get_field_type('channels')._decode_one(buf))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

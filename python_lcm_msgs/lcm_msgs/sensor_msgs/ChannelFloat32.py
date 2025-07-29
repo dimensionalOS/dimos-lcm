@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 class ChannelFloat32(object):
 
@@ -16,6 +17,10 @@ class ChannelFloat32(object):
     __typenames__ = ["int32_t", "string", "float"]
 
     __dimensions__ = [None, None, ["values_length"]]
+
+    values_length: 'int32_t'
+    name: 'string'
+    values: 'float'
 
     def __init__(self, values_length=0, name="", values=[]):
         # LCM Type: int32_t
@@ -51,12 +56,25 @@ class ChannelFloat32(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = ChannelFloat32()
+        self = cls()
         self.values_length = struct.unpack(">i", buf.read(4))[0]
         __name_len = struct.unpack('>I', buf.read(4))[0]
         self.name = buf.read(__name_len)[:-1].decode('utf-8', 'replace')
         self.values = struct.unpack('>%df' % self.values_length, buf.read(self.values_length * 4))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

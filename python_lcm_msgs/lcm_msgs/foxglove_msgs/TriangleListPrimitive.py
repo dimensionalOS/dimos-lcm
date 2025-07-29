@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import geometry_msgs
 from . import *
@@ -19,6 +20,15 @@ class TriangleListPrimitive(object):
     __typenames__ = ["int32_t", "int32_t", "int32_t", "geometry_msgs.Pose", "geometry_msgs.Point", "Color", "Color", "int32_t"]
 
     __dimensions__ = [None, None, None, None, ["points_length"], None, ["colors_length"], ["indices_length"]]
+
+    points_length: 'int32_t'
+    colors_length: 'int32_t'
+    indices_length: 'int32_t'
+    pose: geometry_msgs.Pose
+    points: geometry_msgs.Point
+    color: Color
+    colors: Color
+    indices: 'int32_t'
 
     def __init__(self, points_length=0, colors_length=0, indices_length=0, pose=geometry_msgs.Pose(), points=[], color=Color(), colors=[], indices=[]):
         # LCM Type: int32_t
@@ -70,18 +80,31 @@ class TriangleListPrimitive(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = TriangleListPrimitive()
+        self = cls()
         self.points_length, self.colors_length, self.indices_length = struct.unpack(">iii", buf.read(12))
-        self.pose = geometry_msgs.Pose._decode_one(buf)
+        self.pose = cls._get_field_type('pose')._decode_one(buf)
         self.points = []
         for i0 in range(self.points_length):
-            self.points.append(geometry_msgs.Point._decode_one(buf))
-        self.color = Color._decode_one(buf)
+            self.points.append(cls._get_field_type('points')._decode_one(buf))
+        self.color = cls._get_field_type('color')._decode_one(buf)
         self.colors = []
         for i0 in range(self.colors_length):
-            self.colors.append(Color._decode_one(buf))
+            self.colors.append(cls._get_field_type('colors')._decode_one(buf))
         self.indices = struct.unpack('>%di' % self.indices_length, buf.read(self.indices_length * 4))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

@@ -6,12 +6,13 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from lcm_msgs import geometry_msgs
 from lcm_msgs import std_msgs
 from . import *
-from .MenuEntry import MenuEntry
 from .InteractiveMarkerControl import InteractiveMarkerControl
+from .MenuEntry import MenuEntry
 class InteractiveMarker(object):
 
     msg_name = "visualization_msgs.InteractiveMarker"
@@ -21,6 +22,16 @@ class InteractiveMarker(object):
     __typenames__ = ["int32_t", "int32_t", "std_msgs.Header", "geometry_msgs.Pose", "string", "string", "float", "MenuEntry", "InteractiveMarkerControl"]
 
     __dimensions__ = [None, None, None, None, None, None, None, ["menu_entries_length"], ["controls_length"]]
+
+    menu_entries_length: 'int32_t'
+    controls_length: 'int32_t'
+    header: std_msgs.Header
+    pose: geometry_msgs.Pose
+    name: 'string'
+    description: 'string'
+    scale: 'float'
+    menu_entries: MenuEntry
+    controls: InteractiveMarkerControl
 
     def __init__(self, menu_entries_length=0, controls_length=0, header=std_msgs.Header(), pose=geometry_msgs.Pose(), name="", description="", scale=0.0, menu_entries=[], controls=[]):
         # LCM Type: int32_t
@@ -82,10 +93,10 @@ class InteractiveMarker(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = InteractiveMarker()
+        self = cls()
         self.menu_entries_length, self.controls_length = struct.unpack(">ii", buf.read(8))
-        self.header = std_msgs.Header._decode_one(buf)
-        self.pose = geometry_msgs.Pose._decode_one(buf)
+        self.header = cls._get_field_type('header')._decode_one(buf)
+        self.pose = cls._get_field_type('pose')._decode_one(buf)
         __name_len = struct.unpack('>I', buf.read(4))[0]
         self.name = buf.read(__name_len)[:-1].decode('utf-8', 'replace')
         __description_len = struct.unpack('>I', buf.read(4))[0]
@@ -93,11 +104,24 @@ class InteractiveMarker(object):
         self.scale = struct.unpack(">f", buf.read(4))[0]
         self.menu_entries = []
         for i0 in range(self.menu_entries_length):
-            self.menu_entries.append(MenuEntry._decode_one(buf))
+            self.menu_entries.append(cls._get_field_type('menu_entries')._decode_one(buf))
         self.controls = []
         for i0 in range(self.controls_length):
-            self.controls.append(InteractiveMarkerControl._decode_one(buf))
+            self.controls.append(cls._get_field_type('controls')._decode_one(buf))
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):

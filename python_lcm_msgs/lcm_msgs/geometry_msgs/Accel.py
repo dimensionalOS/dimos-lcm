@@ -6,6 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 from io import BytesIO
 import struct
+import sys
 
 from . import *
 from .Vector3 import Vector3
@@ -18,6 +19,9 @@ class Accel(object):
     __typenames__ = ["Vector3", "Vector3"]
 
     __dimensions__ = [None, None]
+
+    linear: Vector3
+    angular: Vector3
 
     def __init__(self, linear=Vector3(), angular=Vector3()):
         # LCM Type: Vector3
@@ -49,10 +53,23 @@ class Accel(object):
 
     @classmethod
     def _decode_one(cls, buf):
-        self = Accel()
-        self.linear = Vector3._decode_one(buf)
-        self.angular = Vector3._decode_one(buf)
+        self = cls()
+        self.linear = cls._get_field_type('linear')._decode_one(buf)
+        self.angular = cls._get_field_type('angular')._decode_one(buf)
         return self
+
+    @classmethod
+    def _get_field_type(cls, field_name):
+        """Get the type for a field from annotations."""
+        annotation = cls.__annotations__.get(field_name)
+        if annotation is None:
+            return None
+        if isinstance(annotation, str):
+            module = sys.modules[cls.__module__]
+            if hasattr(module, annotation):
+                return getattr(module, annotation)
+            return None
+        return annotation
 
     @classmethod
     def _get_hash_recursive(cls, parents):
