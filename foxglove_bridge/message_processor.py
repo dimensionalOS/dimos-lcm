@@ -101,6 +101,8 @@ class MessageProcessor:
 
                     # Submit all messages for processing
                     for msg in messages_to_process:
+                        if self.executor._shutdown:
+                            break
                         futures.append(self.executor.submit(self._process_single_message, msg))
 
                     # Wait for all processing to complete
