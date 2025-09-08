@@ -9,7 +9,8 @@ import logging
 import queue
 import threading
 import time
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, List, Optional
+import traceback
 
 from foxglove_websocket.server import FoxgloveServer
 from foxglove_websocket.types import ChannelId
@@ -39,6 +40,7 @@ class FoxgloveBridge:
         schema_map: Optional[Dict[str, str]] = None,
         debug: bool = False,
         num_threads: int = DEFAULT_THREAD_POOL_SIZE,
+        shm_channels: Optional[List[str]] = None,
     ):
         self.host = host
         self.port = port
@@ -47,11 +49,16 @@ class FoxgloveBridge:
         self.running = True
         self.lc = lcm.LCM()
         self.topics: Dict[str, TopicInfo] = {}
+        self.shm_topic_to_topic: Dict[str, str] = {}
         self.schema_generator = SchemaGenerator()
         self.message_handlers: Dict[str, Any] = {}
         self.schema_map = schema_map or {}
         self.debug = debug
         self.num_threads = num_threads
+
+        self.shm_channels = shm_channels or []
+        self.shm_subscribers: Dict[str, Callable[[], None]] = {} # topic -> unsubscribe function
+        self.shm_thread: Optional[threading.Thread] = None
 
         # For cross-thread communication
         self.topic_queue: asyncio.Queue = asyncio.Queue()
@@ -90,6 +97,12 @@ class FoxgloveBridge:
         self.lcm_thread = threading.Thread(target=self._lcm_thread_func)
         self.lcm_thread.daemon = True
         self.lcm_thread.start()
+
+        # Start SHM handling thread if we have SHM topics
+        if self.shm_channels:
+            self.shm_thread = threading.Thread(target=self._shm_thread_func)
+            self.shm_thread.daemon = True
+            self.shm_thread.start()
 
         # Create and start Foxglove WebSocket server as a context manager
         async with FoxgloveServer(
@@ -187,8 +200,6 @@ class FoxgloveBridge:
                         logger.error(
                             f"Error registering Foxglove channel for {topic_info.name}: {e}"
                         )
-                        import traceback
-
                         traceback.print_exc()
 
                 # Mark task as done
@@ -197,8 +208,6 @@ class FoxgloveBridge:
                 break
             except Exception as e:
                 logger.error(f"Error in topic processor: {e}")
-                import traceback
-
                 traceback.print_exc()
 
     async def _process_server_queue(self):
@@ -269,12 +278,27 @@ class FoxgloveBridge:
             except Exception as e:
                 logger.error(f"Error handling LCM message: {e}")
 
-    def _on_topic_discovered(self, topic_name: str):
-        """Called when a new topic is discovered"""
-        # Skip if we've already processed this topic
-        if topic_name in self.topics:
-            return
+    def _shm_thread_func(self):
+        """Thread for handling SharedMemory topics"""
+        try:
+            from dimos.protocol.pubsub.shmpubsub import PickleSharedMemory
+            
+            logger.info(f"Starting SHM thread for topics: {self.shm_channels}")
+            
+            shm = PickleSharedMemory()
+            shm.start()
+            
+            for channel in self.shm_channels:
+                self._subscribe_to_shm_channel(shm, channel)
+            
+            while self.running:
+                time.sleep(0.1)
+                
+        except Exception as e:
+            logger.error(f"Error in SHM thread: {e}")
+            traceback.print_exc()
 
+    def _add_topic(self, topic_name: str):
         try:
             logger.info(f"Discovered topic: {topic_name}")
 
@@ -321,17 +345,43 @@ class FoxgloveBridge:
             # Queue the topic for registration with Foxglove
             if self.loop:
                 self.loop.call_soon_threadsafe(self.topic_queue.put_nowait, topic_info)
+        except Exception as e:
+            logger.error(f"Error processing topic {topic_name}: {e}")
+            traceback.print_exc()
+    
+
+    def _on_topic_discovered(self, topic_name: str):
+        """Called when a new topic is discovered"""
+        # Skip if we've already processed this topic
+        if topic_name in self.topics:
+            return
+
+        try:
+            self._add_topic(topic_name)
 
             # Subscribe to the FULL LCM topic name (including schema annotation)
             subscription = self.lc.subscribe(topic_name, self._on_lcm_message)
-            self.message_handlers[topic_name] = subscription
+            self.message_handlers[topic_name] = subscription  # TODO: Is this used?
 
             logger.info(f"Subscribed to LCM topic: {topic_name}")
-
         except Exception as e:
             logger.error(f"Error processing topic {topic_name}: {e}")
-            import traceback
+            traceback.print_exc()
+    
+    def _subscribe_to_shm_channel(self, shm, channel: str):
+        try:
+            self._add_topic(channel)
+            base_topic = channel.split("#", 1)[0]
+            self.shm_topic_to_topic[base_topic] = channel
 
+            def shm_callback(msg, topic_name):
+                self._on_shm_message(topic_name, msg)
+            
+            unsub = shm.subscribe(base_topic, shm_callback)
+            self.shm_subscribers[base_topic] = unsub
+            
+        except Exception as e:
+            logger.error(f"Error subscribing to SHM topic {channel}: {e}")
             traceback.print_exc()
 
     def _on_lcm_message(self, channel: str, data: bytes):
@@ -386,6 +436,38 @@ class FoxgloveBridge:
         except Exception as e:
             logger.error(f"Error queuing message on {channel}: {e}")
 
+    def _on_shm_message(self, topic: str, msg):
+        topic_info = self.topics.get(self.shm_topic_to_topic.get(topic, ''))
+
+        if not topic_info:
+            logger.warning(f"Received SHM message for unknown topic: {topic}")
+            return
+
+        try:
+            # Skip if not yet registered with Foxglove
+            if topic_info.channel_id is None:
+                return
+
+            # Use the existing message converter - SHM already gives us the typed object
+            # This takes an average of 0.005062 seconds
+            msg = topic_info.lcm_class.lcm_decode(msg.lcm_encode())
+            # This takes an average of 0.013835 seconds
+            msg_dict = self.message_processor.converter.convert_message(topic_info, msg)
+            if not msg_dict:
+                logger.error(f"Failed to convert SHM message for {topic}")
+                return
+
+            timestamp_ns = int(time.time() * 1e9)
+
+            try:
+                self.server_queue.put((topic_info, msg_dict, timestamp_ns), block=False)
+            except queue.Full:
+                logger.warning(f"Server queue full, dropping SHM message for {topic}")
+
+        except Exception as e:
+            logger.error(f"Error processing SHM message on {topic}: {e}")
+            traceback.print_exc()
+
     def stop(self):
         """Stop the bridge cleanly"""
         logger.info("Stopping LCM-Foxglove bridge")
@@ -394,3 +476,9 @@ class FoxgloveBridge:
             self.discoverer.stop()
         if self.message_processor:
             self.message_processor.stop()
+
+        for topic, unsub in self.shm_subscribers.items():
+            try:
+                unsub()
+            except Exception as e:
+                logger.error(f"Error stopping SHM subscription for {topic}: {e}")
