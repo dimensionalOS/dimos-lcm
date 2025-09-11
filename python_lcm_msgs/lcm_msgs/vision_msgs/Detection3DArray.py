@@ -13,7 +13,7 @@ from lcm_msgs import std_msgs
 from .Detection3D import Detection3D
 class Detection3DArray(object):
 
-    msg_name = "Detection3DArray"
+    msg_name = "vision_msgs.Detection3DArray"
 
     __slots__ = ["detections_length", "header", "detections"]
 

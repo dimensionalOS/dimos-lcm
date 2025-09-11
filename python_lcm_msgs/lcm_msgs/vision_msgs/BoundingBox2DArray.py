@@ -13,7 +13,7 @@ from lcm_msgs import std_msgs
 from .BoundingBox2D import BoundingBox2D
 class BoundingBox2DArray(object):
 
-    msg_name = "BoundingBox2DArray"
+    msg_name = "vision_msgs.BoundingBox2DArray"
 
     __slots__ = ["boxes_length", "header", "boxes"]
 
