@@ -10,6 +10,7 @@ from collections import defaultdict
 import numpy as np
 from .config import logger
 from .models import TopicInfo
+from turbojpeg import TurboJPEG
 
 
 class MessageConverter:
@@ -191,8 +192,38 @@ class MessageConverter:
             # For Image messages, we need to encode the data as base64
             data_length = getattr(msg, "data_length", len(msg.data) if hasattr(msg, "data") else 0)
             
-            # Convert potentially incompatible encoding
+            # Check if this is a JPEG-compressed image
             encoding = msg.encoding if hasattr(msg, "encoding") and msg.encoding else "rgb8"
+
+            if encoding.lower() == "jpeg":
+                # This is JPEG-compressed data - we need to decode it back to raw pixels
+                # for Foxglove to display it correctly with the Image schema
+                if hasattr(msg, "data") and data_length > 0:
+                    jpeg = TurboJPEG()
+                    # Decode JPEG to BGR array
+                    bgr_array = jpeg.decode(msg.data[:data_length])
+
+                    # Update the message properties to reflect raw image
+                    height, width = bgr_array.shape[:2]
+                    step = width * 3  # 3 bytes per pixel for BGR
+
+                    # Convert BGR array back to bytes
+                    image_data_bytes = bgr_array.tobytes()
+                    image_data = base64.b64encode(image_data_bytes).decode("ascii")
+
+                    # Return as raw Image with rgb8 encoding (Foxglove prefers RGB)
+                    return {
+                        "header": header,
+                        "height": height,
+                        "width": width,
+                        "encoding": "rgb8",  # Foxglove expects rgb8
+                        "is_bigendian": False,
+                        "step": step,
+                        "data": image_data
+                    }
+                else:
+                    image_data = ""
+
             # Foxglove might need rgb8 instead of bgr8
             if encoding.lower() == "bgr8":
                 # Change the encoding string to rgb8
