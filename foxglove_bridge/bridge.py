@@ -41,6 +41,7 @@ class FoxgloveBridge:
         debug: bool = False,
         num_threads: int = DEFAULT_THREAD_POOL_SIZE,
         shm_channels: Optional[List[str]] = None,
+        jpeg_shm_channels: Optional[List[str]] = None,
     ):
         self.host = host
         self.port = port
@@ -57,8 +58,10 @@ class FoxgloveBridge:
         self.num_threads = num_threads
 
         self.shm_channels = shm_channels or []
+        self.jpeg_shm_channels = jpeg_shm_channels or []
         self.shm_subscribers: Dict[str, Callable[[], None]] = {} # topic -> unsubscribe function
         self.shm_thread: Optional[threading.Thread] = None
+        self.jpeg_shm_thread: Optional[threading.Thread] = None
 
         # For cross-thread communication
         self.topic_queue: asyncio.Queue = asyncio.Queue()
@@ -103,6 +106,12 @@ class FoxgloveBridge:
             self.shm_thread = threading.Thread(target=self._shm_thread_func)
             self.shm_thread.daemon = True
             self.shm_thread.start()
+
+        # Start JPEG SHM handling thread if we have JPEG SHM topics
+        if self.jpeg_shm_channels:
+            self.jpeg_shm_thread = threading.Thread(target=self._jpeg_shm_thread_func)
+            self.jpeg_shm_thread.daemon = True
+            self.jpeg_shm_thread.start()
 
         # Create and start Foxglove WebSocket server as a context manager
         async with FoxgloveServer(
@@ -282,20 +291,40 @@ class FoxgloveBridge:
         """Thread for handling SharedMemory topics"""
         try:
             from dimos.protocol.pubsub.shmpubsub import PickleSharedMemory
-            
+
             logger.info(f"Starting SHM thread for topics: {self.shm_channels}")
-            
+
             shm = PickleSharedMemory()
             shm.start()
-            
+
             for channel in self.shm_channels:
-                self._subscribe_to_shm_channel(shm, channel)
-            
+                self._subscribe_to_shm_channel(shm, channel, is_jpeg=False)
+
             while self.running:
                 time.sleep(0.1)
-                
+
         except Exception as e:
             logger.error(f"Error in SHM thread: {e}")
+            traceback.print_exc()
+
+    def _jpeg_shm_thread_func(self):
+        """Thread for handling JPEG SharedMemory topics"""
+        try:
+            from dimos.protocol.pubsub.jpeg_shm import JpegSharedMemory
+
+            logger.info(f"Starting JPEG SHM thread for topics: {self.jpeg_shm_channels}")
+
+            shm = JpegSharedMemory()
+            shm.start()
+
+            for channel in self.jpeg_shm_channels:
+                self._subscribe_to_shm_channel(shm, channel, is_jpeg=True)
+
+            while self.running:
+                time.sleep(0.1)
+
+        except Exception as e:
+            logger.error(f"Error in JPEG SHM thread: {e}")
             traceback.print_exc()
 
     def _add_topic(self, topic_name: str):
@@ -368,18 +397,18 @@ class FoxgloveBridge:
             logger.error(f"Error processing topic {topic_name}: {e}")
             traceback.print_exc()
     
-    def _subscribe_to_shm_channel(self, shm, channel: str):
+    def _subscribe_to_shm_channel(self, shm, channel: str, is_jpeg: bool = False):
         try:
             self._add_topic(channel)
             base_topic = channel.split("#", 1)[0]
             self.shm_topic_to_topic[base_topic] = channel
 
             def shm_callback(msg, topic_name):
-                self._on_shm_message(topic_name, msg)
-            
+                self._on_shm_message(topic_name, msg, is_jpeg=is_jpeg)
+
             unsub = shm.subscribe(base_topic, shm_callback)
             self.shm_subscribers[base_topic] = unsub
-            
+
         except Exception as e:
             logger.error(f"Error subscribing to SHM topic {channel}: {e}")
             traceback.print_exc()
@@ -436,7 +465,7 @@ class FoxgloveBridge:
         except Exception as e:
             logger.error(f"Error queuing message on {channel}: {e}")
 
-    def _on_shm_message(self, topic: str, msg):
+    def _on_shm_message(self, topic: str, msg, is_jpeg: bool = False):
         topic_info = self.topics.get(self.shm_topic_to_topic.get(topic, ''))
 
         if not topic_info:
@@ -448,11 +477,23 @@ class FoxgloveBridge:
             if topic_info.channel_id is None:
                 return
 
-            # Use the existing message converter - SHM already gives us the typed object
-            # This takes an average of 0.005062 seconds
-            msg = topic_info.lcm_class.lcm_decode(msg.lcm_encode())
-            # This takes an average of 0.013835 seconds
-            msg_dict = self.message_processor.converter.convert_message(topic_info, msg)
+            if is_jpeg:
+                # For JPEG SHM, msg is already a sensor_msgs.Image object
+                # We need to convert it back to LCM format, then use the standard converter
+                if topic_info.lcm_class:
+                    # Convert Image object to LCM bytes and back
+                    lcm_msg = topic_info.lcm_class.lcm_decode(msg.lcm_encode())
+                    msg_dict = self.message_processor.converter.convert_message(topic_info, lcm_msg)
+                else:
+                    logger.error(f"No LCM class available for JPEG SHM topic {topic}")
+                    return
+            else:
+                # Use the existing message converter - SHM already gives us the typed object
+                # This takes an average of 0.005062 seconds
+                msg = topic_info.lcm_class.lcm_decode(msg.lcm_encode())
+                # This takes an average of 0.013835 seconds
+                msg_dict = self.message_processor.converter.convert_message(topic_info, msg)
+
             if not msg_dict:
                 logger.error(f"Failed to convert SHM message for {topic}")
                 return
