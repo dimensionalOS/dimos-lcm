@@ -69,17 +69,27 @@ lcm.subscribeRaw("*", (msg) => {
     ? msg.channel.split("#")
     : [msg.channel, null];
 
-  const payload = JSON.stringify({
-    channel,
-    typeName,
-    timestamp: msg.timestamp,
-    // Send binary data as base64
-    data: btoa(String.fromCharCode(...msg.data)),
-  });
+  console.log(`[${channel}]${typeName ? ` ${typeName}` : ""} ${msg.data.length} bytes`);
+
+  // Build binary message: [channelLen:u16][channel][typeLen:u16][type][timestamp:f64][data]
+  const encoder = new TextEncoder();
+  const channelBytes = encoder.encode(channel);
+  const typeBytes = encoder.encode(typeName || "");
+  const headerSize = 2 + channelBytes.length + 2 + typeBytes.length + 8;
+  const packet = new Uint8Array(headerSize + msg.data.length);
+  const view = new DataView(packet.buffer);
+
+  let offset = 0;
+  view.setUint16(offset, channelBytes.length, true); offset += 2;
+  packet.set(channelBytes, offset); offset += channelBytes.length;
+  view.setUint16(offset, typeBytes.length, true); offset += 2;
+  packet.set(typeBytes, offset); offset += typeBytes.length;
+  view.setFloat64(offset, msg.timestamp, true); offset += 8;
+  packet.set(msg.data, offset);
 
   for (const client of clients) {
     if (client.readyState === WebSocket.OPEN) {
-      client.send(payload);
+      client.send(packet);
     }
   }
 });
