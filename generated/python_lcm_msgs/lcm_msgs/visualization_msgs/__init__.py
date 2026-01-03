@@ -4,17 +4,17 @@ DO NOT MODIFY BY HAND!!!!
 lcm-gen 1.5.1
 """
 
-from .MarkerArray import MarkerArray as MarkerArray
-from .Marker import Marker as Marker
-from .InteractiveMarkerPose import InteractiveMarkerPose as InteractiveMarkerPose
-from .MenuEntry import MenuEntry as MenuEntry
-from .InteractiveMarkerControl import (
-    InteractiveMarkerControl as InteractiveMarkerControl,
-)
 from .InteractiveMarkerFeedback import (
     InteractiveMarkerFeedback as InteractiveMarkerFeedback,
 )
-from .InteractiveMarkerUpdate import InteractiveMarkerUpdate as InteractiveMarkerUpdate
+from .InteractiveMarkerPose import InteractiveMarkerPose as InteractiveMarkerPose
+from .MarkerArray import MarkerArray as MarkerArray
+from .InteractiveMarkerControl import (
+    InteractiveMarkerControl as InteractiveMarkerControl,
+)
 from .InteractiveMarkerInit import InteractiveMarkerInit as InteractiveMarkerInit
-from .ImageMarker import ImageMarker as ImageMarker
+from .InteractiveMarkerUpdate import InteractiveMarkerUpdate as InteractiveMarkerUpdate
 from .InteractiveMarker import InteractiveMarker as InteractiveMarker
+from .Marker import Marker as Marker
+from .ImageMarker import ImageMarker as ImageMarker
+from .MenuEntry import MenuEntry as MenuEntry

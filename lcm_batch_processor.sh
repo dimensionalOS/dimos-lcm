@@ -133,7 +133,7 @@ if [ -n "$OUTPUT_DIR" ] && [ ! -d "$OUTPUT_DIR" ]; then
 fi
 
 # Build lcm-gen command base
-LCM_GEN_CMD="./lcm-gen --lazy"
+LCM_GEN_CMD="lcm-gen --lazy"
 
 # Set output directory for each language if specified
 if [ -n "$OUTPUT_DIR" ]; then
@@ -190,9 +190,7 @@ process_lcm_file() {
     eval $cmd
     local status=$?
     
-    if [ $status -eq 0 ]; then
-        echo "Successfully processed: $lcm_file"
-    else
+    if [ $status -ne 0 ]; then
         echo "Error processing: $lcm_file (exit code: $status)"
     fi
     
@@ -200,7 +198,7 @@ process_lcm_file() {
 }
 
 # Find all .lcm files and process them
-echo "Searching for LCM files in '$DIRECTORY'..."
+#echo "Searching for LCM files in '$DIRECTORY'..."
 lcm_files=$(find "$DIRECTORY" -name "*.lcm" -type f)
 lcm_count=$(echo "$lcm_files" | wc -l)
 

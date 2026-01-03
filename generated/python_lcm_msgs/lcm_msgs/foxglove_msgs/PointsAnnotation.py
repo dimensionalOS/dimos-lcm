@@ -9,8 +9,8 @@ import sys
 
 from . import *
 from lcm_msgs import builtin_interfaces
-from .Point2 import Point2
 from .Color import Color
+from .Point2 import Point2
 
 
 class PointsAnnotation(object):

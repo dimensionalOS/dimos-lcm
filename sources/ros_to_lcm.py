@@ -404,7 +404,7 @@ def convert_ros_msg_to_lcm(ros_msg_path, output_dir=None, converted_types=None, 
     with open(output_path, 'w') as f:
         f.write(lcm_content_str)
     
-    logger.info(f"Converted {ros_msg_path} to {output_path}")
+    logger.debug(f"Converted {ros_msg_path} to {output_path}")
     
     # Add dependencies to conversion queue
     for dep in dependencies:
@@ -513,17 +513,20 @@ def convert_ros_msgs(input_path, output_dir=None, search_paths=None):
     return converted_types
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: ros_to_lcm.py <ros_msg_file_or_directory> [output_directory] [search_path1] [search_path2] ...")
-        sys.exit(1)
-    
-    input_path = sys.argv[1]
-    output_dir = sys.argv[2] if len(sys.argv) > 2 else None
+    # Default paths relative to repo structure
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    repo_root = os.path.dirname(script_dir)
+    default_input = os.path.join(script_dir, "ros_msgs")
+    default_output = os.path.join(repo_root, "lcm_types")
+
+    # Accept args but use defaults if not provided
+    input_path = sys.argv[1] if len(sys.argv) > 1 else default_input
+    output_dir = sys.argv[2] if len(sys.argv) > 2 else default_output
     search_paths = sys.argv[3:] if len(sys.argv) > 3 else []
-    
+
     try:
         convert_ros_msgs(input_path, output_dir, search_paths)
-        print("Conversion complete!")
+        print("ROS msg to LCM", input_path, "->", output_dir if output_dir else "current directory", "done!")
     except Exception as e:
         logger.error(f"Error: {e}")
         import traceback

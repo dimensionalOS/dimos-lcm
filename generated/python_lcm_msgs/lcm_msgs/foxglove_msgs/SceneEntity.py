@@ -9,15 +9,15 @@ import sys
 
 from . import *
 from lcm_msgs import builtin_interfaces
-from .KeyValuePair import KeyValuePair
+from .SpherePrimitive import SpherePrimitive
+from .ModelPrimitive import ModelPrimitive
+from .CubePrimitive import CubePrimitive
 from .ArrowPrimitive import ArrowPrimitive
-from .LinePrimitive import LinePrimitive
+from .KeyValuePair import KeyValuePair
+from .CylinderPrimitive import CylinderPrimitive
 from .TriangleListPrimitive import TriangleListPrimitive
 from .TextPrimitive import TextPrimitive
-from .CubePrimitive import CubePrimitive
-from .SpherePrimitive import SpherePrimitive
-from .CylinderPrimitive import CylinderPrimitive
-from .ModelPrimitive import ModelPrimitive
+from .LinePrimitive import LinePrimitive
 
 
 class SceneEntity(object):
