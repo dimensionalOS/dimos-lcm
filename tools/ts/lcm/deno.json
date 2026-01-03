@@ -1,9 +1,10 @@
 {
-  "name": "@dimos/lcm-pure",
+  "name": "@dimos/lcm",
   "version": "0.1.0",
   "exports": "./mod.ts",
   "tasks": {
     "check": "deno check mod.ts",
+    "test": "deno test --allow-net --unstable-net",
     "pub": "deno run --allow-net --unstable-net examples/publisher.ts",
     "sub": "deno run --allow-net --unstable-net examples/subscriber.ts",
     "interop": "deno run --allow-net --unstable-net examples/interop.ts"

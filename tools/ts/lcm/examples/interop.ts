@@ -7,9 +7,8 @@
 //   lc = lcm.LCM()
 //   lc.publish("/vector#geometry_msgs.Vector3", Vector3(x=1, y=2, z=3).lcm_encode())
 
-import { LCM } from "../mod.ts";
-import { Vector3 } from "../../../../generated/ts_lcm_msgs/geometry_msgs/Vector3.ts";
-import { PoseStamped } from "../../../../generated/ts_lcm_msgs/geometry_msgs/PoseStamped.ts";
+import { LCM } from "@dimos/lcm";
+import { Vector3, PoseStamped } from "@dimos/msgs/geometry_msgs";
 
 async function main() {
   const lcm = new LCM();

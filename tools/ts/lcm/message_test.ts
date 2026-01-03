@@ -1,10 +1,6 @@
 import { assertEquals } from "https://deno.land/std@0.208.0/assert/mod.ts";
-import { Point } from "../../../generated/ts_lcm_msgs/geometry_msgs/Point.ts";
-import { Vector3 } from "../../../generated/ts_lcm_msgs/geometry_msgs/Vector3.ts";
-import { Header } from "../../../generated/ts_lcm_msgs/std_msgs/Header.ts";
-import { PoseStamped } from "../../../generated/ts_lcm_msgs/geometry_msgs/PoseStamped.ts";
-import { Pose } from "../../../generated/ts_lcm_msgs/geometry_msgs/Pose.ts";
-import { Quaternion } from "../../../generated/ts_lcm_msgs/geometry_msgs/Quaternion.ts";
+import { Point, Vector3, PoseStamped, Pose, Quaternion } from "@dimos/msgs/geometry_msgs";
+import { Header } from "@dimos/msgs/std_msgs";
 
 Deno.test("Point - encode/decode roundtrip", () => {
   const original = new Point({ x: 1.5, y: 2.5, z: 3.5 });

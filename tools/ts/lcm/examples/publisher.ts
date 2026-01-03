@@ -3,8 +3,8 @@
 // Example: Publishing LCM messages
 // Run with: deno task pub
 
-import { LCM } from "../mod.ts";
-import { Point } from "../../../../generated/ts_lcm_msgs/geometry_msgs/Point.ts";
+import { LCM } from "@dimos/lcm";
+import { Point } from "@dimos/msgs/geometry_msgs";
 
 async function main() {
   const lcm = new LCM();

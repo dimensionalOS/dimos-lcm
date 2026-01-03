@@ -1,0 +1,10 @@
+{
+  "workspace": [
+    "./lcm",
+    "./msgs"
+  ],
+  "imports": {
+    "@dimos/lcm": "./lcm/mod.ts",
+    "@dimos/msgs/": "./msgs/"
+  }
+}
