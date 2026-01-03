@@ -3,8 +3,8 @@
 // Simple LCM Publisher Example
 // Publishes Vector3 messages at 10 Hz
 
-import { LCM } from "@dimos/lcm";
-import { geometry_msgs } from "@dimos/msgs";
+import { LCM } from "jsr:@dimos/lcm";
+import { geometry_msgs } from "jsr:@dimos/msgs";
 
 const lcm = new LCM();
 await lcm.start();
