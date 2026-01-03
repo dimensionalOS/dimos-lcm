@@ -111,6 +111,7 @@ if (args.stdout) {
   const denoJson = {
     name: "@dimos/msgs",
     version: "0.1.0",
+    license: "Apache-2.0",
     exports: packageExports,
     compilerOptions: { strict: true },
   };

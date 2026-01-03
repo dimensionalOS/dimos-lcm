@@ -13,3 +13,8 @@ __pycache__/
 .vscode
 
 **/.claude/settings.local.json
+
+# Python build artifacts
+.direnv/
+dist/
+*.egg-info/
