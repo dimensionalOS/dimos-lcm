@@ -3,8 +3,9 @@
 import { Vector3 } from "./Vector3.ts";
 
 export class Twist {
-  static readonly _HASH = 0x66c2dcceead8c2e4n;
+  static readonly _HASH = 0x3a4144772922add7n;
   static readonly _NAME = "geometry_msgs.Twist";
+  private static _packedFingerprint: bigint | null = null;
 
   linear: Vector3;
   angular: Vector3;
@@ -18,11 +19,12 @@ export class Twist {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== Twist._HASH) {
-      throw new Error(`Hash mismatch: expected ${Twist._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = Twist._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new Twist();
@@ -44,8 +46,8 @@ export class Twist {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, Twist._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, Twist._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -63,5 +65,23 @@ export class Twist {
     size += this.linear._encodedSize();
     size += this.angular._encodedSize();
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(Twist)) return 0n;
+    const newparents = [...parents, Twist];
+    let tmphash = Twist._HASH;
+    tmphash = (tmphash + Vector3._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Vector3._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (Twist._packedFingerprint === null) {
+      Twist._packedFingerprint = Twist._getHashRecursive([]);
+    }
+    return Twist._packedFingerprint;
   }
 }

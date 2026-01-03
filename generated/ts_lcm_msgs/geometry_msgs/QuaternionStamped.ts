@@ -4,8 +4,9 @@ import { Header } from "../std_msgs/Header.ts";
 import { Quaternion } from "./Quaternion.ts";
 
 export class QuaternionStamped {
-  static readonly _HASH = 0xc2e8cae4dcd2dedcn;
+  static readonly _HASH = 0x7a3833b23af3ee48n;
   static readonly _NAME = "geometry_msgs.QuaternionStamped";
+  private static _packedFingerprint: bigint | null = null;
 
   header: Header;
   quaternion: Quaternion;
@@ -19,11 +20,12 @@ export class QuaternionStamped {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== QuaternionStamped._HASH) {
-      throw new Error(`Hash mismatch: expected ${QuaternionStamped._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = QuaternionStamped._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new QuaternionStamped();
@@ -45,8 +47,8 @@ export class QuaternionStamped {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, QuaternionStamped._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, QuaternionStamped._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -64,5 +66,23 @@ export class QuaternionStamped {
     size += this.header._encodedSize();
     size += this.quaternion._encodedSize();
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(QuaternionStamped)) return 0n;
+    const newparents = [...parents, QuaternionStamped];
+    let tmphash = QuaternionStamped._HASH;
+    tmphash = (tmphash + Header._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Quaternion._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (QuaternionStamped._packedFingerprint === null) {
+      QuaternionStamped._packedFingerprint = QuaternionStamped._getHashRecursive([]);
+    }
+    return QuaternionStamped._packedFingerprint;
   }
 }

@@ -4,8 +4,9 @@ import { Pose } from "../geometry_msgs/Pose.ts";
 import { Color } from "./Color.ts";
 
 export class TextPrimitive {
-  static readonly _HASH = 0xe4d2dccee8caf0e8n;
+  static readonly _HASH = 0x3a761dcf4ac0e7c2n;
   static readonly _NAME = "foxglove_msgs.TextPrimitive";
+  private static _packedFingerprint: bigint | null = null;
 
   pose: Pose;
   billboard: boolean;
@@ -27,11 +28,12 @@ export class TextPrimitive {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== TextPrimitive._HASH) {
-      throw new Error(`Hash mismatch: expected ${TextPrimitive._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = TextPrimitive._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new TextPrimitive();
@@ -65,8 +67,8 @@ export class TextPrimitive {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, TextPrimitive._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, TextPrimitive._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -103,5 +105,23 @@ export class TextPrimitive {
     size += this.color._encodedSize();
     size += 4 + new TextEncoder().encode(this.text).length + 1;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(TextPrimitive)) return 0n;
+    const newparents = [...parents, TextPrimitive];
+    let tmphash = TextPrimitive._HASH;
+    tmphash = (tmphash + Pose._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Color._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (TextPrimitive._packedFingerprint === null) {
+      TextPrimitive._packedFingerprint = TextPrimitive._getHashRecursive([]);
+    }
+    return TextPrimitive._packedFingerprint;
   }
 }

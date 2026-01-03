@@ -4,8 +4,9 @@ import { Time } from "../builtin_interfaces/Time.ts";
 import { Pose } from "../geometry_msgs/Pose.ts";
 
 export class PoseInFrame {
-  static readonly _HASH = 0xa0dee6cae0dee6can;
+  static readonly _HASH = 0x84c6ef3a0a4c5cd6n;
   static readonly _NAME = "foxglove_msgs.PoseInFrame";
+  private static _packedFingerprint: bigint | null = null;
 
   timestamp: Time;
   frame_id: string;
@@ -21,11 +22,12 @@ export class PoseInFrame {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== PoseInFrame._HASH) {
-      throw new Error(`Hash mismatch: expected ${PoseInFrame._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = PoseInFrame._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new PoseInFrame();
@@ -53,8 +55,8 @@ export class PoseInFrame {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, PoseInFrame._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, PoseInFrame._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -82,5 +84,23 @@ export class PoseInFrame {
     size += 4 + new TextEncoder().encode(this.frame_id).length + 1;
     size += this.pose._encodedSize();
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(PoseInFrame)) return 0n;
+    const newparents = [...parents, PoseInFrame];
+    let tmphash = PoseInFrame._HASH;
+    tmphash = (tmphash + Time._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Pose._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (PoseInFrame._packedFingerprint === null) {
+      PoseInFrame._packedFingerprint = PoseInFrame._getHashRecursive([]);
+    }
+    return PoseInFrame._packedFingerprint;
   }
 }

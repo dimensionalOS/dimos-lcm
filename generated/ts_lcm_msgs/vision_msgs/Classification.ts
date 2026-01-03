@@ -4,8 +4,9 @@ import { Header } from "../std_msgs/Header.ts";
 import { ObjectHypothesis } from "./ObjectHypothesis.ts";
 
 export class Classification {
-  static readonly _HASH = 0xe4cae6ead8e8e600n;
+  static readonly _HASH = 0x60719354aae1b22an;
   static readonly _NAME = "vision_msgs.Classification";
+  private static _packedFingerprint: bigint | null = null;
 
   results_length: number;
   header: Header;
@@ -21,11 +22,12 @@ export class Classification {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== Classification._HASH) {
-      throw new Error(`Hash mismatch: expected ${Classification._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = Classification._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new Classification();
@@ -52,8 +54,8 @@ export class Classification {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, Classification._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, Classification._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -78,5 +80,23 @@ export class Classification {
       size += this.results[i0]._encodedSize();
     }
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(Classification)) return 0n;
+    const newparents = [...parents, Classification];
+    let tmphash = Classification._HASH;
+    tmphash = (tmphash + Header._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + ObjectHypothesis._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (Classification._packedFingerprint === null) {
+      Classification._packedFingerprint = Classification._getHashRecursive([]);
+    }
+    return Classification._packedFingerprint;
   }
 }

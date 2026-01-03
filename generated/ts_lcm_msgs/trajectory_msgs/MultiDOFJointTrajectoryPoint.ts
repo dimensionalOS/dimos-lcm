@@ -5,8 +5,9 @@ import { Twist } from "../geometry_msgs/Twist.ts";
 import { Duration } from "../std_msgs/Duration.ts";
 
 export class MultiDOFJointTrajectoryPoint {
-  static readonly _HASH = 0xdedabee6e8c2e4e8n;
+  static readonly _HASH = 0x6afb214a921f4cfan;
   static readonly _NAME = "trajectory_msgs.MultiDOFJointTrajectoryPoint";
+  private static _packedFingerprint: bigint | null = null;
 
   transforms_length: number;
   velocities_length: number;
@@ -30,11 +31,12 @@ export class MultiDOFJointTrajectoryPoint {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== MultiDOFJointTrajectoryPoint._HASH) {
-      throw new Error(`Hash mismatch: expected ${MultiDOFJointTrajectoryPoint._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = MultiDOFJointTrajectoryPoint._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new MultiDOFJointTrajectoryPoint();
@@ -75,8 +77,8 @@ export class MultiDOFJointTrajectoryPoint {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, MultiDOFJointTrajectoryPoint._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, MultiDOFJointTrajectoryPoint._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -119,5 +121,25 @@ export class MultiDOFJointTrajectoryPoint {
     }
     size += this.time_from_start._encodedSize();
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(MultiDOFJointTrajectoryPoint)) return 0n;
+    const newparents = [...parents, MultiDOFJointTrajectoryPoint];
+    let tmphash = MultiDOFJointTrajectoryPoint._HASH;
+    tmphash = (tmphash + Transform._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Twist._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Twist._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Duration._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (MultiDOFJointTrajectoryPoint._packedFingerprint === null) {
+      MultiDOFJointTrajectoryPoint._packedFingerprint = MultiDOFJointTrajectoryPoint._getHashRecursive([]);
+    }
+    return MultiDOFJointTrajectoryPoint._packedFingerprint;
   }
 }

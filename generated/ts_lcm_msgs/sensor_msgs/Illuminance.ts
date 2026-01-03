@@ -3,8 +3,9 @@
 import { Header } from "../std_msgs/Header.ts";
 
 export class Illuminance {
-  static readonly _HASH = 0xecc2e4d2c2dcc6can;
+  static readonly _HASH = 0xdfb4b65ce9b1b524n;
   static readonly _NAME = "sensor_msgs.Illuminance";
+  private static _packedFingerprint: bigint | null = null;
 
   header: Header;
   illuminance: number;
@@ -20,11 +21,12 @@ export class Illuminance {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== Illuminance._HASH) {
-      throw new Error(`Hash mismatch: expected ${Illuminance._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = Illuminance._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new Illuminance();
@@ -48,8 +50,8 @@ export class Illuminance {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, Illuminance._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, Illuminance._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -71,5 +73,22 @@ export class Illuminance {
     size += 8;
     size += 8;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(Illuminance)) return 0n;
+    const newparents = [...parents, Illuminance];
+    let tmphash = Illuminance._HASH;
+    tmphash = (tmphash + Header._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (Illuminance._packedFingerprint === null) {
+      Illuminance._packedFingerprint = Illuminance._getHashRecursive([]);
+    }
+    return Illuminance._packedFingerprint;
   }
 }

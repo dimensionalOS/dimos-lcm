@@ -4,8 +4,9 @@ import { Header } from "../std_msgs/Header.ts";
 import { Vector3 } from "../geometry_msgs/Vector3.ts";
 
 export class MagneticField {
-  static readonly _HASH = 0xe4d2c2dcc6ca0212n;
+  static readonly _HASH = 0xbfeb021e4751ed88n;
   static readonly _NAME = "sensor_msgs.MagneticField";
+  private static _packedFingerprint: bigint | null = null;
 
   header: Header;
   magnetic_field: Vector3;
@@ -21,11 +22,12 @@ export class MagneticField {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== MagneticField._HASH) {
-      throw new Error(`Hash mismatch: expected ${MagneticField._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = MagneticField._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new MagneticField();
@@ -52,8 +54,8 @@ export class MagneticField {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, MagneticField._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, MagneticField._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -76,5 +78,23 @@ export class MagneticField {
     size += this.magnetic_field._encodedSize();
     size += 9 * 8;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(MagneticField)) return 0n;
+    const newparents = [...parents, MagneticField];
+    let tmphash = MagneticField._HASH;
+    tmphash = (tmphash + Header._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Vector3._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (MagneticField._packedFingerprint === null) {
+      MagneticField._packedFingerprint = MagneticField._getHashRecursive([]);
+    }
+    return MagneticField._packedFingerprint;
   }
 }

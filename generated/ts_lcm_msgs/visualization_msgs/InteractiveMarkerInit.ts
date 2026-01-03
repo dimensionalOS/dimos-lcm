@@ -3,8 +3,9 @@
 import { InteractiveMarker } from "./InteractiveMarker.ts";
 
 export class InteractiveMarkerInit {
-  static readonly _HASH = 0xdac2e4d6cae4e600n;
+  static readonly _HASH = 0xd2afaf11cff61d9n;
   static readonly _NAME = "visualization_msgs.InteractiveMarkerInit";
+  private static _packedFingerprint: bigint | null = null;
 
   markers_length: number;
   server_id: string;
@@ -22,11 +23,12 @@ export class InteractiveMarkerInit {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== InteractiveMarkerInit._HASH) {
-      throw new Error(`Hash mismatch: expected ${InteractiveMarkerInit._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = InteractiveMarkerInit._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new InteractiveMarkerInit();
@@ -59,8 +61,8 @@ export class InteractiveMarkerInit {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, InteractiveMarkerInit._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, InteractiveMarkerInit._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -96,5 +98,22 @@ export class InteractiveMarkerInit {
       size += this.markers[i0]._encodedSize();
     }
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(InteractiveMarkerInit)) return 0n;
+    const newparents = [...parents, InteractiveMarkerInit];
+    let tmphash = InteractiveMarkerInit._HASH;
+    tmphash = (tmphash + InteractiveMarker._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (InteractiveMarkerInit._packedFingerprint === null) {
+      InteractiveMarkerInit._packedFingerprint = InteractiveMarkerInit._getHashRecursive([]);
+    }
+    return InteractiveMarkerInit._packedFingerprint;
   }
 }

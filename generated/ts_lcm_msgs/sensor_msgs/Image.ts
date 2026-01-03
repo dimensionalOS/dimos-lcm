@@ -3,8 +3,9 @@
 import { Header } from "../std_msgs/Header.ts";
 
 export class Image {
-  static readonly _HASH = 0xf2e8cac8c2e8c200n;
+  static readonly _HASH = 0x79d36c21d3c16094n;
   static readonly _NAME = "sensor_msgs.Image";
+  private static _packedFingerprint: bigint | null = null;
 
   data_length: number;
   header: Header;
@@ -30,11 +31,12 @@ export class Image {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== Image._HASH) {
-      throw new Error(`Hash mismatch: expected ${Image._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = Image._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new Image();
@@ -72,8 +74,8 @@ export class Image {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, Image._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, Image._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -117,5 +119,22 @@ export class Image {
     size += 4;
     size += this.data_length * 1;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(Image)) return 0n;
+    const newparents = [...parents, Image];
+    let tmphash = Image._HASH;
+    tmphash = (tmphash + Header._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (Image._packedFingerprint === null) {
+      Image._packedFingerprint = Image._getHashRecursive([]);
+    }
+    return Image._packedFingerprint;
   }
 }

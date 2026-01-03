@@ -4,8 +4,9 @@ import { Header } from "../std_msgs/Header.ts";
 import { VisionClass } from "./VisionClass.ts";
 
 export class LabelInfo {
-  static readonly _HASH = 0xd0e4cae6d0ded8c8n;
+  static readonly _HASH = 0x73231a5050580a67n;
   static readonly _NAME = "vision_msgs.LabelInfo";
+  private static _packedFingerprint: bigint | null = null;
 
   class_map_length: number;
   header: Header;
@@ -23,11 +24,12 @@ export class LabelInfo {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== LabelInfo._HASH) {
-      throw new Error(`Hash mismatch: expected ${LabelInfo._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = LabelInfo._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new LabelInfo();
@@ -56,8 +58,8 @@ export class LabelInfo {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, LabelInfo._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, LabelInfo._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -85,5 +87,23 @@ export class LabelInfo {
     }
     size += 4;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(LabelInfo)) return 0n;
+    const newparents = [...parents, LabelInfo];
+    let tmphash = LabelInfo._HASH;
+    tmphash = (tmphash + Header._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + VisionClass._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (LabelInfo._packedFingerprint === null) {
+      LabelInfo._packedFingerprint = LabelInfo._getHashRecursive([]);
+    }
+    return LabelInfo._packedFingerprint;
   }
 }

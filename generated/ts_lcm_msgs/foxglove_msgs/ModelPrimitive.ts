@@ -5,8 +5,9 @@ import { Vector3 } from "../geometry_msgs/Vector3.ts";
 import { Color } from "./Color.ts";
 
 export class ModelPrimitive {
-  static readonly _HASH = 0xf2e8cac8c2e8c200n;
+  static readonly _HASH = 0x23cd41ba898fa1fan;
   static readonly _NAME = "foxglove_msgs.ModelPrimitive";
+  private static _packedFingerprint: bigint | null = null;
 
   data_length: number;
   pose: Pose;
@@ -32,11 +33,12 @@ export class ModelPrimitive {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== ModelPrimitive._HASH) {
-      throw new Error(`Hash mismatch: expected ${ModelPrimitive._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = ModelPrimitive._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new ModelPrimitive();
@@ -78,8 +80,8 @@ export class ModelPrimitive {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, ModelPrimitive._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, ModelPrimitive._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -128,5 +130,24 @@ export class ModelPrimitive {
     size += 4 + new TextEncoder().encode(this.media_type).length + 1;
     size += this.data_length * 1;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(ModelPrimitive)) return 0n;
+    const newparents = [...parents, ModelPrimitive];
+    let tmphash = ModelPrimitive._HASH;
+    tmphash = (tmphash + Pose._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Vector3._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Color._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (ModelPrimitive._packedFingerprint === null) {
+      ModelPrimitive._packedFingerprint = ModelPrimitive._getHashRecursive([]);
+    }
+    return ModelPrimitive._packedFingerprint;
   }
 }

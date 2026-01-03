@@ -3,8 +3,9 @@
 import { Point2D } from "./Point2D.ts";
 
 export class Pose2D {
-  static readonly _HASH = 0xc4d8cae8d0cae8c2n;
+  static readonly _HASH = 0x2da59bf5b18f540n;
   static readonly _NAME = "vision_msgs.Pose2D";
+  private static _packedFingerprint: bigint | null = null;
 
   position: Point2D;
   theta: number;
@@ -18,11 +19,12 @@ export class Pose2D {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== Pose2D._HASH) {
-      throw new Error(`Hash mismatch: expected ${Pose2D._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = Pose2D._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new Pose2D();
@@ -44,8 +46,8 @@ export class Pose2D {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, Pose2D._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, Pose2D._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -64,5 +66,22 @@ export class Pose2D {
     size += this.position._encodedSize();
     size += 8;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(Pose2D)) return 0n;
+    const newparents = [...parents, Pose2D];
+    let tmphash = Pose2D._HASH;
+    tmphash = (tmphash + Point2D._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (Pose2D._packedFingerprint === null) {
+      Pose2D._packedFingerprint = Pose2D._getHashRecursive([]);
+    }
+    return Pose2D._packedFingerprint;
   }
 }

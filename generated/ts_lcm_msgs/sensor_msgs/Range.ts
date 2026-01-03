@@ -3,8 +3,9 @@
 import { Header } from "../std_msgs/Header.ts";
 
 export class Range {
-  static readonly _HASH = 0xdec2e8e4c2dccecan;
+  static readonly _HASH = 0xaaf9249a1465f86an;
   static readonly _NAME = "sensor_msgs.Range";
+  private static _packedFingerprint: bigint | null = null;
 
   static readonly ULTRASOUND = 0;
   static readonly INFRARED = 1;
@@ -29,11 +30,12 @@ export class Range {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== Range._HASH) {
-      throw new Error(`Hash mismatch: expected ${Range._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = Range._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new Range();
@@ -63,8 +65,8 @@ export class Range {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, Range._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, Range._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -95,5 +97,22 @@ export class Range {
     size += 4;
     size += 4;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(Range)) return 0n;
+    const newparents = [...parents, Range];
+    let tmphash = Range._HASH;
+    tmphash = (tmphash + Header._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (Range._packedFingerprint === null) {
+      Range._packedFingerprint = Range._getHashRecursive([]);
+    }
+    return Range._packedFingerprint;
   }
 }

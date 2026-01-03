@@ -4,8 +4,9 @@ import { SceneEntityDeletion } from "./SceneEntityDeletion.ts";
 import { SceneEntity } from "./SceneEntity.ts";
 
 export class SceneUpdate {
-  static readonly _HASH = 0xdce8d2e8d2cae600n;
+  static readonly _HASH = 0x8f9d4ee9e2a92d31n;
   static readonly _NAME = "foxglove_msgs.SceneUpdate";
+  private static _packedFingerprint: bigint | null = null;
 
   deletions_length: number;
   entities_length: number;
@@ -23,11 +24,12 @@ export class SceneUpdate {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== SceneUpdate._HASH) {
-      throw new Error(`Hash mismatch: expected ${SceneUpdate._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = SceneUpdate._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new SceneUpdate();
@@ -59,8 +61,8 @@ export class SceneUpdate {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, SceneUpdate._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, SceneUpdate._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -92,5 +94,23 @@ export class SceneUpdate {
       size += this.entities[i0]._encodedSize();
     }
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(SceneUpdate)) return 0n;
+    const newparents = [...parents, SceneUpdate];
+    let tmphash = SceneUpdate._HASH;
+    tmphash = (tmphash + SceneEntityDeletion._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + SceneEntity._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (SceneUpdate._packedFingerprint === null) {
+      SceneUpdate._packedFingerprint = SceneUpdate._getHashRecursive([]);
+    }
+    return SceneUpdate._packedFingerprint;
   }
 }

@@ -4,8 +4,9 @@ import { Header } from "../std_msgs/Header.ts";
 import { Pose } from "./Pose.ts";
 
 export class PoseStamped {
-  static readonly _HASH = 0xa0dee6cae0dee6can;
+  static readonly _HASH = 0xe10feebec5c97663n;
   static readonly _NAME = "geometry_msgs.PoseStamped";
+  private static _packedFingerprint: bigint | null = null;
 
   header: Header;
   pose: Pose;
@@ -19,11 +20,12 @@ export class PoseStamped {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== PoseStamped._HASH) {
-      throw new Error(`Hash mismatch: expected ${PoseStamped._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = PoseStamped._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new PoseStamped();
@@ -45,8 +47,8 @@ export class PoseStamped {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, PoseStamped._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, PoseStamped._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -64,5 +66,23 @@ export class PoseStamped {
     size += this.header._encodedSize();
     size += this.pose._encodedSize();
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(PoseStamped)) return 0n;
+    const newparents = [...parents, PoseStamped];
+    let tmphash = PoseStamped._HASH;
+    tmphash = (tmphash + Header._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Pose._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (PoseStamped._packedFingerprint === null) {
+      PoseStamped._packedFingerprint = PoseStamped._getHashRecursive([]);
+    }
+    return PoseStamped._packedFingerprint;
   }
 }

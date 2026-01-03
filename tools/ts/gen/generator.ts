@@ -142,9 +142,10 @@ function generateStruct(struct: LcmStruct, allTypes: Map<string, LcmType>): stri
   // Class declaration
   lines.push(`export class ${className} {`);
 
-  // Static fingerprint
+  // Static fingerprint (base hash, not including nested types)
   lines.push(`${indent(1)}static readonly _HASH = 0x${struct.hash.toString(16)}n;`);
   lines.push(`${indent(1)}static readonly _NAME = "${struct.fullName}";`);
+  lines.push(`${indent(1)}private static _packedFingerprint: bigint | null = null;`);
   lines.push("");
 
   // Constants
@@ -181,11 +182,12 @@ function generateStruct(struct: LcmStruct, allTypes: Map<string, LcmType>): stri
   lines.push(`${indent(2)}const view = new DataView(data.buffer, data.byteOffset, data.byteLength);`);
   lines.push(`${indent(2)}let offset = 0;`);
   lines.push("");
-  lines.push(`${indent(2)}// Verify fingerprint`);
+  lines.push(`${indent(2)}// Verify fingerprint (recursive hash including nested types)`);
   lines.push(`${indent(2)}const hash = view.getBigUint64(offset, false);`);
   lines.push(`${indent(2)}offset += 8;`);
-  lines.push(`${indent(2)}if (hash !== ${className}._HASH) {`);
-  lines.push(`${indent(3)}throw new Error(\`Hash mismatch: expected \${${className}._HASH.toString(16)}, got \${hash.toString(16)}\`);`);
+  lines.push(`${indent(2)}const expectedHash = ${className}._getPackedFingerprint();`);
+  lines.push(`${indent(2)}if (hash !== expectedHash) {`);
+  lines.push(`${indent(3)}throw new Error(\`Hash mismatch: expected \${expectedHash.toString(16)}, got \${hash.toString(16)}\`);`);
   lines.push(`${indent(2)}}`);
   lines.push("");
   lines.push(`${indent(2)}const result = new ${className}();`);
@@ -212,8 +214,8 @@ function generateStruct(struct: LcmStruct, allTypes: Map<string, LcmType>): stri
   lines.push(`${indent(2)}const view = new DataView(data.buffer);`);
   lines.push(`${indent(2)}let offset = 0;`);
   lines.push("");
-  lines.push(`${indent(2)}// Write fingerprint`);
-  lines.push(`${indent(2)}view.setBigUint64(offset, ${className}._HASH, false);`);
+  lines.push(`${indent(2)}// Write fingerprint (recursive hash including nested types)`);
+  lines.push(`${indent(2)}view.setBigUint64(offset, ${className}._getPackedFingerprint(), false);`);
   lines.push(`${indent(2)}offset += 8;`);
   lines.push("");
   lines.push(`${indent(2)}offset = this._encodeOne(view, offset);`);
@@ -237,6 +239,43 @@ function generateStruct(struct: LcmStruct, allTypes: Map<string, LcmType>): stri
     generateEncodedSize(lines, member, allTypes, 2);
   }
   lines.push(`${indent(2)}return size;`);
+  lines.push(`${indent(1)}}`);
+  lines.push("");
+
+  // _getHashRecursive method - computes full hash including nested types at runtime
+  lines.push(`${indent(1)}// deno-lint-ignore no-explicit-any`);
+  lines.push(`${indent(1)}static _getHashRecursive(parents: any[]): bigint {`);
+  lines.push(`${indent(2)}if (parents.includes(${className})) return 0n;`);
+  lines.push(`${indent(2)}const newparents = [...parents, ${className}];`);
+
+  // Collect non-primitive member types
+  const nestedTypes = struct.members
+    .filter((m) => !isPrimitive(m.type))
+    .map((m) => tsType(m.type));
+
+  if (nestedTypes.length === 0) {
+    // No nested types - just return base hash with rotation
+    lines.push(`${indent(2)}let tmphash = ${className}._HASH;`);
+  } else {
+    // Add nested type hashes
+    lines.push(`${indent(2)}let tmphash = ${className}._HASH;`);
+    for (const nestedType of nestedTypes) {
+      lines.push(`${indent(2)}tmphash = (tmphash + ${nestedType}._getHashRecursive(newparents)) & 0xffffffffffffffffn;`);
+    }
+  }
+
+  // Apply rotation: (hash << 1) + (hash >> 63)
+  lines.push(`${indent(2)}tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;`);
+  lines.push(`${indent(2)}return tmphash;`);
+  lines.push(`${indent(1)}}`);
+  lines.push("");
+
+  // _getPackedFingerprint - cached recursive hash
+  lines.push(`${indent(1)}static _getPackedFingerprint(): bigint {`);
+  lines.push(`${indent(2)}if (${className}._packedFingerprint === null) {`);
+  lines.push(`${indent(3)}${className}._packedFingerprint = ${className}._getHashRecursive([]);`);
+  lines.push(`${indent(2)}}`);
+  lines.push(`${indent(2)}return ${className}._packedFingerprint;`);
   lines.push(`${indent(1)}}`);
 
   lines.push("}");

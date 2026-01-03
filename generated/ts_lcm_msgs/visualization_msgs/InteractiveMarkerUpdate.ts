@@ -4,8 +4,9 @@ import { InteractiveMarker } from "./InteractiveMarker.ts";
 import { InteractiveMarkerPose } from "./InteractiveMarkerPose.ts";
 
 export class InteractiveMarkerUpdate {
-  static readonly _HASH = 0xcecae4c2e6cae600n;
+  static readonly _HASH = 0xf6eebb4c4a608b4cn;
   static readonly _NAME = "visualization_msgs.InteractiveMarkerUpdate";
+  private static _packedFingerprint: bigint | null = null;
 
   static readonly KEEP_ALIVE = 0;
   static readonly UPDATE = 1;
@@ -36,11 +37,12 @@ export class InteractiveMarkerUpdate {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== InteractiveMarkerUpdate._HASH) {
-      throw new Error(`Hash mismatch: expected ${InteractiveMarkerUpdate._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = InteractiveMarkerUpdate._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new InteractiveMarkerUpdate();
@@ -93,8 +95,8 @@ export class InteractiveMarkerUpdate {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, InteractiveMarkerUpdate._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, InteractiveMarkerUpdate._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -159,5 +161,23 @@ export class InteractiveMarkerUpdate {
       size += 4 + new TextEncoder().encode(this.erases[i0]).length + 1;
     }
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(InteractiveMarkerUpdate)) return 0n;
+    const newparents = [...parents, InteractiveMarkerUpdate];
+    let tmphash = InteractiveMarkerUpdate._HASH;
+    tmphash = (tmphash + InteractiveMarker._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + InteractiveMarkerPose._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (InteractiveMarkerUpdate._packedFingerprint === null) {
+      InteractiveMarkerUpdate._packedFingerprint = InteractiveMarkerUpdate._getHashRecursive([]);
+    }
+    return InteractiveMarkerUpdate._packedFingerprint;
   }
 }

@@ -5,8 +5,9 @@ import { Vector3 } from "../geometry_msgs/Vector3.ts";
 import { Color } from "./Color.ts";
 
 export class SpherePrimitive {
-  static readonly _HASH = 0xd8dee4c6ded8dee4n;
+  static readonly _HASH = 0xe7e8912ea6542887n;
   static readonly _NAME = "foxglove_msgs.SpherePrimitive";
+  private static _packedFingerprint: bigint | null = null;
 
   pose: Pose;
   size: Vector3;
@@ -22,11 +23,12 @@ export class SpherePrimitive {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== SpherePrimitive._HASH) {
-      throw new Error(`Hash mismatch: expected ${SpherePrimitive._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = SpherePrimitive._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new SpherePrimitive();
@@ -50,8 +52,8 @@ export class SpherePrimitive {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, SpherePrimitive._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, SpherePrimitive._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -71,5 +73,24 @@ export class SpherePrimitive {
     size += this.size._encodedSize();
     size += this.color._encodedSize();
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(SpherePrimitive)) return 0n;
+    const newparents = [...parents, SpherePrimitive];
+    let tmphash = SpherePrimitive._HASH;
+    tmphash = (tmphash + Pose._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Vector3._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Color._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (SpherePrimitive._packedFingerprint === null) {
+      SpherePrimitive._packedFingerprint = SpherePrimitive._getHashRecursive([]);
+    }
+    return SpherePrimitive._packedFingerprint;
   }
 }

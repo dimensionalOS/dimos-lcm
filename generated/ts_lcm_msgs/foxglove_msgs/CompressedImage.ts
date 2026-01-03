@@ -3,8 +3,9 @@
 import { Time } from "../builtin_interfaces/Time.ts";
 
 export class CompressedImage {
-  static readonly _HASH = 0xdcceccdee4dac2e8n;
+  static readonly _HASH = 0x448d6658328c5ebcn;
   static readonly _NAME = "foxglove_msgs.CompressedImage";
+  private static _packedFingerprint: bigint | null = null;
 
   data_length: number;
   timestamp: Time;
@@ -24,11 +25,12 @@ export class CompressedImage {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== CompressedImage._HASH) {
-      throw new Error(`Hash mismatch: expected ${CompressedImage._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = CompressedImage._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new CompressedImage();
@@ -64,8 +66,8 @@ export class CompressedImage {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, CompressedImage._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, CompressedImage._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -107,5 +109,22 @@ export class CompressedImage {
     size += this.data_length * 1;
     size += 4 + new TextEncoder().encode(this.format).length + 1;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(CompressedImage)) return 0n;
+    const newparents = [...parents, CompressedImage];
+    let tmphash = CompressedImage._HASH;
+    tmphash = (tmphash + Time._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (CompressedImage._packedFingerprint === null) {
+      CompressedImage._packedFingerprint = CompressedImage._getHashRecursive([]);
+    }
+    return CompressedImage._packedFingerprint;
   }
 }

@@ -3,8 +3,9 @@
 import { Header } from "../std_msgs/Header.ts";
 
 export class Temperature {
-  static readonly _HASH = 0xecc2e4d2c2dcc6can;
+  static readonly _HASH = 0x39cc1dc52d6ca13dn;
   static readonly _NAME = "sensor_msgs.Temperature";
+  private static _packedFingerprint: bigint | null = null;
 
   header: Header;
   temperature: number;
@@ -20,11 +21,12 @@ export class Temperature {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== Temperature._HASH) {
-      throw new Error(`Hash mismatch: expected ${Temperature._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = Temperature._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new Temperature();
@@ -48,8 +50,8 @@ export class Temperature {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, Temperature._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, Temperature._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -71,5 +73,22 @@ export class Temperature {
     size += 8;
     size += 8;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(Temperature)) return 0n;
+    const newparents = [...parents, Temperature];
+    let tmphash = Temperature._HASH;
+    tmphash = (tmphash + Header._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (Temperature._packedFingerprint === null) {
+      Temperature._packedFingerprint = Temperature._getHashRecursive([]);
+    }
+    return Temperature._packedFingerprint;
   }
 }

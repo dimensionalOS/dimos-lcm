@@ -3,8 +3,9 @@
 import { Time } from "../builtin_interfaces/Time.ts";
 
 export class CameraCalibration {
-  static readonly _HASH = 0xdeeac4d8cae00218n;
+  static readonly _HASH = 0x89c275083a857ce2n;
   static readonly _NAME = "foxglove_msgs.CameraCalibration";
+  private static _packedFingerprint: bigint | null = null;
 
   d_length: number;
   timestamp: Time;
@@ -34,11 +35,12 @@ export class CameraCalibration {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== CameraCalibration._HASH) {
-      throw new Error(`Hash mismatch: expected ${CameraCalibration._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = CameraCalibration._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new CameraCalibration();
@@ -96,8 +98,8 @@ export class CameraCalibration {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, CameraCalibration._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, CameraCalibration._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -162,5 +164,22 @@ export class CameraCalibration {
     size += 9 * 8;
     size += 12 * 8;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(CameraCalibration)) return 0n;
+    const newparents = [...parents, CameraCalibration];
+    let tmphash = CameraCalibration._HASH;
+    tmphash = (tmphash + Time._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (CameraCalibration._packedFingerprint === null) {
+      CameraCalibration._packedFingerprint = CameraCalibration._getHashRecursive([]);
+    }
+    return CameraCalibration._packedFingerprint;
   }
 }

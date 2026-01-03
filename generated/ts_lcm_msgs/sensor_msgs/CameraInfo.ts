@@ -4,8 +4,9 @@ import { Header } from "../std_msgs/Header.ts";
 import { RegionOfInterest } from "./RegionOfInterest.ts";
 
 export class CameraInfo {
-  static readonly _HASH = 0xcae4cae6e8e4ded2n;
+  static readonly _HASH = 0xb4ea6258bc6d0702n;
   static readonly _NAME = "sensor_msgs.CameraInfo";
+  private static _packedFingerprint: bigint | null = null;
 
   D_length: number;
   header: Header;
@@ -39,11 +40,12 @@ export class CameraInfo {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== CameraInfo._HASH) {
-      throw new Error(`Hash mismatch: expected ${CameraInfo._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = CameraInfo._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new CameraInfo();
@@ -101,8 +103,8 @@ export class CameraInfo {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, CameraInfo._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, CameraInfo._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -165,5 +167,23 @@ export class CameraInfo {
     size += 4;
     size += this.roi._encodedSize();
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(CameraInfo)) return 0n;
+    const newparents = [...parents, CameraInfo];
+    let tmphash = CameraInfo._HASH;
+    tmphash = (tmphash + Header._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + RegionOfInterest._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (CameraInfo._packedFingerprint === null) {
+      CameraInfo._packedFingerprint = CameraInfo._getHashRecursive([]);
+    }
+    return CameraInfo._packedFingerprint;
   }
 }

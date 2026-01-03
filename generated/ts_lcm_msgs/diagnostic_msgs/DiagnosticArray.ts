@@ -4,8 +4,9 @@ import { Header } from "../std_msgs/Header.ts";
 import { DiagnosticStatus } from "./DiagnosticStatus.ts";
 
 export class DiagnosticArray {
-  static readonly _HASH = 0xe6e6e8c2e8eae600n;
+  static readonly _HASH = 0x163c308c500b94dn;
   static readonly _NAME = "diagnostic_msgs.DiagnosticArray";
+  private static _packedFingerprint: bigint | null = null;
 
   status_length: number;
   header: Header;
@@ -21,11 +22,12 @@ export class DiagnosticArray {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== DiagnosticArray._HASH) {
-      throw new Error(`Hash mismatch: expected ${DiagnosticArray._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = DiagnosticArray._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new DiagnosticArray();
@@ -52,8 +54,8 @@ export class DiagnosticArray {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, DiagnosticArray._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, DiagnosticArray._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -78,5 +80,23 @@ export class DiagnosticArray {
       size += this.status[i0]._encodedSize();
     }
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(DiagnosticArray)) return 0n;
+    const newparents = [...parents, DiagnosticArray];
+    let tmphash = DiagnosticArray._HASH;
+    tmphash = (tmphash + Header._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + DiagnosticStatus._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (DiagnosticArray._packedFingerprint === null) {
+      DiagnosticArray._packedFingerprint = DiagnosticArray._getHashRecursive([]);
+    }
+    return DiagnosticArray._packedFingerprint;
   }
 }

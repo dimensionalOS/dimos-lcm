@@ -3,8 +3,9 @@
 import { Vector3 } from "./Vector3.ts";
 
 export class Wrench {
-  static readonly _HASH = 0xe466e8dee4e2eacan;
+  static readonly _HASH = 0x980c3aea984c9a6n;
   static readonly _NAME = "geometry_msgs.Wrench";
+  private static _packedFingerprint: bigint | null = null;
 
   force: Vector3;
   torque: Vector3;
@@ -18,11 +19,12 @@ export class Wrench {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== Wrench._HASH) {
-      throw new Error(`Hash mismatch: expected ${Wrench._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = Wrench._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new Wrench();
@@ -44,8 +46,8 @@ export class Wrench {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, Wrench._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, Wrench._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -63,5 +65,23 @@ export class Wrench {
     size += this.force._encodedSize();
     size += this.torque._encodedSize();
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(Wrench)) return 0n;
+    const newparents = [...parents, Wrench];
+    let tmphash = Wrench._HASH;
+    tmphash = (tmphash + Vector3._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Vector3._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (Wrench._packedFingerprint === null) {
+      Wrench._packedFingerprint = Wrench._getHashRecursive([]);
+    }
+    return Wrench._packedFingerprint;
   }
 }

@@ -4,8 +4,9 @@ import { Pose } from "../geometry_msgs/Pose.ts";
 import { Vector3 } from "../geometry_msgs/Vector3.ts";
 
 export class BoundingBox3D {
-  static readonly _HASH = 0xe8dee466e6d2f4can;
+  static readonly _HASH = 0xe10feec5cba89663n;
   static readonly _NAME = "vision_msgs.BoundingBox3D";
+  private static _packedFingerprint: bigint | null = null;
 
   center: Pose;
   size: Vector3;
@@ -19,11 +20,12 @@ export class BoundingBox3D {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== BoundingBox3D._HASH) {
-      throw new Error(`Hash mismatch: expected ${BoundingBox3D._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = BoundingBox3D._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new BoundingBox3D();
@@ -45,8 +47,8 @@ export class BoundingBox3D {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, BoundingBox3D._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, BoundingBox3D._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -64,5 +66,23 @@ export class BoundingBox3D {
     size += this.center._encodedSize();
     size += this.size._encodedSize();
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(BoundingBox3D)) return 0n;
+    const newparents = [...parents, BoundingBox3D];
+    let tmphash = BoundingBox3D._HASH;
+    tmphash = (tmphash + Pose._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Vector3._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (BoundingBox3D._packedFingerprint === null) {
+      BoundingBox3D._packedFingerprint = BoundingBox3D._getHashRecursive([]);
+    }
+    return BoundingBox3D._packedFingerprint;
   }
 }

@@ -3,8 +3,9 @@
 import { JoyFeedback } from "./JoyFeedback.ts";
 
 export class JoyFeedbackArray {
-  static readonly _HASH = 0xc6d6c2e4e4c2f200n;
+  static readonly _HASH = 0xde2a78c20ffefa04n;
   static readonly _NAME = "sensor_msgs.JoyFeedbackArray";
+  private static _packedFingerprint: bigint | null = null;
 
   array_length: number;
   array: JoyFeedback[];
@@ -18,11 +19,12 @@ export class JoyFeedbackArray {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== JoyFeedbackArray._HASH) {
-      throw new Error(`Hash mismatch: expected ${JoyFeedbackArray._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = JoyFeedbackArray._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new JoyFeedbackArray();
@@ -47,8 +49,8 @@ export class JoyFeedbackArray {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, JoyFeedbackArray._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, JoyFeedbackArray._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -71,5 +73,22 @@ export class JoyFeedbackArray {
       size += this.array[i0]._encodedSize();
     }
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(JoyFeedbackArray)) return 0n;
+    const newparents = [...parents, JoyFeedbackArray];
+    let tmphash = JoyFeedbackArray._HASH;
+    tmphash = (tmphash + JoyFeedback._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (JoyFeedbackArray._packedFingerprint === null) {
+      JoyFeedbackArray._packedFingerprint = JoyFeedbackArray._getHashRecursive([]);
+    }
+    return JoyFeedbackArray._packedFingerprint;
   }
 }

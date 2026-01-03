@@ -5,8 +5,9 @@ import { Vector3 } from "../geometry_msgs/Vector3.ts";
 import { Quaternion } from "../geometry_msgs/Quaternion.ts";
 
 export class FrameTransform {
-  static readonly _HASH = 0xe4dee8c2e8d2dedcn;
+  static readonly _HASH = 0x16cb223d6329d1f0n;
   static readonly _NAME = "foxglove_msgs.FrameTransform";
+  private static _packedFingerprint: bigint | null = null;
 
   timestamp: Time;
   parent_frame_id: string;
@@ -26,11 +27,12 @@ export class FrameTransform {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== FrameTransform._HASH) {
-      throw new Error(`Hash mismatch: expected ${FrameTransform._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = FrameTransform._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new FrameTransform();
@@ -66,8 +68,8 @@ export class FrameTransform {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, FrameTransform._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, FrameTransform._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -107,5 +109,24 @@ export class FrameTransform {
     size += this.translation._encodedSize();
     size += this.rotation._encodedSize();
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(FrameTransform)) return 0n;
+    const newparents = [...parents, FrameTransform];
+    let tmphash = FrameTransform._HASH;
+    tmphash = (tmphash + Time._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Vector3._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Quaternion._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (FrameTransform._packedFingerprint === null) {
+      FrameTransform._packedFingerprint = FrameTransform._getHashRecursive([]);
+    }
+    return FrameTransform._packedFingerprint;
   }
 }

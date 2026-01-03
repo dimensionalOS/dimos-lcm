@@ -3,8 +3,9 @@
 import { Pose } from "./Pose.ts";
 
 export class PoseWithCovariance {
-  static readonly _HASH = 0xe4d2c2dcc6ca0248n;
+  static readonly _HASH = 0x42dbdfaa69371237n;
   static readonly _NAME = "geometry_msgs.PoseWithCovariance";
+  private static _packedFingerprint: bigint | null = null;
 
   pose: Pose;
   covariance: number[];
@@ -18,11 +19,12 @@ export class PoseWithCovariance {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== PoseWithCovariance._HASH) {
-      throw new Error(`Hash mismatch: expected ${PoseWithCovariance._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = PoseWithCovariance._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new PoseWithCovariance();
@@ -47,8 +49,8 @@ export class PoseWithCovariance {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, PoseWithCovariance._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, PoseWithCovariance._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -69,5 +71,22 @@ export class PoseWithCovariance {
     size += this.pose._encodedSize();
     size += 36 * 8;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(PoseWithCovariance)) return 0n;
+    const newparents = [...parents, PoseWithCovariance];
+    let tmphash = PoseWithCovariance._HASH;
+    tmphash = (tmphash + Pose._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (PoseWithCovariance._packedFingerprint === null) {
+      PoseWithCovariance._packedFingerprint = PoseWithCovariance._getHashRecursive([]);
+    }
+    return PoseWithCovariance._packedFingerprint;
   }
 }

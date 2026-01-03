@@ -3,8 +3,9 @@
 import { Header } from "../std_msgs/Header.ts";
 
 export class BatteryState {
-  static readonly _HASH = 0xd8bedceadac4cae4n;
+  static readonly _HASH = 0x8f419fb94c3b774dn;
   static readonly _NAME = "sensor_msgs.BatteryState";
+  private static _packedFingerprint: bigint | null = null;
 
   static readonly POWER_SUPPLY_STATUS_UNKNOWN = 0;
   static readonly POWER_SUPPLY_STATUS_CHARGING = 1;
@@ -72,11 +73,12 @@ export class BatteryState {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== BatteryState._HASH) {
-      throw new Error(`Hash mismatch: expected ${BatteryState._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = BatteryState._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new BatteryState();
@@ -144,8 +146,8 @@ export class BatteryState {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, BatteryState._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, BatteryState._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -230,5 +232,22 @@ export class BatteryState {
     size += 4 + new TextEncoder().encode(this.location).length + 1;
     size += 4 + new TextEncoder().encode(this.serial_number).length + 1;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(BatteryState)) return 0n;
+    const newparents = [...parents, BatteryState];
+    let tmphash = BatteryState._HASH;
+    tmphash = (tmphash + Header._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (BatteryState._packedFingerprint === null) {
+      BatteryState._packedFingerprint = BatteryState._getHashRecursive([]);
+    }
+    return BatteryState._packedFingerprint;
   }
 }

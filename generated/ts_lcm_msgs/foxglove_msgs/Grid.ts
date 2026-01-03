@@ -6,8 +6,9 @@ import { Vector2 } from "./Vector2.ts";
 import { PackedElementField } from "./PackedElementField.ts";
 
 export class Grid {
-  static readonly _HASH = 0xf2e8cac8c2e8c200n;
+  static readonly _HASH = 0x91f7114ed51a5321n;
   static readonly _NAME = "foxglove_msgs.Grid";
+  private static _packedFingerprint: bigint | null = null;
 
   fields_length: number;
   data_length: number;
@@ -39,11 +40,12 @@ export class Grid {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== Grid._HASH) {
-      throw new Error(`Hash mismatch: expected ${Grid._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = Grid._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new Grid();
@@ -90,8 +92,8 @@ export class Grid {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, Grid._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, Grid._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -145,5 +147,25 @@ export class Grid {
     }
     size += this.data_length * 1;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(Grid)) return 0n;
+    const newparents = [...parents, Grid];
+    let tmphash = Grid._HASH;
+    tmphash = (tmphash + Time._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Pose._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Vector2._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + PackedElementField._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (Grid._packedFingerprint === null) {
+      Grid._packedFingerprint = Grid._getHashRecursive([]);
+    }
+    return Grid._packedFingerprint;
   }
 }

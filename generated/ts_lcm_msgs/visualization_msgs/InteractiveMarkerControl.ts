@@ -4,8 +4,9 @@ import { Quaternion } from "../geometry_msgs/Quaternion.ts";
 import { Marker } from "./Marker.ts";
 
 export class InteractiveMarkerControl {
-  static readonly _HASH = 0xc6e4d2e0e8d2dedcn;
+  static readonly _HASH = 0x9e1db7d7740da609n;
   static readonly _NAME = "visualization_msgs.InteractiveMarkerControl";
+  private static _packedFingerprint: bigint | null = null;
 
   static readonly INHERIT = 0;
   static readonly FIXED = 1;
@@ -47,11 +48,12 @@ export class InteractiveMarkerControl {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== InteractiveMarkerControl._HASH) {
-      throw new Error(`Hash mismatch: expected ${InteractiveMarkerControl._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = InteractiveMarkerControl._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new InteractiveMarkerControl();
@@ -98,8 +100,8 @@ export class InteractiveMarkerControl {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, InteractiveMarkerControl._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, InteractiveMarkerControl._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -156,5 +158,23 @@ export class InteractiveMarkerControl {
     size += 1;
     size += 4 + new TextEncoder().encode(this.description).length + 1;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(InteractiveMarkerControl)) return 0n;
+    const newparents = [...parents, InteractiveMarkerControl];
+    let tmphash = InteractiveMarkerControl._HASH;
+    tmphash = (tmphash + Quaternion._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Marker._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (InteractiveMarkerControl._packedFingerprint === null) {
+      InteractiveMarkerControl._packedFingerprint = InteractiveMarkerControl._getHashRecursive([]);
+    }
+    return InteractiveMarkerControl._packedFingerprint;
   }
 }

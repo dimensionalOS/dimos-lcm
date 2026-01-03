@@ -3,8 +3,9 @@
 import { Marker } from "./Marker.ts";
 
 export class MarkerArray {
-  static readonly _HASH = 0xdac2e4d6cae4e600n;
+  static readonly _HASH = 0xd9e3851dad1e0d9en;
   static readonly _NAME = "visualization_msgs.MarkerArray";
+  private static _packedFingerprint: bigint | null = null;
 
   markers_length: number;
   markers: Marker[];
@@ -18,11 +19,12 @@ export class MarkerArray {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== MarkerArray._HASH) {
-      throw new Error(`Hash mismatch: expected ${MarkerArray._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = MarkerArray._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new MarkerArray();
@@ -47,8 +49,8 @@ export class MarkerArray {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, MarkerArray._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, MarkerArray._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -71,5 +73,22 @@ export class MarkerArray {
       size += this.markers[i0]._encodedSize();
     }
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(MarkerArray)) return 0n;
+    const newparents = [...parents, MarkerArray];
+    let tmphash = MarkerArray._HASH;
+    tmphash = (tmphash + Marker._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (MarkerArray._packedFingerprint === null) {
+      MarkerArray._packedFingerprint = MarkerArray._getHashRecursive([]);
+    }
+    return MarkerArray._packedFingerprint;
   }
 }

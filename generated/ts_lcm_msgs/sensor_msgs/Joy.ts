@@ -3,8 +3,9 @@
 import { Header } from "../std_msgs/Header.ts";
 
 export class Joy {
-  static readonly _HASH = 0xc4eae8e8dedce600n;
+  static readonly _HASH = 0x209d2c19077a692fn;
   static readonly _NAME = "sensor_msgs.Joy";
+  private static _packedFingerprint: bigint | null = null;
 
   axes_length: number;
   buttons_length: number;
@@ -24,11 +25,12 @@ export class Joy {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== Joy._HASH) {
-      throw new Error(`Hash mismatch: expected ${Joy._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = Joy._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new Joy();
@@ -62,8 +64,8 @@ export class Joy {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, Joy._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, Joy._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -95,5 +97,22 @@ export class Joy {
     size += this.axes_length * 4;
     size += this.buttons_length * 4;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(Joy)) return 0n;
+    const newparents = [...parents, Joy];
+    let tmphash = Joy._HASH;
+    tmphash = (tmphash + Header._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (Joy._packedFingerprint === null) {
+      Joy._packedFingerprint = Joy._getHashRecursive([]);
+    }
+    return Joy._packedFingerprint;
   }
 }
