@@ -5,9 +5,5 @@
   "tasks": {
     "start": "deno run --allow-net --allow-read --unstable-net server.ts",
     "dev": "deno run --watch --allow-net --allow-read --unstable-net server.ts"
-  },
-  "imports": {
-    "@dimos/lcm": "jsr:@dimos/lcm@^0.1.0",
-    "@dimos/msgs/": "jsr:@dimos/msgs@^0.1.0/"
   }
 }

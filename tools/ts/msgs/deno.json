@@ -1,0 +1,25 @@
+{
+  "name": "@dimos/msgs",
+  "version": "0.1.3",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./mod.ts",
+    "./actionlib_msgs": "./generated/actionlib_msgs/mod.ts",
+    "./builtin_interfaces": "./generated/builtin_interfaces/mod.ts",
+    "./diagnostic_msgs": "./generated/diagnostic_msgs/mod.ts",
+    "./foxglove_msgs": "./generated/foxglove_msgs/mod.ts",
+    "./geometry_msgs": "./generated/geometry_msgs/mod.ts",
+    "./nav_msgs": "./generated/nav_msgs/mod.ts",
+    "./sensor_msgs": "./generated/sensor_msgs/mod.ts",
+    "./shape_msgs": "./generated/shape_msgs/mod.ts",
+    "./std_msgs": "./generated/std_msgs/mod.ts",
+    "./stereo_msgs": "./generated/stereo_msgs/mod.ts",
+    "./tf2_msgs": "./generated/tf2_msgs/mod.ts",
+    "./trajectory_msgs": "./generated/trajectory_msgs/mod.ts",
+    "./vision_msgs": "./generated/vision_msgs/mod.ts",
+    "./visualization_msgs": "./generated/visualization_msgs/mod.ts"
+  },
+  "compilerOptions": {
+    "strict": true
+  }
+}

@@ -7,6 +7,8 @@ import type {
   ParsedUrl,
   Subscription,
   SubscriptionHandler,
+  PacketHandler,
+  PacketSubscription,
 } from "./types.ts";
 import { MAX_SMALL_MESSAGE, SHORT_HEADER_SIZE } from "./types.ts";
 import { parseUrl } from "./url.ts";
@@ -53,6 +55,7 @@ export class LCM {
   private socket: UdpMulticastSocket | null = null;
   private reassembler = new FragmentReassembler();
   private subscriptions: Subscription[] = [];
+  private packetSubscriptions: PacketSubscription[] = [];
   private sequenceNumber = 0;
   private running = false;
   private messageQueue: LCMMessage<Uint8Array>[] = [];
@@ -120,6 +123,52 @@ export class LCM {
       const idx = this.subscriptions.indexOf(subscription);
       if (idx !== -1) {
         this.subscriptions.splice(idx, 1);
+      }
+    };
+  }
+
+  /**
+   * Subscribe to raw UDP packets.
+   * Useful for forwarding packets to WebSocket clients without parsing.
+   *
+   * @param handler - Callback function for received packets (no pattern = all packets)
+   * @returns Unsubscribe function
+   *
+   * @example
+   * // Forward all packets
+   * lcm.subscribePacket((packet) => ws.send(packet));
+   */
+  subscribePacket(handler: PacketHandler): () => void;
+  /**
+   * Subscribe to raw UDP packets with channel pattern filtering.
+   *
+   * @param channelPattern - Channel pattern to match (e.g., "/vector#*")
+   * @param handler - Callback function for received packets
+   * @returns Unsubscribe function
+   *
+   * @example
+   * // Forward only matching packets
+   * lcm.subscribePacket("/vector#*", (packet) => ws.send(packet));
+   */
+  subscribePacket(channelPattern: string, handler: PacketHandler): () => void;
+  subscribePacket(
+    patternOrHandler: string | PacketHandler,
+    maybeHandler?: PacketHandler
+  ): () => void {
+    const pattern = typeof patternOrHandler === "string"
+      ? this.channelToRegex(patternOrHandler)
+      : null;
+    const handler = typeof patternOrHandler === "function"
+      ? patternOrHandler
+      : maybeHandler!;
+
+    const subscription: PacketSubscription = { pattern, handler };
+    this.packetSubscriptions.push(subscription);
+
+    return () => {
+      const idx = this.packetSubscriptions.indexOf(subscription);
+      if (idx !== -1) {
+        this.packetSubscriptions.splice(idx, 1);
       }
     };
   }
@@ -218,6 +267,25 @@ export class LCM {
   }
 
   /**
+   * Publish a pre-encoded LCM packet.
+   * Useful for forwarding packets received from WebSocket clients.
+   *
+   * @param packet - Raw LCM packet (with header, channel, and payload)
+   *
+   * @example
+   * // Forward packet from WebSocket to LCM network
+   * ws.onmessage = (event) => {
+   *   lcm.publishPacket(new Uint8Array(event.data));
+   * };
+   */
+  async publishPacket(packet: Uint8Array): Promise<void> {
+    if (!this.socket) {
+      throw new Error("LCM not started. Call start() first.");
+    }
+    await this.socket.send(packet);
+  }
+
+  /**
    * Handle messages synchronously (blocking).
    * Processes any pending messages and waits for new ones.
    *
@@ -284,6 +352,24 @@ export class LCM {
       return;
     }
 
+    // Dispatch to raw packet handlers first
+    const channel = decoded.type === "small"
+      ? decoded.channel
+      : decoded.channel; // fragments have channel in first fragment
+
+    if (channel) {
+      for (const sub of this.packetSubscriptions) {
+        if (!sub.pattern || sub.pattern.test(channel)) {
+          try {
+            sub.handler(data);
+          } catch (e) {
+            console.error(`Error in raw packet handler:`, e);
+          }
+        }
+      }
+    }
+
+    // Continue with normal processing
     if (decoded.type === "small") {
       this.queueMessage(decoded.channel, decoded.data);
     } else {

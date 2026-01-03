@@ -18,6 +18,9 @@ export interface MessageClass<T> {
 /** Subscription handler function */
 export type SubscriptionHandler<T = Uint8Array> = (msg: LCMMessage<T>) => void;
 
+/** Packet handler function (for raw UDP packets) */
+export type PacketHandler = (packet: Uint8Array) => void;
+
 /** LCM configuration options */
 export interface LCMOptions {
   /** LCM URL (e.g., "udpm://239.255.76.67:7667?ttl=1") */
@@ -43,6 +46,12 @@ export interface Subscription {
   pattern: RegExp;
   handler: SubscriptionHandler<unknown>;
   msgClass?: MessageClass<unknown>;
+}
+
+/** Internal packet subscription record */
+export interface PacketSubscription {
+  pattern: RegExp | null; // null = match all
+  handler: PacketHandler;
 }
 
 // LCM Protocol constants
