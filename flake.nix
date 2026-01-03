@@ -18,6 +18,9 @@
           buildInputs = [
             lcmgen
             pkgs.python3
+            pkgs.python3Packages.build
+            pkgs.ruff
+            pkgs.deno
           ];
         };
       });

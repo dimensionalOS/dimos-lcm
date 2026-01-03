@@ -20,6 +20,7 @@ This will:
 3. Generate C++ bindings (`generated/cpp_lcm_msgs/`)
 4. Generate C# bindings (`generated/cs_lcm_msgs/`)
 5. Generate Java bindings (`generated/java_lcm_msgs/`)
+6. Generate Typescript bindings (`generated/ts_lcm_msgs/`)
 
 ## Directory Structure
 
