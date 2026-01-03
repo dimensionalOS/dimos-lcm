@@ -4,7 +4,7 @@
 // Forwards raw LCM packets to browser clients for decoding
 
 import { LCM } from "@dimos/lcm";
-import { decodePacket } from "@dimos/msgs";
+import { decodePacket, geometry_msgs } from "@dimos/msgs";
 
 const PORT = 8080;
 const clients = new Set<WebSocket>();
@@ -33,6 +33,13 @@ console.log(`Server: http://localhost:${PORT}`);
 const lcm = new LCM();
 await lcm.start();
 
+// Typed subscription - auto-decodes to geometry_msgs.Vector3
+// Subscribes to "/vector#geometry_msgs.Vector3"
+lcm.subscribe("/vector", geometry_msgs.Vector3, (msg) => {
+  console.log(`[typed] x=${msg.data.x.toFixed(2)} y=${msg.data.y.toFixed(2)} z=${msg.data.z.toFixed(2)}`);
+});
+
+// Raw packet subscription - forwards all packets to WebSocket clients
 lcm.subscribePacket((packet) => {
   // Log decoded message on server
   try {
