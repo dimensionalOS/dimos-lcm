@@ -8,8 +8,12 @@ from .MarkerArray import MarkerArray as MarkerArray
 from .Marker import Marker as Marker
 from .InteractiveMarkerPose import InteractiveMarkerPose as InteractiveMarkerPose
 from .MenuEntry import MenuEntry as MenuEntry
-from .InteractiveMarkerControl import InteractiveMarkerControl as InteractiveMarkerControl
-from .InteractiveMarkerFeedback import InteractiveMarkerFeedback as InteractiveMarkerFeedback
+from .InteractiveMarkerControl import (
+    InteractiveMarkerControl as InteractiveMarkerControl,
+)
+from .InteractiveMarkerFeedback import (
+    InteractiveMarkerFeedback as InteractiveMarkerFeedback,
+)
 from .InteractiveMarkerUpdate import InteractiveMarkerUpdate as InteractiveMarkerUpdate
 from .InteractiveMarkerInit import InteractiveMarkerInit as InteractiveMarkerInit
 from .ImageMarker import ImageMarker as ImageMarker

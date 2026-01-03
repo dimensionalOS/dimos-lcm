@@ -14,7 +14,9 @@ from .Detection3DArray import Detection3DArray as Detection3DArray
 from .BoundingBox3DArray import BoundingBox3DArray as BoundingBox3DArray
 from .Detection3D import Detection3D as Detection3D
 from .Detection2DArray import Detection2DArray as Detection2DArray
-from .ObjectHypothesisWithPose import ObjectHypothesisWithPose as ObjectHypothesisWithPose
+from .ObjectHypothesisWithPose import (
+    ObjectHypothesisWithPose as ObjectHypothesisWithPose,
+)
 from .Classification import Classification as Classification
 from .Pose2D import Pose2D as Pose2D
 from .Detection2D import Detection2D as Detection2D
