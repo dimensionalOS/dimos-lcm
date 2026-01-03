@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LCM WebSocket Viewer</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #1a1a2e;
+      color: #eee;
+    }
+    h1 { margin: 0 0 20px; color: #00d9ff; }
+    .status {
+      padding: 8px 16px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-bottom: 20px;
+    }
+    .status.connected { background: #0a3; }
+    .status.disconnected { background: #a30; }
+    .status.connecting { background: #a80; }
+    #messages {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .message {
+      background: #16213e;
+      border-radius: 8px;
+      padding: 12px;
+      border-left: 4px solid #00d9ff;
+    }
+    .message .channel {
+      color: #00d9ff;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    .message .type {
+      color: #888;
+      font-size: 12px;
+      margin-left: 8px;
+    }
+    .message .time {
+      color: #666;
+      font-size: 11px;
+      float: right;
+    }
+    .message .data {
+      margin-top: 8px;
+      font-family: 'Fira Code', 'Monaco', monospace;
+      font-size: 13px;
+      background: #0f0f23;
+      padding: 8px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+    .message .raw {
+      color: #666;
+      font-size: 11px;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>LCM WebSocket Viewer</h1>
+  <div id="status" class="status connecting">Connecting...</div>
+  <div id="messages"></div>
+
+  <script type="module">
+    // Message decoders for common types
+    const decoders = {
+      'geometry_msgs.Point': (data) => {
+        const view = new DataView(data.buffer, data.byteOffset);
+        return {
+          x: view.getFloat64(0, true),
+          y: view.getFloat64(8, true),
+          z: view.getFloat64(16, true),
+        };
+      },
+      'geometry_msgs.Vector3': (data) => {
+        const view = new DataView(data.buffer, data.byteOffset);
+        return {
+          x: view.getFloat64(0, true),
+          y: view.getFloat64(8, true),
+          z: view.getFloat64(16, true),
+        };
+      },
+      'geometry_msgs.Quaternion': (data) => {
+        const view = new DataView(data.buffer, data.byteOffset);
+        return {
+          x: view.getFloat64(0, true),
+          y: view.getFloat64(8, true),
+          z: view.getFloat64(16, true),
+          w: view.getFloat64(24, true),
+        };
+      },
+      'geometry_msgs.Pose': (data) => {
+        const view = new DataView(data.buffer, data.byteOffset);
+        return {
+          position: {
+            x: view.getFloat64(0, true),
+            y: view.getFloat64(8, true),
+            z: view.getFloat64(16, true),
+          },
+          orientation: {
+            x: view.getFloat64(24, true),
+            y: view.getFloat64(32, true),
+            z: view.getFloat64(40, true),
+            w: view.getFloat64(48, true),
+          },
+        };
+      },
+      'std_msgs.String': (data) => {
+        const view = new DataView(data.buffer, data.byteOffset);
+        const len = view.getInt32(0, true);
+        const decoder = new TextDecoder();
+        return { data: decoder.decode(data.slice(4, 4 + len)) };
+      },
+      'std_msgs.Int32': (data) => {
+        const view = new DataView(data.buffer, data.byteOffset);
+        return { data: view.getInt32(0, true) };
+      },
+      'std_msgs.Float64': (data) => {
+        const view = new DataView(data.buffer, data.byteOffset);
+        return { data: view.getFloat64(0, true) };
+      },
+    };
+
+    function decode(typeName, base64Data) {
+      // Decode base64 to Uint8Array
+      const binary = atob(base64Data);
+      const data = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        data[i] = binary.charCodeAt(i);
+      }
+
+      // Skip LCM hash (8 bytes)
+      const payload = data.slice(8);
+
+      if (typeName && decoders[typeName]) {
+        try {
+          return decoders[typeName](payload);
+        } catch (e) {
+          console.warn('Decode error:', e);
+        }
+      }
+      return null;
+    }
+
+    function formatValue(val) {
+      if (typeof val === 'number') {
+        return Number.isInteger(val) ? val : val.toFixed(4);
+      }
+      if (typeof val === 'object' && val !== null) {
+        const parts = Object.entries(val).map(([k, v]) => `${k}: ${formatValue(v)}`);
+        return `{ ${parts.join(', ')} }`;
+      }
+      return JSON.stringify(val);
+    }
+
+    const statusEl = document.getElementById('status');
+    const messagesEl = document.getElementById('messages');
+    const MAX_MESSAGES = 100;
+
+    function connect() {
+      const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const ws = new WebSocket(`${protocol}//${location.host}`);
+
+      ws.onopen = () => {
+        statusEl.textContent = 'Connected';
+        statusEl.className = 'status connected';
+      };
+
+      ws.onclose = () => {
+        statusEl.textContent = 'Disconnected - Reconnecting...';
+        statusEl.className = 'status disconnected';
+        setTimeout(connect, 2000);
+      };
+
+      ws.onerror = () => {
+        statusEl.textContent = 'Error';
+        statusEl.className = 'status disconnected';
+      };
+
+      ws.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        const decoded = decode(msg.typeName, msg.data);
+
+        const el = document.createElement('div');
+        el.className = 'message';
+
+        const time = new Date(msg.timestamp).toLocaleTimeString();
+        const typeSpan = msg.typeName ? `<span class="type">${msg.typeName}</span>` : '';
+
+        el.innerHTML = `
+          <span class="channel">${msg.channel}</span>${typeSpan}
+          <span class="time">${time}</span>
+          <div class="data">${decoded ? formatValue(decoded) : `[${atob(msg.data).length} bytes]`}</div>
+        `;
+
+        messagesEl.insertBefore(el, messagesEl.firstChild);
+
+        // Limit messages
+        while (messagesEl.children.length > MAX_MESSAGES) {
+          messagesEl.removeChild(messagesEl.lastChild);
+        }
+      };
+    }
+
+    connect();
+  </script>
+</body>
+</html>

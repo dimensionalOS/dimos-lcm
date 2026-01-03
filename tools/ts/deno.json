@@ -1,7 +1,8 @@
 {
   "workspace": [
     "./lcm",
-    "./msgs"
+    "./msgs",
+    "./examples/web"
   ],
   "imports": {
     "@dimos/lcm": "./lcm/mod.ts",
