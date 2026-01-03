@@ -8,8 +8,8 @@ import struct
 import sys
 
 from . import *
-from .PointsAnnotation import PointsAnnotation
 from .CircleAnnotation import CircleAnnotation
+from .PointsAnnotation import PointsAnnotation
 from .TextAnnotation import TextAnnotation
 
 

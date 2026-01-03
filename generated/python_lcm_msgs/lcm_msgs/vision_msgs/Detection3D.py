@@ -9,8 +9,8 @@ import sys
 
 from . import *
 from lcm_msgs import std_msgs
-from .BoundingBox3D import BoundingBox3D
 from .ObjectHypothesisWithPose import ObjectHypothesisWithPose
+from .BoundingBox3D import BoundingBox3D
 
 
 class Detection3D(object):

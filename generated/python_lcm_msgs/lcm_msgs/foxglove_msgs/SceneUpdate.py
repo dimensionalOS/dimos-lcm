@@ -8,8 +8,8 @@ import struct
 import sys
 
 from . import *
-from .SceneEntityDeletion import SceneEntityDeletion
 from .SceneEntity import SceneEntity
+from .SceneEntityDeletion import SceneEntityDeletion
 
 
 class SceneUpdate(object):
