@@ -4,7 +4,7 @@
 // Run with: deno task sub
 
 import { LCM } from "@dimos/lcm";
-import { Point } from "@dimos/msgs/geometry_msgs";
+import { Point } from "@dimos/msgs/geometry_msgs/mod.ts";
 
 async function main() {
   const lcm = new LCM();
