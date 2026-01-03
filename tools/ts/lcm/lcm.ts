@@ -4,6 +4,7 @@ import type {
   LCMOptions,
   LCMMessage,
   MessageClass,
+  ParsedUrl,
   Subscription,
   SubscriptionHandler,
 } from "./types.ts";
@@ -48,7 +49,7 @@ const textEncoder = new TextEncoder();
  * ```
  */
 export class LCM {
-  private readonly config;
+  private readonly config: ParsedUrl;
   private socket: UdpMulticastSocket | null = null;
   private reassembler = new FragmentReassembler();
   private subscriptions: Subscription[] = [];
@@ -329,7 +330,7 @@ export class LCM {
   }
 
   /** Get current configuration */
-  getConfig() {
+  getConfig(): ParsedUrl {
     return { ...this.config };
   }
 
