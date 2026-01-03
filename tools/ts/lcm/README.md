@@ -1,6 +1,12 @@
-# LCM Pure TypeScript
+# @dimos/lcm
 
 Pure TypeScript implementation of the [LCM (Lightweight Communications and Marshalling)](https://lcm-proj.github.io/) protocol for Deno.
+
+## Installation
+
+```bash
+deno add jsr:@dimos/lcm jsr:@dimos/msgs
+```
 
 ## Features
 
@@ -9,42 +15,63 @@ Pure TypeScript implementation of the [LCM (Lightweight Communications and Marsh
 - Fragmented message support (large messages split across packets)
 - Type-safe message encoding/decoding with generated types
 - Wildcard channel subscriptions
+- Raw packet forwarding for WebSocket bridges
 - Full interop with Python/C++/Java LCM implementations
 
 ## Quick Start
 
 ```typescript
-import { LCM } from "./mod.ts";
-import { Vector3 } from "../../../generated/ts_lcm_msgs/geometry_msgs/Vector3.ts";
+import { LCM } from "@dimos/lcm";
+import { geometry_msgs } from "@dimos/msgs";
 
 const lcm = new LCM();
 await lcm.start();
 
 // Subscribe to typed messages (type suffix added automatically)
-lcm.subscribe("/vectors", Vector3, (msg) => {
+lcm.subscribe("/vector", geometry_msgs.Vector3, (msg) => {
   console.log(`Received: x=${msg.data.x}, y=${msg.data.y}, z=${msg.data.z}`);
 });
 
 // Publish messages (type suffix added automatically)
-const vec = new Vector3({ x: 1.0, y: 2.0, z: 3.0 });
-await lcm.publish("/vectors", vec);
+const vec = new geometry_msgs.Vector3({ x: 1.0, y: 2.0, z: 3.0 });
+await lcm.publish("/vector", vec);
 
 // Run message loop
 await lcm.run();
 ```
 
-## Running Examples
+## Examples
+
+### Simple Publisher/Subscriber
+
+Basic examples demonstrating typed pub/sub:
 
 ```bash
+cd examples/simple
+
 # Terminal 1: Start subscriber
 deno task sub
 
 # Terminal 2: Start publisher
 deno task pub
-
-# Or test interop with Python/C++ publishers
-deno task interop
 ```
+
+### WebSocket Bridge
+
+Web-based LCM message viewer that forwards packets to browser clients:
+
+```bash
+cd examples/web
+
+# Start server
+deno task start
+
+# Open http://localhost:8080
+```
+
+The web example demonstrates:
+- `subscribePacket()` for raw packet forwarding
+- Client-side decoding with `@dimos/msgs`
 
 ## API Reference
 
@@ -58,126 +85,126 @@ const lcm = new LCM();
 const lcm = new LCM("udpm://239.255.76.67:7667?ttl=1");
 
 // Options object
-const lcm = new LCM({
-  url: "udpm://239.255.76.67:7667",
-  ttl: 1,
-});
+const lcm = new LCM({ url: "udpm://239.255.76.67:7667", ttl: 1 });
 ```
 
-### Methods
+### Subscription Methods
 
-#### `start(): Promise<void>`
-Start the LCM instance and begin listening for messages.
-
-#### `stop(): void`
-Stop the LCM instance and close the socket.
-
-#### `subscribe<T>(channel: string, msgClass, handler): () => void`
-Subscribe to typed messages with automatic decoding. The type name is automatically appended to the channel (e.g., `/pose` becomes `/pose#geometry_msgs.PoseStamped`).
+#### `subscribe<T>(channel, msgClass, handler): () => void`
+Typed subscription with automatic decoding. Type suffix is appended automatically.
 
 ```typescript
-lcm.subscribe("/pose", PoseStamped, (msg) => {
+lcm.subscribe("/pose", geometry_msgs.PoseStamped, (msg) => {
   console.log(msg.data.pose.position.x); // Fully typed
 });
+// Subscribes to: /pose#geometry_msgs.PoseStamped
 ```
 
-#### `subscribeRaw(channel: string, handler): () => void`
-Subscribe to raw messages on a channel. Returns an unsubscribe function.
+#### `subscribeRaw(pattern, handler): () => void`
+Subscribe to parsed messages with raw payload bytes.
 
 ```typescript
-const unsub = lcm.subscribeRaw("CHANNEL_*", (msg) => {
+lcm.subscribeRaw("SENSOR_*", (msg) => {
   console.log(msg.channel, msg.data); // data is Uint8Array
 });
-unsub(); // Stop receiving
 ```
 
-#### `publish<T>(channel: string, msg: T): Promise<void>`
-Publish a typed message. The type name is automatically appended to the channel.
+#### `subscribePacket(handler): () => void`
+Subscribe to raw UDP packets. Useful for WebSocket forwarding.
 
 ```typescript
-await lcm.publish("/vectors", new Vector3({ x: 1, y: 2, z: 3 }));
-// Publishes to "/vectors#geometry_msgs.Vector3"
+lcm.subscribePacket((packet) => {
+  ws.send(packet); // Forward raw packet to WebSocket
+});
+
+// With channel filter
+lcm.subscribePacket("/vector#*", (packet) => { ... });
 ```
 
-#### `publishRaw(channel: string, data: Uint8Array): Promise<void>`
-Publish raw bytes (no type suffix added).
+### Publishing Methods
 
-#### `handle(timeoutMs?: number): number`
-Process pending messages synchronously. Returns number of messages handled.
+#### `publish<T>(channel, msg): Promise<void>`
+Publish a typed message. Type suffix is appended automatically.
 
-#### `handleAsync(timeoutMs?: number): Promise<number>`
-Process messages asynchronously, waiting for at least one or timeout.
+```typescript
+await lcm.publish("/vector", new geometry_msgs.Vector3({ x: 1, y: 2, z: 3 }));
+// Publishes to: /vector#geometry_msgs.Vector3
+```
 
-#### `run(callback?: () => void): Promise<void>`
-Run the message loop continuously until `stop()` is called.
+#### `publishRaw(channel, data): Promise<void>`
+Publish raw bytes with a channel name.
+
+#### `publishPacket(packet): Promise<void>`
+Forward a pre-encoded LCM packet (e.g., from WebSocket client).
+
+```typescript
+ws.onmessage = (event) => {
+  lcm.publishPacket(new Uint8Array(event.data));
+};
+```
+
+### Control Methods
+
+- `start(): Promise<void>` - Start listening for messages
+- `stop(): void` - Stop and close socket
+- `handle(timeoutMs?): number` - Process pending messages synchronously
+- `handleAsync(timeoutMs?): Promise<number>` - Process messages async
+- `run(callback?): Promise<void>` - Run message loop continuously
+- `isRunning(): boolean` - Check if running
 
 ### Channel Patterns
 
 Raw subscriptions support wildcard patterns:
 
 ```typescript
-lcm.subscribeRaw("SENSOR_*", handler);  // Matches SENSOR_IMU, SENSOR_GPS, etc.
-lcm.subscribeRaw("*/status", handler);  // Matches robot/status, arm/status, etc.
-lcm.subscribeRaw("*", handler);         // Matches all channels
+lcm.subscribeRaw("SENSOR_*", handler);  // SENSOR_IMU, SENSOR_GPS, etc.
+lcm.subscribeRaw("*/status", handler);  // robot/status, arm/status, etc.
+lcm.subscribeRaw("*", handler);         // All channels
+```
+
+## Companion Package: @dimos/msgs
+
+The `@dimos/msgs` package provides message types and packet utilities:
+
+```typescript
+import { decodePacket, encodePacket, geometry_msgs } from "@dimos/msgs";
+
+// Decode raw packet to { channel, data }
+const { channel, data } = decodePacket(packet);
+
+// Encode typed message to packet
+const packet = encodePacket("/vector", new geometry_msgs.Vector3({ x: 1, y: 2, z: 3 }));
 ```
 
 ## Interop with Other Languages
 
-LCM uses a common wire protocol, so TypeScript can communicate with Python, C++, Java, etc.
+LCM uses a common wire protocol. TypeScript can communicate with Python, C++, Java, etc.
 
 ### Channel Naming Convention
 
 Typed channels include the message type as a suffix:
-
 ```
 /my_topic#package.MessageType
 ```
 
-This is handled automatically - just use the base channel name:
+This is handled automatically by `subscribe()` and `publish()`.
 
 ```typescript
 // TypeScript - type suffix added automatically
-lcm.subscribe("/robot/pose", PoseStamped, handler);
+lcm.subscribe("/robot/pose", geometry_msgs.PoseStamped, handler);
 // Subscribes to: /robot/pose#geometry_msgs.PoseStamped
 
-// Python publisher
+// Python publisher must use full channel name
 lc.publish("/robot/pose#geometry_msgs.PoseStamped", pose.lcm_encode())
 ```
-
-## Protocol Details
-
-This implementation follows the [LCM UDP multicast protocol](https://lcm-proj.github.io/group__LcmC__lcm__t.html):
-
-- **Small messages** (≤64KB): 8-byte header + channel name + payload
-- **Fragmented messages** (>64KB): 20-byte header per fragment
-
-The message fingerprint (hash) is computed using the same algorithm as the C implementation, ensuring binary compatibility across all LCM language bindings.
 
 ## Limitations
 
 - Requires Deno's unstable net API (`--unstable-net` flag)
-- Only UDP multicast transport is supported (no TCP, no file logging)
-- Multicast group membership relies on OS-level configuration
-
-## Files
-
-```
-lcm-pure/
-├── mod.ts             # Main exports
-├── lcm.ts             # LCM class implementation
-├── transport.ts       # UDP multicast, packet encoding/decoding
-├── types.ts           # TypeScript type definitions
-├── url.ts             # LCM URL parser
-├── *_test.ts          # Unit tests
-├── examples/
-│   ├── publisher.ts   # Publish example
-│   ├── subscriber.ts  # Subscribe example
-│   └── interop.ts     # Cross-language interop example
-└── README.md
-```
+- Only UDP multicast transport (no TCP, no file logging)
 
 ## Running Tests
 
 ```bash
-deno test --allow-net --unstable-net
+deno test --allow-net --allow-read --allow-write --allow-run
 ```

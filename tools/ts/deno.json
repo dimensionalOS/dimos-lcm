@@ -3,6 +3,7 @@
     "./lcm",
     "./gen",
     "./msgs",
+    "./examples/simple",
     "./examples/web"
   ],
   "imports": {
