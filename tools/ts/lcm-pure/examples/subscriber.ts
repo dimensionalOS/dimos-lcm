@@ -14,14 +14,14 @@ async function main() {
   console.log("Press Ctrl+C to stop.\n");
 
   // Subscribe to typed Point messages
-  lcm.subscribeTyped("EXAMPLE_POINT", Point, (msg) => {
+  lcm.subscribe("EXAMPLE_POINT", Point, (msg) => {
     console.log(
       `[${msg.channel}] Point: x=${msg.data.x.toFixed(2)}, y=${msg.data.y.toFixed(2)}, z=${msg.data.z.toFixed(2)}`
     );
   });
 
   // Subscribe to raw messages on any channel starting with "RAW_"
-  lcm.subscribe("RAW_*", (msg) => {
+  lcm.subscribeRaw("RAW_*", (msg) => {
     console.log(`[${msg.channel}] Raw: ${msg.data.length} bytes`);
   });
 

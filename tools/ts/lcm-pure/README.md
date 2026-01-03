@@ -15,19 +15,19 @@ Pure TypeScript implementation of the [LCM (Lightweight Communications and Marsh
 
 ```typescript
 import { LCM } from "./mod.ts";
-import { Vector3 } from "../../generated/ts_lcm_msgs/geometry_msgs/Vector3.ts";
+import { Vector3 } from "../../../generated/ts_lcm_msgs/geometry_msgs/Vector3.ts";
 
 const lcm = new LCM();
 await lcm.start();
 
-// Subscribe to typed messages
-lcm.subscribeTyped("MY_CHANNEL", Vector3, (msg) => {
+// Subscribe to typed messages (type suffix added automatically)
+lcm.subscribe("/vectors", Vector3, (msg) => {
   console.log(`Received: x=${msg.data.x}, y=${msg.data.y}, z=${msg.data.z}`);
 });
 
-// Publish messages
+// Publish messages (type suffix added automatically)
 const vec = new Vector3({ x: 1.0, y: 2.0, z: 3.0 });
-await lcm.publish("MY_CHANNEL", vec);
+await lcm.publish("/vectors", vec);
 
 // Run message loop
 await lcm.run();
@@ -72,34 +72,35 @@ Start the LCM instance and begin listening for messages.
 #### `stop(): void`
 Stop the LCM instance and close the socket.
 
-#### `subscribe(channel: string, handler): () => void`
+#### `subscribe<T>(channel: string, msgClass, handler): () => void`
+Subscribe to typed messages with automatic decoding. The type name is automatically appended to the channel (e.g., `/pose` becomes `/pose#geometry_msgs.PoseStamped`).
+
+```typescript
+lcm.subscribe("/pose", PoseStamped, (msg) => {
+  console.log(msg.data.pose.position.x); // Fully typed
+});
+```
+
+#### `subscribeRaw(channel: string, handler): () => void`
 Subscribe to raw messages on a channel. Returns an unsubscribe function.
 
 ```typescript
-const unsub = lcm.subscribe("CHANNEL", (msg) => {
+const unsub = lcm.subscribeRaw("CHANNEL_*", (msg) => {
   console.log(msg.channel, msg.data); // data is Uint8Array
 });
 unsub(); // Stop receiving
 ```
 
-#### `subscribeTyped<T>(channel: string, msgClass, handler): () => void`
-Subscribe to typed messages with automatic decoding.
-
-```typescript
-lcm.subscribeTyped("POSE", PoseStamped, (msg) => {
-  console.log(msg.data.pose.position.x); // Fully typed
-});
-```
-
 #### `publish<T>(channel: string, msg: T): Promise<void>`
-Publish a typed message.
+Publish a typed message. The type name is automatically appended to the channel.
 
 ```typescript
-await lcm.publish("CHANNEL", new Vector3({ x: 1, y: 2, z: 3 }));
+await lcm.publish("/vectors", new Vector3({ x: 1, y: 2, z: 3 }));
+// Publishes to "/vectors#geometry_msgs.Vector3"
 ```
 
 #### `publishRaw(channel: string, data: Uint8Array): Promise<void>`
-Publish raw bytes.
+Publish raw bytes (no type suffix added).
 
 #### `handle(timeoutMs?: number): number`
 Process pending messages synchronously. Returns number of messages handled.
@@ -112,12 +113,12 @@ Run the message loop continuously until `stop()` is called.
 
 ### Channel Patterns
 
-Subscriptions support wildcard patterns:
+Raw subscriptions support wildcard patterns:
 
 ```typescript
-lcm.subscribe("SENSOR_*", handler);     // Matches SENSOR_IMU, SENSOR_GPS, etc.
-lcm.subscribe("*/status", handler);     // Matches robot/status, arm/status, etc.
-lcm.subscribe("*", handler);            // Matches all channels
+lcm.subscribeRaw("SENSOR_*", handler);  // Matches SENSOR_IMU, SENSOR_GPS, etc.
+lcm.subscribeRaw("*/status", handler);  // Matches robot/status, arm/status, etc.
+lcm.subscribeRaw("*", handler);         // Matches all channels
 ```
 
 ## Interop with Other Languages
@@ -126,16 +127,18 @@ LCM uses a common wire protocol, so TypeScript can communicate with Python, C++,
 
 ### Channel Naming Convention
 
-When using typed channels (recommended for interop), include the type in the channel name:
+Typed channels include the message type as a suffix:
 
 ```
 /my_topic#package.MessageType
 ```
 
-Example:
+This is handled automatically - just use the base channel name:
+
 ```typescript
-// TypeScript subscriber
-lcm.subscribeTyped("/robot/pose#geometry_msgs.PoseStamped", PoseStamped, handler);
+// TypeScript - type suffix added automatically
+lcm.subscribe("/robot/pose", PoseStamped, handler);
+// Subscribes to: /robot/pose#geometry_msgs.PoseStamped
 
 // Python publisher
 lc.publish("/robot/pose#geometry_msgs.PoseStamped", pose.lcm_encode())
@@ -160,14 +163,21 @@ The message fingerprint (hash) is computed using the same algorithm as the C imp
 
 ```
 lcm-pure/
-├── mod.ts          # Main exports
-├── lcm.ts          # LCM class implementation
-├── transport.ts    # UDP multicast, packet encoding/decoding
-├── types.ts        # TypeScript type definitions
-├── url.ts          # LCM URL parser
+├── mod.ts             # Main exports
+├── lcm.ts             # LCM class implementation
+├── transport.ts       # UDP multicast, packet encoding/decoding
+├── types.ts           # TypeScript type definitions
+├── url.ts             # LCM URL parser
+├── *_test.ts          # Unit tests
 ├── examples/
 │   ├── publisher.ts   # Publish example
 │   ├── subscriber.ts  # Subscribe example
 │   └── interop.ts     # Cross-language interop example
 └── README.md
+```
+
+## Running Tests
+
+```bash
+deno test --allow-net --unstable-net
 ```

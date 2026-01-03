@@ -29,19 +29,19 @@ const textEncoder = new TextEncoder();
  * const lcm = new LCM();
  * await lcm.start();
  *
- * // Subscribe to raw messages
- * lcm.subscribe("EXAMPLE", (msg) => {
- *   console.log("Received:", msg.channel, msg.data);
- * });
- *
- * // Subscribe with typed messages
- * lcm.subscribeTyped("POSE", Pose, (msg) => {
+ * // Subscribe with typed messages (type suffix added automatically)
+ * lcm.subscribe("/pose", Pose, (msg) => {
  *   console.log("Pose:", msg.data.x, msg.data.y);
  * });
  *
- * // Publish a message
+ * // Subscribe to raw messages
+ * lcm.subscribeRaw("EXAMPLE", (msg) => {
+ *   console.log("Received:", msg.channel, msg.data);
+ * });
+ *
+ * // Publish a message (type suffix added automatically)
  * const pose = new Pose({ x: 1.0, y: 2.0, z: 3.0 });
- * lcm.publish("POSE", pose);
+ * await lcm.publish("/pose", pose);
  *
  * // Handle messages
  * await lcm.handleAsync();
@@ -102,7 +102,7 @@ export class LCM {
    * @param handler - Callback function for received messages
    * @returns Unsubscribe function
    */
-  subscribe(
+  subscribeRaw(
     channelPattern: string,
     handler: SubscriptionHandler<Uint8Array>
   ): () => void {
@@ -125,20 +125,29 @@ export class LCM {
 
   /**
    * Subscribe to a channel with typed message decoding.
+   * The type name is automatically appended from msgClass._NAME.
    *
-   * @param channelPattern - Channel name or regex pattern
+   * @param channel - Channel name (type suffix added automatically)
    * @param msgClass - Message class with decode method (generated LCM type)
    * @param handler - Callback function for received messages
    * @returns Unsubscribe function
+   *
+   * @example
+   * // Subscribes to "/vector#geometry_msgs.Vector3"
+   * lcm.subscribe("/vector", Vector3, (msg) => { ... });
    */
-  subscribeTyped<T>(
-    channelPattern: string,
+  subscribe<T>(
+    channel: string,
     msgClass: MessageClass<T>,
     handler: SubscriptionHandler<T>
   ): () => void {
-    const pattern = this.channelToRegex(channelPattern);
+    // Build full channel with type suffix: "channel#typename"
+    const typeName = (msgClass as unknown as { _NAME: string })._NAME;
+    const fullChannel = channel.includes("#") ? channel : `${channel}#${typeName}`;
+    const pattern = this.channelToRegex(fullChannel);
+
     const subscription: Subscription = {
-      channel: channelPattern,
+      channel: fullChannel,
       pattern,
       handler: handler as SubscriptionHandler<unknown>,
       msgClass: msgClass as MessageClass<unknown>,
@@ -185,16 +194,26 @@ export class LCM {
 
   /**
    * Publish a typed message.
+   * The type name is automatically appended from the message's constructor._NAME.
    *
-   * @param channel - Channel name to publish on
+   * @param channel - Channel name to publish on (type suffix added automatically)
    * @param msg - Message instance with encode() method
+   *
+   * @example
+   * // Publishes to "/vector#geometry_msgs.Vector3"
+   * lcm.publish("/vector", new Vector3({ x: 1, y: 2, z: 3 }));
    */
   async publish<T extends { encode(): Uint8Array }>(
     channel: string,
     msg: T
   ): Promise<void> {
     const data = msg.encode();
-    await this.publishRaw(channel, data);
+    // Get type name from constructor's _NAME static property
+    const typeName = (msg.constructor as unknown as { _NAME?: string })._NAME;
+    const fullChannel = typeName && !channel.includes("#")
+      ? `${channel}#${typeName}`
+      : channel;
+    await this.publishRaw(fullChannel, data);
   }
 
   /**

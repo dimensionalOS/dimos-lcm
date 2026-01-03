@@ -17,18 +17,18 @@ async function main() {
 
   console.log("Listening for LCM messages from other processes...");
   console.log("Subscribed channels:");
-  console.log("  - /vector#geometry_msgs.Vector3");
-  console.log("  - /pose#geometry_msgs.PoseStamped");
+  console.log("  - /vector (geometry_msgs.Vector3)");
+  console.log("  - /pose (geometry_msgs.PoseStamped)");
   console.log("\nPress Ctrl+C to stop.\n");
 
-  // Subscribe to Vector3 messages
-  lcm.subscribeTyped("/vector#geometry_msgs.Vector3", Vector3, (msg) => {
+  // Subscribe to Vector3 messages (type suffix added automatically)
+  lcm.subscribe("/vector", Vector3, (msg) => {
     const v = msg.data;
     console.log(`[Vector3] x=${v.x.toFixed(2)}, y=${v.y.toFixed(2)}, z=${v.z.toFixed(2)}`);
   });
 
-  // Subscribe to PoseStamped messages
-  lcm.subscribeTyped("/pose#geometry_msgs.PoseStamped", PoseStamped, (msg) => {
+  // Subscribe to PoseStamped messages (type suffix added automatically)
+  lcm.subscribe("/pose", PoseStamped, (msg) => {
     const p = msg.data.pose.position;
     const o = msg.data.pose.orientation;
     console.log(
@@ -38,7 +38,7 @@ async function main() {
   });
 
   // Also log any unhandled channels
-  lcm.subscribe("*", (msg) => {
+  lcm.subscribeRaw("*", (msg) => {
     if (!msg.channel.includes("vector") && !msg.channel.includes("pose")) {
       console.log(`[${msg.channel}] ${msg.data.length} bytes`);
     }
