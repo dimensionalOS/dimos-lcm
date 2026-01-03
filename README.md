@@ -1,6 +1,10 @@
 # LCM Message Definitions
 
-This repository contains LCM message definitions for the Dimos project and tools to generate language bindings.
+This repository contains LCM message definitions for the Dimos project and tools to generate those language bindings.
+
+It depends on our [LCM fork](https://github.com/dimensionalOS/lcm) for generation since we introduced some convinience changes to python message definitions.
+
+lcmgen from our lcm fork is conviniently pulled and built by our `flake.nix`
 
 ## Generating Bindings
 
@@ -23,3 +27,7 @@ This will:
 - `lcm_types/` - Generated LCM message definitions
 - `generated/` - Generated language bindings
 
+## Python Package
+
+This repo is also a Python package and you can install it via `pip install dimos-lcm`
+It is not very useful standalone and is meant to be used in conjuction with actual [dimOS](https://github.com/dimensionalOS/dimos)
