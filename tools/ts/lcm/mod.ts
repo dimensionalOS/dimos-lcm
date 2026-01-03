@@ -1,5 +1,5 @@
 // LCM Pure TypeScript Implementation
-// Usage: import { LCM } from "@dimos/ts-lcm-pure";
+// Usage: import { LCM } from "@dimos/lcm";
 
 export { LCM } from "./lcm.ts";
 export type { LCMOptions, LCMMessage, MessageClass, ParsedUrl } from "./types.ts";
