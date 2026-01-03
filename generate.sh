@@ -4,6 +4,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+mkdir -p "$SCRIPT_DIR/generated"
+
 python3 "$SCRIPT_DIR/sources/ros_to_lcm.py"
 
 echo -e "\033[32mRos -> LCM done\033[0m"
