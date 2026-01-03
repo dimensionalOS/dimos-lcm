@@ -1,75 +1,33 @@
-# LCM Message Definitions and ROS msg to LCM Converter
+# LCM Message Definitions
 
-This repository contains LCM message definitions and a tool to convert ROS messages to LCM messages.
+This repository contains LCM message definitions for the Dimos project and tools to generate those language bindings.
 
-## Converting ROS Messages to LCM
+It depends on our [LCM fork](https://github.com/dimensionalOS/lcm) for generation since we introduced some convinience changes to python message definitions.
 
-- The Python msg to lcm converter is used to convert the ROS messages to LCM messages.
+lcmgen from our lcm fork is conviniently pulled and built by our `flake.nix`
 
-```py
-python3 ros_to_lcm.py ros_msgs lcm_files
-```
+## Generating Bindings
 
-- The lcm-gen command is used to generate the language bindings for the LCM message definitions.
+Run `generate.sh` to regenerate all bindings:
 
 ```sh
-./lcm_batch_processor.sh -p lcm_files -o python_lcm_msgs/lcm_msgs
+./generate.sh
 ```
 
-- Then to make sure tha Python messages package is installable, run
+This will:
+1. Convert ROS messages to LCM definitions (from `sources/ros_msgs/` to `lcm_types/`)
+2. Generate Python bindings (`generated/python_lcm_msgs/`)
+3. Generate C++ bindings (`generated/cpp_lcm_msgs/`)
+4. Generate C# bindings (`generated/cs_lcm_msgs/`)
+5. Generate Java bindings (`generated/java_lcm_msgs/`)
 
-```sh
-cd python_lcm_msgs
-python3 fix_imports.py
-```
+## Directory Structure
 
-- The Foxglove bridge converts all LCM messages to JSON and sends them via WebSocket to Foxglove for visualization.
+- `sources/` - Source ROS message definitions and conversion tools
+- `lcm_types/` - Generated LCM message definitions
+- `generated/` - Generated language bindings
 
-```py
-python3 lcm_foxglove_bridge.py
-```
+## Python Package
 
-## Using LCM-Spy with Custom Message Types
-
-To use lcm-spy with your custom message types, you need to build a JAR file containing the Java bindings for your LCM message types.
-
-### Building the JAR File
-
-1. Make sure you have the Java LCM bindings generated in the `java_lcm_msgs` directory.
-2. Run the build script to create the JAR file:
-
-```sh
-./build_lcm_jar.sh
-```
-
-This will compile all Java message definitions and create `lcm_types.jar` in the project directory.
-
-### Running LCM-Spy
-
-Use the provided script to run lcm-spy with your custom JAR file:
-
-```sh
-./run_lcm_spy.sh
-```
-
-You can also pass additional arguments to lcm-spy:
-
-```sh
-# For a specific LCM URL
-./run_lcm_spy.sh --lcm-url=udpm://239.255.76.67:7667?ttl=1
-
-# For a specific interface
-./run_lcm_spy.sh --lcm-url=udpm://<multicast-address>:<port>
-```
-
-When running lcm-spy this way, all your custom message types will be automatically decoded and displayed in the lcm-spy interface.
-
-### Manual Execution
-
-If you prefer to run lcm-spy manually, use:
-
-```sh
-CLASSPATH=/path/to/lcm.jar:lcm_types.jar lcm-spy
-```
-
-Replace `/path/to/lcm.jar` with the actual path to the LCM Java library on your system.
+This repo is also a Python package and you can install it via `pip install dimos-lcm`
+It is not very useful standalone and is meant to be used in conjuction with actual [dimOS](https://github.com/dimensionalOS/dimos)

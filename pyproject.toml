@@ -22,9 +22,10 @@ dependencies = [
 
 [tool.setuptools]
 packages = [
-    "dimos_lcm", 
+    "dimos_lcm",
+    "dimos_lcm.foxglove_bridge",
     "dimos_lcm.geometry_msgs",
-    "dimos_lcm.sensor_msgs", 
+    "dimos_lcm.sensor_msgs",
     "dimos_lcm.std_msgs",
     "dimos_lcm.nav_msgs",
     "dimos_lcm.diagnostic_msgs",
@@ -41,28 +42,25 @@ packages = [
 
 [tool.setuptools.package-dir]
 "dimos_lcm" = "."
-"dimos_lcm.geometry_msgs" = "python_lcm_msgs/lcm_msgs/geometry_msgs"
-"dimos_lcm.sensor_msgs" = "python_lcm_msgs/lcm_msgs/sensor_msgs"
-"dimos_lcm.std_msgs" = "python_lcm_msgs/lcm_msgs/std_msgs"
-"dimos_lcm.nav_msgs" = "python_lcm_msgs/lcm_msgs/nav_msgs"
-"dimos_lcm.diagnostic_msgs" = "python_lcm_msgs/lcm_msgs/diagnostic_msgs"
-"dimos_lcm.actionlib_msgs" = "python_lcm_msgs/lcm_msgs/actionlib_msgs"
-"dimos_lcm.builtin_interfaces" = "python_lcm_msgs/lcm_msgs/builtin_interfaces"
-"dimos_lcm.foxglove_msgs" = "python_lcm_msgs/lcm_msgs/foxglove_msgs"
-"dimos_lcm.shape_msgs" = "python_lcm_msgs/lcm_msgs/shape_msgs"
-"dimos_lcm.stereo_msgs" = "python_lcm_msgs/lcm_msgs/stereo_msgs"
-"dimos_lcm.tf2_msgs" = "python_lcm_msgs/lcm_msgs/tf2_msgs"
-"dimos_lcm.trajectory_msgs" = "python_lcm_msgs/lcm_msgs/trajectory_msgs"
-"dimos_lcm.vision_msgs" = "python_lcm_msgs/lcm_msgs/vision_msgs"
-"dimos_lcm.visualization_msgs" = "python_lcm_msgs/lcm_msgs/visualization_msgs"
+"dimos_lcm.foxglove_bridge" = "tools/foxglove_bridge"
+"dimos_lcm.geometry_msgs" = "generated/python_lcm_msgs/lcm_msgs/geometry_msgs"
+"dimos_lcm.sensor_msgs" = "generated/python_lcm_msgs/lcm_msgs/sensor_msgs"
+"dimos_lcm.std_msgs" = "generated/python_lcm_msgs/lcm_msgs/std_msgs"
+"dimos_lcm.nav_msgs" = "generated/python_lcm_msgs/lcm_msgs/nav_msgs"
+"dimos_lcm.diagnostic_msgs" = "generated/python_lcm_msgs/lcm_msgs/diagnostic_msgs"
+"dimos_lcm.actionlib_msgs" = "generated/python_lcm_msgs/lcm_msgs/actionlib_msgs"
+"dimos_lcm.builtin_interfaces" = "generated/python_lcm_msgs/lcm_msgs/builtin_interfaces"
+"dimos_lcm.foxglove_msgs" = "generated/python_lcm_msgs/lcm_msgs/foxglove_msgs"
+"dimos_lcm.shape_msgs" = "generated/python_lcm_msgs/lcm_msgs/shape_msgs"
+"dimos_lcm.stereo_msgs" = "generated/python_lcm_msgs/lcm_msgs/stereo_msgs"
+"dimos_lcm.tf2_msgs" = "generated/python_lcm_msgs/lcm_msgs/tf2_msgs"
+"dimos_lcm.trajectory_msgs" = "generated/python_lcm_msgs/lcm_msgs/trajectory_msgs"
+"dimos_lcm.vision_msgs" = "generated/python_lcm_msgs/lcm_msgs/vision_msgs"
+"dimos_lcm.visualization_msgs" = "generated/python_lcm_msgs/lcm_msgs/visualization_msgs"
 
 [tool.setuptools.package-data]
 "dimos_lcm" = [
-    "*.py", 
-    "*.sh", 
-    "ros_msgs/**/*", 
-    "lcm_files/**/*", 
-    "python_lcm_msgs/**/*",
-    "foxglove_bridge/**/*"
+    "*.py",
+    "generated/python_lcm_msgs/**/*"
 ]
 
