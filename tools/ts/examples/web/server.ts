@@ -3,8 +3,8 @@
 // LCM to WebSocket Bridge
 // Forwards raw LCM packets to browser clients for decoding
 
-import { LCM } from "@dimos/lcm";
-import { decodePacket, geometry_msgs } from "@dimos/msgs";
+import { LCM } from "jsr:@dimos/lcm";
+import { decodePacket, geometry_msgs } from "jsr:@dimos/msgs";
 
 const PORT = 8080;
 const clients = new Set<WebSocket>();
