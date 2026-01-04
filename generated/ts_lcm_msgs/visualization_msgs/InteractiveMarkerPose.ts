@@ -4,8 +4,9 @@ import { Header } from "../std_msgs/Header.ts";
 import { Pose } from "../geometry_msgs/Pose.ts";
 
 export class InteractiveMarkerPose {
-  static readonly _HASH = 0xe4d2dccedcc2dacan;
+  static readonly _HASH = 0x8c873ae70410464dn;
   static readonly _NAME = "visualization_msgs.InteractiveMarkerPose";
+  private static _packedFingerprint: bigint | null = null;
 
   header: Header;
   pose: Pose;
@@ -21,11 +22,12 @@ export class InteractiveMarkerPose {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== InteractiveMarkerPose._HASH) {
-      throw new Error(`Hash mismatch: expected ${InteractiveMarkerPose._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = InteractiveMarkerPose._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new InteractiveMarkerPose();
@@ -53,8 +55,8 @@ export class InteractiveMarkerPose {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, InteractiveMarkerPose._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, InteractiveMarkerPose._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -82,5 +84,23 @@ export class InteractiveMarkerPose {
     size += this.pose._encodedSize();
     size += 4 + new TextEncoder().encode(this.name).length + 1;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(InteractiveMarkerPose)) return 0n;
+    const newparents = [...parents, InteractiveMarkerPose];
+    let tmphash = InteractiveMarkerPose._HASH;
+    tmphash = (tmphash + Header._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Pose._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (InteractiveMarkerPose._packedFingerprint === null) {
+      InteractiveMarkerPose._packedFingerprint = InteractiveMarkerPose._getHashRecursive([]);
+    }
+    return InteractiveMarkerPose._packedFingerprint;
   }
 }

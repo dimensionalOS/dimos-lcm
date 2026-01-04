@@ -3,8 +3,9 @@
 import { MultiArrayLayout } from "./MultiArrayLayout.ts";
 
 export class Int16MultiArray {
-  static readonly _HASH = 0x6cbee8c8c2e8c200n;
+  static readonly _HASH = 0xaa51366c8f222c76n;
   static readonly _NAME = "std_msgs.Int16MultiArray";
+  private static _packedFingerprint: bigint | null = null;
 
   data_length: number;
   layout: MultiArrayLayout;
@@ -20,11 +21,12 @@ export class Int16MultiArray {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== Int16MultiArray._HASH) {
-      throw new Error(`Hash mismatch: expected ${Int16MultiArray._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = Int16MultiArray._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new Int16MultiArray();
@@ -51,8 +53,8 @@ export class Int16MultiArray {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, Int16MultiArray._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, Int16MultiArray._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -76,5 +78,22 @@ export class Int16MultiArray {
     size += this.layout._encodedSize();
     size += this.data_length * 2;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(Int16MultiArray)) return 0n;
+    const newparents = [...parents, Int16MultiArray];
+    let tmphash = Int16MultiArray._HASH;
+    tmphash = (tmphash + MultiArrayLayout._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (Int16MultiArray._packedFingerprint === null) {
+      Int16MultiArray._packedFingerprint = Int16MultiArray._getHashRecursive([]);
+    }
+    return Int16MultiArray._packedFingerprint;
   }
 }

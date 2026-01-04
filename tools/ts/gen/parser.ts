@@ -55,57 +55,76 @@ class Tokenizer {
   }
 }
 
-function computeStructHash(struct: LcmStruct, typeMap: Map<string, LcmType>): bigint {
-  // Base hash from type name and members
-  let hash = 0x12345678n;
-
-  // Hash the struct name
-  for (const char of struct.fullName) {
-    hash = ((hash << 8n) ^ BigInt(char.charCodeAt(0))) & 0xffffffffffffffffn;
+// LCM hash algorithm - matches the C implementation in lcmgen.c
+// hash_update: v = ((v << 8) ^ (v >> 55)) + c
+// IMPORTANT: C uses int64_t which means arithmetic (signed) right shift
+function hashUpdate(v: bigint, c: number): bigint {
+  const leftShift = (v << 8n) & 0xffffffffffffffffn;
+  // Arithmetic right shift: if MSB is set, fill with 1s
+  let rightShift: bigint;
+  if (v >= 0x8000000000000000n) {
+    // Negative in signed representation - arithmetic shift fills with 1s
+    const signed = v - 0x10000000000000000n;
+    rightShift = (signed >> 55n) & 0xffffffffffffffffn;
+  } else {
+    rightShift = v >> 55n;
   }
+  return ((leftShift ^ rightShift) + BigInt(c)) & 0xffffffffffffffffn;
+}
+
+// hash_string_update: hash the length first, then each character
+function hashStringUpdate(v: bigint, s: string): bigint {
+  v = hashUpdate(v, s.length);
+  for (const char of s) {
+    v = hashUpdate(v, char.charCodeAt(0));
+  }
+  return v;
+}
+
+function computeStructHash(struct: LcmStruct, typeMap: Map<string, LcmType>): bigint {
+  // Base hash - start with 0x12345678
+  let v = 0x12345678n;
+
+  // NOTE: We do NOT include the struct name in the hash
+  // This allows renaming types without breaking compatibility
 
   // Hash each member
   for (const member of struct.members) {
-    // Hash type name
-    for (const char of member.type) {
-      hash = ((hash << 8n) ^ BigInt(char.charCodeAt(0))) & 0xffffffffffffffffn;
+    // Hash the member name
+    v = hashStringUpdate(v, member.name);
+
+    // If primitive type, hash the type name
+    if (isPrimitive(member.type)) {
+      v = hashStringUpdate(v, member.type);
     }
-    // Hash member name
-    for (const char of member.name) {
-      hash = ((hash << 8n) ^ BigInt(char.charCodeAt(0))) & 0xffffffffffffffffn;
-    }
-    // Hash dimensions
+    // For non-primitive types, don't hash the type name here
+    // (it will be included in the recursive hash at runtime)
+
+    // Hash dimensionality information
+    const ndim = member.dimensions.length;
+    v = hashUpdate(v, ndim);
+
     for (const dim of member.dimensions) {
-      hash = ((hash << 8n) ^ BigInt(dim.isConstant ? 1 : 0)) & 0xffffffffffffffffn;
-      if (dim.isConstant) {
-        hash = ((hash << 8n) ^ BigInt(parseInt(dim.size))) & 0xffffffffffffffffn;
-      }
+      // LCM_CONST = 0, LCM_VAR = 1
+      const mode = dim.isConstant ? 0 : 1;
+      v = hashUpdate(v, mode);
+      v = hashStringUpdate(v, dim.size);
     }
   }
 
-  // Rotate
-  hash = (((hash << 1n) & 0xffffffffffffffffn) + (hash >> 63n)) & 0xffffffffffffffffn;
-
-  return hash;
+  return v;
 }
 
+// Note: The recursive hash is computed at RUNTIME in the generated code,
+// not at generation time. This is because nested types may be in different
+// files that aren't available during parsing. The generator emits a
+// _getHashRecursive() method that computes the full hash at runtime.
+
 function computeEnumHash(enumType: LcmEnum): bigint {
-  let hash = 0x87654321n;
-
-  for (const char of enumType.fullName) {
-    hash = ((hash << 8n) ^ BigInt(char.charCodeAt(0))) & 0xffffffffffffffffn;
-  }
-
-  for (const value of enumType.values) {
-    for (const char of value.name) {
-      hash = ((hash << 8n) ^ BigInt(char.charCodeAt(0))) & 0xffffffffffffffffn;
-    }
-    hash = ((hash << 8n) ^ BigInt(value.value)) & 0xffffffffffffffffn;
-  }
-
-  hash = (((hash << 1n) & 0xffffffffffffffffn) + (hash >> 63n)) & 0xffffffffffffffffn;
-
-  return hash;
+  // Enum hash only includes the short name
+  let v = 0x87654321n;
+  v = hashStringUpdate(v, enumType.name);
+  return v;
 }
 
 export function parse(source: string): LcmFile {
@@ -136,6 +155,7 @@ export function parse(source: string): LcmFile {
 
   for (const type of types) {
     if (type.kind === "struct") {
+      // Store the BASE hash - recursive hash is computed at runtime
       type.hash = computeStructHash(type, typeMap);
     } else {
       type.hash = computeEnumHash(type);

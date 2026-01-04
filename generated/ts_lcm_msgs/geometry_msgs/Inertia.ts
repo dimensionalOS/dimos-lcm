@@ -3,8 +3,9 @@
 import { Vector3 } from "./Vector3.ts";
 
 export class Inertia {
-  static readonly _HASH = 0xdeeac4d8cad2f4f4n;
+  static readonly _HASH = 0xbeaa1a2a4c70b2e0n;
   static readonly _NAME = "geometry_msgs.Inertia";
+  private static _packedFingerprint: bigint | null = null;
 
   m: number;
   com: Vector3;
@@ -30,11 +31,12 @@ export class Inertia {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== Inertia._HASH) {
-      throw new Error(`Hash mismatch: expected ${Inertia._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = Inertia._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new Inertia();
@@ -68,8 +70,8 @@ export class Inertia {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, Inertia._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, Inertia._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -106,5 +108,22 @@ export class Inertia {
     size += 8;
     size += 8;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(Inertia)) return 0n;
+    const newparents = [...parents, Inertia];
+    let tmphash = Inertia._HASH;
+    tmphash = (tmphash + Vector3._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (Inertia._packedFingerprint === null) {
+      Inertia._packedFingerprint = Inertia._getHashRecursive([]);
+    }
+    return Inertia._packedFingerprint;
   }
 }

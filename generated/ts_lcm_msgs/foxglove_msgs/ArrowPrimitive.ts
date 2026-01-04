@@ -4,8 +4,9 @@ import { Pose } from "../geometry_msgs/Pose.ts";
 import { Color } from "./Color.ts";
 
 export class ArrowPrimitive {
-  static readonly _HASH = 0xd8dee4c6ded8dee4n;
+  static readonly _HASH = 0xb1f9d32968e60fbbn;
   static readonly _NAME = "foxglove_msgs.ArrowPrimitive";
+  private static _packedFingerprint: bigint | null = null;
 
   pose: Pose;
   shaft_length: number;
@@ -27,11 +28,12 @@ export class ArrowPrimitive {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== ArrowPrimitive._HASH) {
-      throw new Error(`Hash mismatch: expected ${ArrowPrimitive._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = ArrowPrimitive._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new ArrowPrimitive();
@@ -61,8 +63,8 @@ export class ArrowPrimitive {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, ArrowPrimitive._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, ArrowPrimitive._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -92,5 +94,23 @@ export class ArrowPrimitive {
     size += 8;
     size += this.color._encodedSize();
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(ArrowPrimitive)) return 0n;
+    const newparents = [...parents, ArrowPrimitive];
+    let tmphash = ArrowPrimitive._HASH;
+    tmphash = (tmphash + Pose._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Color._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (ArrowPrimitive._packedFingerprint === null) {
+      ArrowPrimitive._packedFingerprint = ArrowPrimitive._getHashRecursive([]);
+    }
+    return ArrowPrimitive._packedFingerprint;
   }
 }

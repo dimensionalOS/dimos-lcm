@@ -3,8 +3,9 @@
 import { Header } from "../std_msgs/Header.ts";
 
 export class VisionInfo {
-  static readonly _HASH = 0xbeeccae4e6d2dedcn;
+  static readonly _HASH = 0x62c1cbfdc2184fbbn;
   static readonly _NAME = "vision_msgs.VisionInfo";
+  private static _packedFingerprint: bigint | null = null;
 
   header: Header;
   method: string;
@@ -22,11 +23,12 @@ export class VisionInfo {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== VisionInfo._HASH) {
-      throw new Error(`Hash mismatch: expected ${VisionInfo._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = VisionInfo._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new VisionInfo();
@@ -60,8 +62,8 @@ export class VisionInfo {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, VisionInfo._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, VisionInfo._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -100,5 +102,22 @@ export class VisionInfo {
     size += 4 + new TextEncoder().encode(this.database_location).length + 1;
     size += 4;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(VisionInfo)) return 0n;
+    const newparents = [...parents, VisionInfo];
+    let tmphash = VisionInfo._HASH;
+    tmphash = (tmphash + Header._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (VisionInfo._packedFingerprint === null) {
+      VisionInfo._packedFingerprint = VisionInfo._getHashRecursive([]);
+    }
+    return VisionInfo._packedFingerprint;
   }
 }

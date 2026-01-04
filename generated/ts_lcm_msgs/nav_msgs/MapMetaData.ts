@@ -4,8 +4,9 @@ import { Time } from "../std_msgs/Time.ts";
 import { Pose } from "../geometry_msgs/Pose.ts";
 
 export class MapMetaData {
-  static readonly _HASH = 0xe6cadee4d2ced2dcn;
+  static readonly _HASH = 0x3245f3cdb468ba93n;
   static readonly _NAME = "nav_msgs.MapMetaData";
+  private static _packedFingerprint: bigint | null = null;
 
   map_load_time: Time;
   resolution: number;
@@ -25,11 +26,12 @@ export class MapMetaData {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== MapMetaData._HASH) {
-      throw new Error(`Hash mismatch: expected ${MapMetaData._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = MapMetaData._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new MapMetaData();
@@ -57,8 +59,8 @@ export class MapMetaData {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, MapMetaData._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, MapMetaData._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -85,5 +87,23 @@ export class MapMetaData {
     size += 4;
     size += this.origin._encodedSize();
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(MapMetaData)) return 0n;
+    const newparents = [...parents, MapMetaData];
+    let tmphash = MapMetaData._HASH;
+    tmphash = (tmphash + Time._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Pose._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (MapMetaData._packedFingerprint === null) {
+      MapMetaData._packedFingerprint = MapMetaData._getHashRecursive([]);
+    }
+    return MapMetaData._packedFingerprint;
   }
 }

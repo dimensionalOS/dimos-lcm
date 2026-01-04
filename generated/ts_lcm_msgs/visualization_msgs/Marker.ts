@@ -8,8 +8,9 @@ import { Duration } from "../std_msgs/Duration.ts";
 import { Point } from "../geometry_msgs/Point.ts";
 
 export class Marker {
-  static readonly _HASH = 0xc2e8cae4d2c2d8e6n;
+  static readonly _HASH = 0x707e24d8bc038bd3n;
   static readonly _NAME = "visualization_msgs.Marker";
+  private static _packedFingerprint: bigint | null = null;
 
   static readonly ARROW = 0;
   static readonly CUBE = 1;
@@ -70,11 +71,12 @@ export class Marker {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== Marker._HASH) {
-      throw new Error(`Hash mismatch: expected ${Marker._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = Marker._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new Marker();
@@ -144,8 +146,8 @@ export class Marker {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, Marker._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, Marker._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -232,5 +234,28 @@ export class Marker {
     size += 4 + new TextEncoder().encode(this.mesh_resource).length + 1;
     size += 1;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(Marker)) return 0n;
+    const newparents = [...parents, Marker];
+    let tmphash = Marker._HASH;
+    tmphash = (tmphash + Header._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Pose._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Vector3._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + ColorRGBA._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Duration._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Point._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + ColorRGBA._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (Marker._packedFingerprint === null) {
+      Marker._packedFingerprint = Marker._getHashRecursive([]);
+    }
+    return Marker._packedFingerprint;
   }
 }

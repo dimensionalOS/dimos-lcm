@@ -5,8 +5,9 @@ import { Point } from "../geometry_msgs/Point.ts";
 import { Color } from "./Color.ts";
 
 export class TriangleListPrimitive {
-  static readonly _HASH = 0xd2dcc8d2c6cae600n;
+  static readonly _HASH = 0xcf3047947917a6ccn;
   static readonly _NAME = "foxglove_msgs.TriangleListPrimitive";
+  private static _packedFingerprint: bigint | null = null;
 
   points_length: number;
   colors_length: number;
@@ -32,11 +33,12 @@ export class TriangleListPrimitive {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== TriangleListPrimitive._HASH) {
-      throw new Error(`Hash mismatch: expected ${TriangleListPrimitive._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = TriangleListPrimitive._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new TriangleListPrimitive();
@@ -79,8 +81,8 @@ export class TriangleListPrimitive {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, TriangleListPrimitive._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, TriangleListPrimitive._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -124,5 +126,25 @@ export class TriangleListPrimitive {
     }
     size += this.indices_length * 4;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(TriangleListPrimitive)) return 0n;
+    const newparents = [...parents, TriangleListPrimitive];
+    let tmphash = TriangleListPrimitive._HASH;
+    tmphash = (tmphash + Pose._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Point._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Color._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Color._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (TriangleListPrimitive._packedFingerprint === null) {
+      TriangleListPrimitive._packedFingerprint = TriangleListPrimitive._getHashRecursive([]);
+    }
+    return TriangleListPrimitive._packedFingerprint;
   }
 }

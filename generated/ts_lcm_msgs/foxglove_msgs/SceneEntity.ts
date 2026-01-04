@@ -13,8 +13,9 @@ import { TextPrimitive } from "./TextPrimitive.ts";
 import { ModelPrimitive } from "./ModelPrimitive.ts";
 
 export class SceneEntity {
-  static readonly _HASH = 0xcadadec8cad8e600n;
+  static readonly _HASH = 0xe143d679579f0ab0n;
   static readonly _NAME = "foxglove_msgs.SceneEntity";
+  private static _packedFingerprint: bigint | null = null;
 
   metadata_length: number;
   arrows_length: number;
@@ -70,11 +71,12 @@ export class SceneEntity {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== SceneEntity._HASH) {
-      throw new Error(`Hash mismatch: expected ${SceneEntity._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = SceneEntity._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new SceneEntity();
@@ -173,8 +175,8 @@ export class SceneEntity {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, SceneEntity._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, SceneEntity._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -296,5 +298,32 @@ export class SceneEntity {
       size += this.models[i0]._encodedSize();
     }
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(SceneEntity)) return 0n;
+    const newparents = [...parents, SceneEntity];
+    let tmphash = SceneEntity._HASH;
+    tmphash = (tmphash + Time._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Duration._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + KeyValuePair._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + ArrowPrimitive._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + CubePrimitive._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + SpherePrimitive._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + CylinderPrimitive._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + LinePrimitive._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + TriangleListPrimitive._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + TextPrimitive._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + ModelPrimitive._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (SceneEntity._packedFingerprint === null) {
+      SceneEntity._packedFingerprint = SceneEntity._getHashRecursive([]);
+    }
+    return SceneEntity._packedFingerprint;
   }
 }

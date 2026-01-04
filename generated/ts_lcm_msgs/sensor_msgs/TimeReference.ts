@@ -4,8 +4,9 @@ import { Header } from "../std_msgs/Header.ts";
 import { Time } from "../std_msgs/Time.ts";
 
 export class TimeReference {
-  static readonly _HASH = 0xdccee6deeae4c6can;
+  static readonly _HASH = 0x1a6b1c8c5abae6dbn;
   static readonly _NAME = "sensor_msgs.TimeReference";
+  private static _packedFingerprint: bigint | null = null;
 
   header: Header;
   time_ref: Time;
@@ -21,11 +22,12 @@ export class TimeReference {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== TimeReference._HASH) {
-      throw new Error(`Hash mismatch: expected ${TimeReference._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = TimeReference._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new TimeReference();
@@ -53,8 +55,8 @@ export class TimeReference {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, TimeReference._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, TimeReference._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -82,5 +84,23 @@ export class TimeReference {
     size += this.time_ref._encodedSize();
     size += 4 + new TextEncoder().encode(this.source).length + 1;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(TimeReference)) return 0n;
+    const newparents = [...parents, TimeReference];
+    let tmphash = TimeReference._HASH;
+    tmphash = (tmphash + Header._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Time._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (TimeReference._packedFingerprint === null) {
+      TimeReference._packedFingerprint = TimeReference._getHashRecursive([]);
+    }
+    return TimeReference._packedFingerprint;
   }
 }

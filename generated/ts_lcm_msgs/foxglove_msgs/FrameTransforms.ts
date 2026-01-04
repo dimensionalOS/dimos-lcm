@@ -3,8 +3,9 @@
 import { FrameTransform } from "./FrameTransform.ts";
 
 export class FrameTransforms {
-  static readonly _HASH = 0xdce6ccdee4dae600n;
+  static readonly _HASH = 0x37bc5cbce50a5ce2n;
   static readonly _NAME = "foxglove_msgs.FrameTransforms";
+  private static _packedFingerprint: bigint | null = null;
 
   transforms_length: number;
   transforms: FrameTransform[];
@@ -18,11 +19,12 @@ export class FrameTransforms {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== FrameTransforms._HASH) {
-      throw new Error(`Hash mismatch: expected ${FrameTransforms._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = FrameTransforms._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new FrameTransforms();
@@ -47,8 +49,8 @@ export class FrameTransforms {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, FrameTransforms._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, FrameTransforms._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -71,5 +73,22 @@ export class FrameTransforms {
       size += this.transforms[i0]._encodedSize();
     }
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(FrameTransforms)) return 0n;
+    const newparents = [...parents, FrameTransforms];
+    let tmphash = FrameTransforms._HASH;
+    tmphash = (tmphash + FrameTransform._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (FrameTransforms._packedFingerprint === null) {
+      FrameTransforms._packedFingerprint = FrameTransforms._getHashRecursive([]);
+    }
+    return FrameTransforms._packedFingerprint;
   }
 }

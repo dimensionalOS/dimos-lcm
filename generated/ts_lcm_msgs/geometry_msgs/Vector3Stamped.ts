@@ -4,8 +4,9 @@ import { Header } from "../std_msgs/Header.ts";
 import { Vector3 } from "./Vector3.ts";
 
 export class Vector3Stamped {
-  static readonly _HASH = 0xe466eccac6e8dee4n;
+  static readonly _HASH = 0xecb8cfd985d1cbe0n;
   static readonly _NAME = "geometry_msgs.Vector3Stamped";
+  private static _packedFingerprint: bigint | null = null;
 
   header: Header;
   vector: Vector3;
@@ -19,11 +20,12 @@ export class Vector3Stamped {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== Vector3Stamped._HASH) {
-      throw new Error(`Hash mismatch: expected ${Vector3Stamped._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = Vector3Stamped._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new Vector3Stamped();
@@ -45,8 +47,8 @@ export class Vector3Stamped {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, Vector3Stamped._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, Vector3Stamped._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -64,5 +66,23 @@ export class Vector3Stamped {
     size += this.header._encodedSize();
     size += this.vector._encodedSize();
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(Vector3Stamped)) return 0n;
+    const newparents = [...parents, Vector3Stamped];
+    let tmphash = Vector3Stamped._HASH;
+    tmphash = (tmphash + Header._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Vector3._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (Vector3Stamped._packedFingerprint === null) {
+      Vector3Stamped._packedFingerprint = Vector3Stamped._getHashRecursive([]);
+    }
+    return Vector3Stamped._packedFingerprint;
   }
 }

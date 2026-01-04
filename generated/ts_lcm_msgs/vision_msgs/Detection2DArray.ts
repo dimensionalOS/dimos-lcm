@@ -4,8 +4,9 @@ import { Header } from "../std_msgs/Header.ts";
 import { Detection2D } from "./Detection2D.ts";
 
 export class Detection2DArray {
-  static readonly _HASH = 0xcac6e8d2dedce600n;
+  static readonly _HASH = 0x85b4a076ba01be3cn;
   static readonly _NAME = "vision_msgs.Detection2DArray";
+  private static _packedFingerprint: bigint | null = null;
 
   detections_length: number;
   header: Header;
@@ -21,11 +22,12 @@ export class Detection2DArray {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== Detection2DArray._HASH) {
-      throw new Error(`Hash mismatch: expected ${Detection2DArray._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = Detection2DArray._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new Detection2DArray();
@@ -52,8 +54,8 @@ export class Detection2DArray {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, Detection2DArray._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, Detection2DArray._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -78,5 +80,23 @@ export class Detection2DArray {
       size += this.detections[i0]._encodedSize();
     }
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(Detection2DArray)) return 0n;
+    const newparents = [...parents, Detection2DArray];
+    let tmphash = Detection2DArray._HASH;
+    tmphash = (tmphash + Header._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Detection2D._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (Detection2DArray._packedFingerprint === null) {
+      Detection2DArray._packedFingerprint = Detection2DArray._getHashRecursive([]);
+    }
+    return Detection2DArray._packedFingerprint;
   }
 }

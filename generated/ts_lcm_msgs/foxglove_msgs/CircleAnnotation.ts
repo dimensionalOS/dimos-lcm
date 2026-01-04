@@ -5,8 +5,9 @@ import { Point2 } from "./Point2.ts";
 import { Color } from "./Color.ts";
 
 export class CircleAnnotation {
-  static readonly _HASH = 0xdccabec6ded8dee4n;
+  static readonly _HASH = 0x5a3219098258887cn;
   static readonly _NAME = "foxglove_msgs.CircleAnnotation";
+  private static _packedFingerprint: bigint | null = null;
 
   timestamp: Time;
   position: Point2;
@@ -28,11 +29,12 @@ export class CircleAnnotation {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== CircleAnnotation._HASH) {
-      throw new Error(`Hash mismatch: expected ${CircleAnnotation._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = CircleAnnotation._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new CircleAnnotation();
@@ -62,8 +64,8 @@ export class CircleAnnotation {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, CircleAnnotation._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, CircleAnnotation._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -91,5 +93,25 @@ export class CircleAnnotation {
     size += this.fill_color._encodedSize();
     size += this.outline_color._encodedSize();
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(CircleAnnotation)) return 0n;
+    const newparents = [...parents, CircleAnnotation];
+    let tmphash = CircleAnnotation._HASH;
+    tmphash = (tmphash + Time._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Point2._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Color._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Color._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (CircleAnnotation._packedFingerprint === null) {
+      CircleAnnotation._packedFingerprint = CircleAnnotation._getHashRecursive([]);
+    }
+    return CircleAnnotation._packedFingerprint;
   }
 }

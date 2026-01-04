@@ -3,8 +3,9 @@
 import { Header } from "../std_msgs/Header.ts";
 
 export class JointState {
-  static readonly _HASH = 0xcacaccccdee4e800n;
+  static readonly _HASH = 0xb69cc30d0d7668fan;
   static readonly _NAME = "sensor_msgs.JointState";
+  private static _packedFingerprint: bigint | null = null;
 
   name_length: number;
   position_length: number;
@@ -32,11 +33,12 @@ export class JointState {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== JointState._HASH) {
-      throw new Error(`Hash mismatch: expected ${JointState._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = JointState._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new JointState();
@@ -88,8 +90,8 @@ export class JointState {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, JointState._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, JointState._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -146,5 +148,22 @@ export class JointState {
     size += this.velocity_length * 8;
     size += this.effort_length * 8;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(JointState)) return 0n;
+    const newparents = [...parents, JointState];
+    let tmphash = JointState._HASH;
+    tmphash = (tmphash + Header._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (JointState._packedFingerprint === null) {
+      JointState._packedFingerprint = JointState._getHashRecursive([]);
+    }
+    return JointState._packedFingerprint;
   }
 }

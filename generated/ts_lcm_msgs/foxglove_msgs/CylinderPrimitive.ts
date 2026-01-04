@@ -5,8 +5,9 @@ import { Vector3 } from "../geometry_msgs/Vector3.ts";
 import { Color } from "./Color.ts";
 
 export class CylinderPrimitive {
-  static readonly _HASH = 0xd8dee4c6ded8dee4n;
+  static readonly _HASH = 0xa52103034bfe0bacn;
   static readonly _NAME = "foxglove_msgs.CylinderPrimitive";
+  private static _packedFingerprint: bigint | null = null;
 
   pose: Pose;
   size: Vector3;
@@ -26,11 +27,12 @@ export class CylinderPrimitive {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== CylinderPrimitive._HASH) {
-      throw new Error(`Hash mismatch: expected ${CylinderPrimitive._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = CylinderPrimitive._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new CylinderPrimitive();
@@ -58,8 +60,8 @@ export class CylinderPrimitive {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, CylinderPrimitive._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, CylinderPrimitive._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -85,5 +87,24 @@ export class CylinderPrimitive {
     size += 8;
     size += this.color._encodedSize();
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(CylinderPrimitive)) return 0n;
+    const newparents = [...parents, CylinderPrimitive];
+    let tmphash = CylinderPrimitive._HASH;
+    tmphash = (tmphash + Pose._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Vector3._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Color._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (CylinderPrimitive._packedFingerprint === null) {
+      CylinderPrimitive._packedFingerprint = CylinderPrimitive._getHashRecursive([]);
+    }
+    return CylinderPrimitive._packedFingerprint;
   }
 }

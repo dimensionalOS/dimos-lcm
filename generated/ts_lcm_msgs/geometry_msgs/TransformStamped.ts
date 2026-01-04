@@ -4,8 +4,9 @@ import { Header } from "../std_msgs/Header.ts";
 import { Transform } from "./Transform.ts";
 
 export class TransformStamped {
-  static readonly _HASH = 0xe4c2dce6ccdee4dan;
+  static readonly _HASH = 0xf694f4a6d8779002n;
   static readonly _NAME = "geometry_msgs.TransformStamped";
+  private static _packedFingerprint: bigint | null = null;
 
   header: Header;
   child_frame_id: string;
@@ -21,11 +22,12 @@ export class TransformStamped {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== TransformStamped._HASH) {
-      throw new Error(`Hash mismatch: expected ${TransformStamped._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = TransformStamped._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new TransformStamped();
@@ -53,8 +55,8 @@ export class TransformStamped {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, TransformStamped._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, TransformStamped._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -82,5 +84,23 @@ export class TransformStamped {
     size += 4 + new TextEncoder().encode(this.child_frame_id).length + 1;
     size += this.transform._encodedSize();
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(TransformStamped)) return 0n;
+    const newparents = [...parents, TransformStamped];
+    let tmphash = TransformStamped._HASH;
+    tmphash = (tmphash + Header._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Transform._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (TransformStamped._packedFingerprint === null) {
+      TransformStamped._packedFingerprint = TransformStamped._getHashRecursive([]);
+    }
+    return TransformStamped._packedFingerprint;
   }
 }

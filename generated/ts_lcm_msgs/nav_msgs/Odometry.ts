@@ -5,8 +5,9 @@ import { PoseWithCovariance } from "../geometry_msgs/PoseWithCovariance.ts";
 import { TwistWithCovariance } from "../geometry_msgs/TwistWithCovariance.ts";
 
 export class Odometry {
-  static readonly _HASH = 0xdcc6cae8eed2e6e8n;
+  static readonly _HASH = 0x97f82279756d9d18n;
   static readonly _NAME = "nav_msgs.Odometry";
+  private static _packedFingerprint: bigint | null = null;
 
   header: Header;
   child_frame_id: string;
@@ -24,11 +25,12 @@ export class Odometry {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== Odometry._HASH) {
-      throw new Error(`Hash mismatch: expected ${Odometry._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = Odometry._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new Odometry();
@@ -58,8 +60,8 @@ export class Odometry {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, Odometry._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, Odometry._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -89,5 +91,24 @@ export class Odometry {
     size += this.pose._encodedSize();
     size += this.twist._encodedSize();
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(Odometry)) return 0n;
+    const newparents = [...parents, Odometry];
+    let tmphash = Odometry._HASH;
+    tmphash = (tmphash + Header._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + PoseWithCovariance._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + TwistWithCovariance._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (Odometry._packedFingerprint === null) {
+      Odometry._packedFingerprint = Odometry._getHashRecursive([]);
+    }
+    return Odometry._packedFingerprint;
   }
 }

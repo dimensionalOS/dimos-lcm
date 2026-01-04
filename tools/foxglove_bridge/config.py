@@ -11,10 +11,12 @@ logger = logging.getLogger("lcm_foxglove_bridge")
 
 # Get the directory where this config.py file is located
 _CONFIG_DIR = os.path.dirname(os.path.abspath(__file__))
+# Project root is two levels up from tools/foxglove_bridge/
+_PROJECT_ROOT = os.path.abspath(os.path.join(_CONFIG_DIR, "..", ".."))
 
-# Directory paths - now using absolute paths relative to config.py location
-ROS_MSGS_DIR = os.path.abspath(os.path.join(_CONFIG_DIR, "..", "ros_msgs"))
-LCM_PYTHON_MODULES_PATH = os.path.abspath(os.path.join(_CONFIG_DIR, "..", "python_lcm_msgs", "lcm_msgs"))
+# Directory paths - using paths relative to project root
+ROS_MSGS_DIR = os.path.join(_PROJECT_ROOT, "sources", "ros_msgs")
+LCM_PYTHON_MODULES_PATH = os.path.join(_PROJECT_ROOT, "generated", "python_lcm_msgs", "lcm_msgs")
 
 # Thread pool settings
 DEFAULT_THREAD_POOL_SIZE = 8

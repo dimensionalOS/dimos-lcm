@@ -5,8 +5,9 @@ import { Point32 } from "../geometry_msgs/Point32.ts";
 import { ChannelFloat32 } from "./ChannelFloat32.ts";
 
 export class PointCloud {
-  static readonly _HASH = 0xd0c2dcdccad8e600n;
+  static readonly _HASH = 0x3ff7dc99e345164en;
   static readonly _NAME = "sensor_msgs.PointCloud";
+  private static _packedFingerprint: bigint | null = null;
 
   points_length: number;
   channels_length: number;
@@ -26,11 +27,12 @@ export class PointCloud {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== PointCloud._HASH) {
-      throw new Error(`Hash mismatch: expected ${PointCloud._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = PointCloud._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new PointCloud();
@@ -64,8 +66,8 @@ export class PointCloud {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, PointCloud._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, PointCloud._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -99,5 +101,24 @@ export class PointCloud {
       size += this.channels[i0]._encodedSize();
     }
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(PointCloud)) return 0n;
+    const newparents = [...parents, PointCloud];
+    let tmphash = PointCloud._HASH;
+    tmphash = (tmphash + Header._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Point32._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + ChannelFloat32._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (PointCloud._packedFingerprint === null) {
+      PointCloud._packedFingerprint = PointCloud._getHashRecursive([]);
+    }
+    return PointCloud._packedFingerprint;
   }
 }

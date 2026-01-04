@@ -3,8 +3,9 @@
 import { Time } from "../builtin_interfaces/Time.ts";
 
 export class RawImage {
-  static readonly _HASH = 0xf2e8cac8c2e8c200n;
+  static readonly _HASH = 0x8dc0da8aa491bb39n;
   static readonly _NAME = "foxglove_msgs.RawImage";
+  private static _packedFingerprint: bigint | null = null;
 
   data_length: number;
   timestamp: Time;
@@ -30,11 +31,12 @@ export class RawImage {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== RawImage._HASH) {
-      throw new Error(`Hash mismatch: expected ${RawImage._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = RawImage._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new RawImage();
@@ -76,8 +78,8 @@ export class RawImage {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, RawImage._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, RawImage._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -128,5 +130,22 @@ export class RawImage {
     size += 4;
     size += this.data_length * 1;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(RawImage)) return 0n;
+    const newparents = [...parents, RawImage];
+    let tmphash = RawImage._HASH;
+    tmphash = (tmphash + Time._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (RawImage._packedFingerprint === null) {
+      RawImage._packedFingerprint = RawImage._getHashRecursive([]);
+    }
+    return RawImage._packedFingerprint;
   }
 }

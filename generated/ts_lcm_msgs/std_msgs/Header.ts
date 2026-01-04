@@ -3,8 +3,9 @@
 import { Time } from "./Time.ts";
 
 export class Header {
-  static readonly _HASH = 0xcce4c2dacabed2c8n;
+  static readonly _HASH = 0xdbb33f5b4c19b8ean;
   static readonly _NAME = "std_msgs.Header";
+  private static _packedFingerprint: bigint | null = null;
 
   seq: number;
   stamp: Time;
@@ -20,11 +21,12 @@ export class Header {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== Header._HASH) {
-      throw new Error(`Hash mismatch: expected ${Header._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = Header._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new Header();
@@ -52,8 +54,8 @@ export class Header {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, Header._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, Header._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -82,5 +84,22 @@ export class Header {
     size += this.stamp._encodedSize();
     size += 4 + new TextEncoder().encode(this.frame_id).length + 1;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(Header)) return 0n;
+    const newparents = [...parents, Header];
+    let tmphash = Header._HASH;
+    tmphash = (tmphash + Time._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (Header._packedFingerprint === null) {
+      Header._packedFingerprint = Header._getHashRecursive([]);
+    }
+    return Header._packedFingerprint;
   }
 }

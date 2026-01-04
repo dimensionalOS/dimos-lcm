@@ -3,8 +3,9 @@
 import { Twist } from "./Twist.ts";
 
 export class TwistWithCovariance {
-  static readonly _HASH = 0xe4d2c2dcc6ca0248n;
+  static readonly _HASH = 0xaba0a9d55e98da5dn;
   static readonly _NAME = "geometry_msgs.TwistWithCovariance";
+  private static _packedFingerprint: bigint | null = null;
 
   twist: Twist;
   covariance: number[];
@@ -18,11 +19,12 @@ export class TwistWithCovariance {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== TwistWithCovariance._HASH) {
-      throw new Error(`Hash mismatch: expected ${TwistWithCovariance._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = TwistWithCovariance._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new TwistWithCovariance();
@@ -47,8 +49,8 @@ export class TwistWithCovariance {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, TwistWithCovariance._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, TwistWithCovariance._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -69,5 +71,22 @@ export class TwistWithCovariance {
     size += this.twist._encodedSize();
     size += 36 * 8;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(TwistWithCovariance)) return 0n;
+    const newparents = [...parents, TwistWithCovariance];
+    let tmphash = TwistWithCovariance._HASH;
+    tmphash = (tmphash + Twist._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (TwistWithCovariance._packedFingerprint === null) {
+      TwistWithCovariance._packedFingerprint = TwistWithCovariance._getHashRecursive([]);
+    }
+    return TwistWithCovariance._packedFingerprint;
   }
 }

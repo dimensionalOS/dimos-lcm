@@ -3,8 +3,9 @@
 import { Accel } from "./Accel.ts";
 
 export class AccelWithCovariance {
-  static readonly _HASH = 0xe4d2c2dcc6ca0248n;
+  static readonly _HASH = 0x545f576dfe97951dn;
   static readonly _NAME = "geometry_msgs.AccelWithCovariance";
+  private static _packedFingerprint: bigint | null = null;
 
   accel: Accel;
   covariance: number[];
@@ -18,11 +19,12 @@ export class AccelWithCovariance {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== AccelWithCovariance._HASH) {
-      throw new Error(`Hash mismatch: expected ${AccelWithCovariance._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = AccelWithCovariance._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new AccelWithCovariance();
@@ -47,8 +49,8 @@ export class AccelWithCovariance {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, AccelWithCovariance._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, AccelWithCovariance._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -69,5 +71,22 @@ export class AccelWithCovariance {
     size += this.accel._encodedSize();
     size += 36 * 8;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(AccelWithCovariance)) return 0n;
+    const newparents = [...parents, AccelWithCovariance];
+    let tmphash = AccelWithCovariance._HASH;
+    tmphash = (tmphash + Accel._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (AccelWithCovariance._packedFingerprint === null) {
+      AccelWithCovariance._packedFingerprint = AccelWithCovariance._getHashRecursive([]);
+    }
+    return AccelWithCovariance._packedFingerprint;
   }
 }

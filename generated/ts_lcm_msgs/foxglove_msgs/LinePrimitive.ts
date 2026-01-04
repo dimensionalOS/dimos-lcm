@@ -5,8 +5,9 @@ import { Point } from "../geometry_msgs/Point.ts";
 import { Color } from "./Color.ts";
 
 export class LinePrimitive {
-  static readonly _HASH = 0xd2dcc8d2c6cae600n;
+  static readonly _HASH = 0x3b39f8eb653b3cd3n;
   static readonly _NAME = "foxglove_msgs.LinePrimitive";
+  private static _packedFingerprint: bigint | null = null;
 
   static readonly LINE_STRIP = 0;
   static readonly LINE_LOOP = 1;
@@ -42,11 +43,12 @@ export class LinePrimitive {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== LinePrimitive._HASH) {
-      throw new Error(`Hash mismatch: expected ${LinePrimitive._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = LinePrimitive._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new LinePrimitive();
@@ -95,8 +97,8 @@ export class LinePrimitive {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, LinePrimitive._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, LinePrimitive._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -149,5 +151,25 @@ export class LinePrimitive {
     }
     size += this.indices_length * 4;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(LinePrimitive)) return 0n;
+    const newparents = [...parents, LinePrimitive];
+    let tmphash = LinePrimitive._HASH;
+    tmphash = (tmphash + Pose._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Point._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Color._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Color._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (LinePrimitive._packedFingerprint === null) {
+      LinePrimitive._packedFingerprint = LinePrimitive._getHashRecursive([]);
+    }
+    return LinePrimitive._packedFingerprint;
   }
 }

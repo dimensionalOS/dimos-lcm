@@ -5,8 +5,9 @@ import { PointsAnnotation } from "./PointsAnnotation.ts";
 import { TextAnnotation } from "./TextAnnotation.ts";
 
 export class ImageAnnotations {
-  static readonly _HASH = 0xdedce8caf0e8e600n;
+  static readonly _HASH = 0x8b3a52c632c59b07n;
   static readonly _NAME = "foxglove_msgs.ImageAnnotations";
+  private static _packedFingerprint: bigint | null = null;
 
   circles_length: number;
   points_length: number;
@@ -28,11 +29,12 @@ export class ImageAnnotations {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== ImageAnnotations._HASH) {
-      throw new Error(`Hash mismatch: expected ${ImageAnnotations._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = ImageAnnotations._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new ImageAnnotations();
@@ -71,8 +73,8 @@ export class ImageAnnotations {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, ImageAnnotations._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, ImageAnnotations._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -113,5 +115,24 @@ export class ImageAnnotations {
       size += this.texts[i0]._encodedSize();
     }
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(ImageAnnotations)) return 0n;
+    const newparents = [...parents, ImageAnnotations];
+    let tmphash = ImageAnnotations._HASH;
+    tmphash = (tmphash + CircleAnnotation._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + PointsAnnotation._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + TextAnnotation._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (ImageAnnotations._packedFingerprint === null) {
+      ImageAnnotations._packedFingerprint = ImageAnnotations._getHashRecursive([]);
+    }
+    return ImageAnnotations._packedFingerprint;
   }
 }

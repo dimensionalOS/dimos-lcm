@@ -4,8 +4,9 @@ import { ObjectHypothesis } from "./ObjectHypothesis.ts";
 import { PoseWithCovariance } from "../geometry_msgs/PoseWithCovariance.ts";
 
 export class ObjectHypothesisWithPose {
-  static readonly _HASH = 0xc2dcc6cae0dee6can;
+  static readonly _HASH = 0x65e1d44b451e8a8bn;
   static readonly _NAME = "vision_msgs.ObjectHypothesisWithPose";
+  private static _packedFingerprint: bigint | null = null;
 
   hypothesis: ObjectHypothesis;
   pose: PoseWithCovariance;
@@ -19,11 +20,12 @@ export class ObjectHypothesisWithPose {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== ObjectHypothesisWithPose._HASH) {
-      throw new Error(`Hash mismatch: expected ${ObjectHypothesisWithPose._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = ObjectHypothesisWithPose._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new ObjectHypothesisWithPose();
@@ -45,8 +47,8 @@ export class ObjectHypothesisWithPose {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, ObjectHypothesisWithPose._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, ObjectHypothesisWithPose._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -64,5 +66,23 @@ export class ObjectHypothesisWithPose {
     size += this.hypothesis._encodedSize();
     size += this.pose._encodedSize();
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(ObjectHypothesisWithPose)) return 0n;
+    const newparents = [...parents, ObjectHypothesisWithPose];
+    let tmphash = ObjectHypothesisWithPose._HASH;
+    tmphash = (tmphash + ObjectHypothesis._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + PoseWithCovariance._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (ObjectHypothesisWithPose._packedFingerprint === null) {
+      ObjectHypothesisWithPose._packedFingerprint = ObjectHypothesisWithPose._getHashRecursive([]);
+    }
+    return ObjectHypothesisWithPose._packedFingerprint;
   }
 }

@@ -3,8 +3,9 @@
 import { Time } from "../builtin_interfaces/Time.ts";
 
 export class Log {
-  static readonly _HASH = 0x6664bee8d8d2dccan;
+  static readonly _HASH = 0x623dae456e90a1c7n;
   static readonly _NAME = "foxglove_msgs.Log";
+  private static _packedFingerprint: bigint | null = null;
 
   static readonly UNKNOWN = 0;
   static readonly DEBUG = 1;
@@ -33,11 +34,12 @@ export class Log {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== Log._HASH) {
-      throw new Error(`Hash mismatch: expected ${Log._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = Log._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new Log();
@@ -79,8 +81,8 @@ export class Log {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, Log._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, Log._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -132,5 +134,22 @@ export class Log {
     size += 4 + new TextEncoder().encode(this.file).length + 1;
     size += 4;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(Log)) return 0n;
+    const newparents = [...parents, Log];
+    let tmphash = Log._HASH;
+    tmphash = (tmphash + Time._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (Log._packedFingerprint === null) {
+      Log._packedFingerprint = Log._getHashRecursive([]);
+    }
+    return Log._packedFingerprint;
   }
 }

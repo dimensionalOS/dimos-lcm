@@ -3,8 +3,9 @@
 import { Pose2D } from "./Pose2D.ts";
 
 export class BoundingBox2D {
-  static readonly _HASH = 0xd8cae6d2f4cabef2n;
+  static readonly _HASH = 0xe2274ad6240f1c77n;
   static readonly _NAME = "vision_msgs.BoundingBox2D";
+  private static _packedFingerprint: bigint | null = null;
 
   center: Pose2D;
   size_x: number;
@@ -20,11 +21,12 @@ export class BoundingBox2D {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== BoundingBox2D._HASH) {
-      throw new Error(`Hash mismatch: expected ${BoundingBox2D._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = BoundingBox2D._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new BoundingBox2D();
@@ -48,8 +50,8 @@ export class BoundingBox2D {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, BoundingBox2D._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, BoundingBox2D._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -71,5 +73,22 @@ export class BoundingBox2D {
     size += 8;
     size += 8;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(BoundingBox2D)) return 0n;
+    const newparents = [...parents, BoundingBox2D];
+    let tmphash = BoundingBox2D._HASH;
+    tmphash = (tmphash + Pose2D._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (BoundingBox2D._packedFingerprint === null) {
+      BoundingBox2D._packedFingerprint = BoundingBox2D._getHashRecursive([]);
+    }
+    return BoundingBox2D._packedFingerprint;
   }
 }

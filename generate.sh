@@ -32,4 +32,7 @@ echo -e "\033[32mLCM -> Java done\033[0m"
 # Generate TypeScript bindings
 rm -rf "$SCRIPT_DIR/generated/ts_lcm_msgs"
 deno run --allow-read --allow-write "$SCRIPT_DIR/tools/ts/gen/mod.ts" -q -o "$SCRIPT_DIR/generated/ts_lcm_msgs" "$SCRIPT_DIR/lcm_types"/*.lcm
+# Copy to msgs package (for JSR publishing - symlinks not supported)
+rm -rf "$SCRIPT_DIR/tools/ts/msgs/generated"
+cp -r "$SCRIPT_DIR/generated/ts_lcm_msgs" "$SCRIPT_DIR/tools/ts/msgs/generated"
 echo -e "\033[32mLCM -> TypeScript done\033[0m"

@@ -1,0 +1,19 @@
+{
+  "name": "@dimos/lcm",
+  "version": "0.2.0",
+  "license": "Apache-2.0",
+  "exports": "./mod.ts",
+  "publish": {
+    "exclude": ["examples/", "*_test.ts"]
+  },
+  "tasks": {
+    "check": "deno check mod.ts",
+    "test": "deno test --allow-net --unstable-net",
+    "pub": "deno run --allow-net --unstable-net examples/publisher.ts",
+    "sub": "deno run --allow-net --unstable-net examples/subscriber.ts",
+    "interop": "deno run --allow-net --unstable-net examples/interop.ts"
+  },
+  "compilerOptions": {
+    "strict": true
+  }
+}

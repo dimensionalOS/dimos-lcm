@@ -4,8 +4,9 @@ import { Header } from "../std_msgs/Header.ts";
 import { MapMetaData } from "./MapMetaData.ts";
 
 export class OccupancyGrid {
-  static readonly _HASH = 0x70bee8c8c2e8c200n;
+  static readonly _HASH = 0x9e67f3f149308d87n;
   static readonly _NAME = "nav_msgs.OccupancyGrid";
+  private static _packedFingerprint: bigint | null = null;
 
   data_length: number;
   header: Header;
@@ -23,11 +24,12 @@ export class OccupancyGrid {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== OccupancyGrid._HASH) {
-      throw new Error(`Hash mismatch: expected ${OccupancyGrid._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = OccupancyGrid._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new OccupancyGrid();
@@ -56,8 +58,8 @@ export class OccupancyGrid {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, OccupancyGrid._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, OccupancyGrid._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -83,5 +85,23 @@ export class OccupancyGrid {
     size += this.info._encodedSize();
     size += this.data_length * 1;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(OccupancyGrid)) return 0n;
+    const newparents = [...parents, OccupancyGrid];
+    let tmphash = OccupancyGrid._HASH;
+    tmphash = (tmphash + Header._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + MapMetaData._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (OccupancyGrid._packedFingerprint === null) {
+      OccupancyGrid._packedFingerprint = OccupancyGrid._getHashRecursive([]);
+    }
+    return OccupancyGrid._packedFingerprint;
   }
 }

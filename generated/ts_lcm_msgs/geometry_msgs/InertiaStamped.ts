@@ -4,8 +4,9 @@ import { Header } from "../std_msgs/Header.ts";
 import { Inertia } from "./Inertia.ts";
 
 export class InertiaStamped {
-  static readonly _HASH = 0xc2d2dccae4e8d2c2n;
+  static readonly _HASH = 0x3a39287c292abed7n;
   static readonly _NAME = "geometry_msgs.InertiaStamped";
+  private static _packedFingerprint: bigint | null = null;
 
   header: Header;
   inertia: Inertia;
@@ -19,11 +20,12 @@ export class InertiaStamped {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== InertiaStamped._HASH) {
-      throw new Error(`Hash mismatch: expected ${InertiaStamped._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = InertiaStamped._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new InertiaStamped();
@@ -45,8 +47,8 @@ export class InertiaStamped {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, InertiaStamped._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, InertiaStamped._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -64,5 +66,23 @@ export class InertiaStamped {
     size += this.header._encodedSize();
     size += this.inertia._encodedSize();
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(InertiaStamped)) return 0n;
+    const newparents = [...parents, InertiaStamped];
+    let tmphash = InertiaStamped._HASH;
+    tmphash = (tmphash + Header._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Inertia._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (InertiaStamped._packedFingerprint === null) {
+      InertiaStamped._packedFingerprint = InertiaStamped._getHashRecursive([]);
+    }
+    return InertiaStamped._packedFingerprint;
   }
 }

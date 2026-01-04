@@ -5,8 +5,9 @@ import { Image } from "../sensor_msgs/Image.ts";
 import { RegionOfInterest } from "../sensor_msgs/RegionOfInterest.ts";
 
 export class DisparityImage {
-  static readonly _HASH = 0xe8c8cad8e8c2bec8n;
+  static readonly _HASH = 0xdeb7a557a2b9258an;
   static readonly _NAME = "stereo_msgs.DisparityImage";
+  private static _packedFingerprint: bigint | null = null;
 
   header: Header;
   image: Image;
@@ -32,11 +33,12 @@ export class DisparityImage {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== DisparityImage._HASH) {
-      throw new Error(`Hash mismatch: expected ${DisparityImage._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = DisparityImage._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new DisparityImage();
@@ -70,8 +72,8 @@ export class DisparityImage {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, DisparityImage._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, DisparityImage._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -106,5 +108,24 @@ export class DisparityImage {
     size += 4;
     size += 4;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(DisparityImage)) return 0n;
+    const newparents = [...parents, DisparityImage];
+    let tmphash = DisparityImage._HASH;
+    tmphash = (tmphash + Header._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Image._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + RegionOfInterest._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (DisparityImage._packedFingerprint === null) {
+      DisparityImage._packedFingerprint = DisparityImage._getHashRecursive([]);
+    }
+    return DisparityImage._packedFingerprint;
   }
 }

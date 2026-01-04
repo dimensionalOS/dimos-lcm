@@ -5,8 +5,9 @@ import { Quaternion } from "../geometry_msgs/Quaternion.ts";
 import { Vector3 } from "../geometry_msgs/Vector3.ts";
 
 export class Imu {
-  static readonly _HASH = 0xe4d2c2dcc6ca0212n;
+  static readonly _HASH = 0x55c1e238541325f6n;
   static readonly _NAME = "sensor_msgs.Imu";
+  private static _packedFingerprint: bigint | null = null;
 
   header: Header;
   orientation: Quaternion;
@@ -30,11 +31,12 @@ export class Imu {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== Imu._HASH) {
-      throw new Error(`Hash mismatch: expected ${Imu._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = Imu._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new Imu();
@@ -75,8 +77,8 @@ export class Imu {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, Imu._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, Imu._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -113,5 +115,25 @@ export class Imu {
     size += this.linear_acceleration._encodedSize();
     size += 9 * 8;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(Imu)) return 0n;
+    const newparents = [...parents, Imu];
+    let tmphash = Imu._HASH;
+    tmphash = (tmphash + Header._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Quaternion._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Vector3._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Vector3._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (Imu._packedFingerprint === null) {
+      Imu._packedFingerprint = Imu._getHashRecursive([]);
+    }
+    return Imu._packedFingerprint;
   }
 }

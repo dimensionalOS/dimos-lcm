@@ -3,8 +3,9 @@
 import { Time } from "../std_msgs/Time.ts";
 
 export class GoalID {
-  static readonly _HASH = 0xe6e8e4d2dcced2c8n;
+  static readonly _HASH = 0xef36683ef0767e95n;
   static readonly _NAME = "actionlib_msgs.GoalID";
+  private static _packedFingerprint: bigint | null = null;
 
   stamp: Time;
   id: string;
@@ -18,11 +19,12 @@ export class GoalID {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== GoalID._HASH) {
-      throw new Error(`Hash mismatch: expected ${GoalID._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = GoalID._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new GoalID();
@@ -48,8 +50,8 @@ export class GoalID {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, GoalID._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, GoalID._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -75,5 +77,22 @@ export class GoalID {
     size += this.stamp._encodedSize();
     size += 4 + new TextEncoder().encode(this.id).length + 1;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(GoalID)) return 0n;
+    const newparents = [...parents, GoalID];
+    let tmphash = GoalID._HASH;
+    tmphash = (tmphash + Time._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (GoalID._packedFingerprint === null) {
+      GoalID._packedFingerprint = GoalID._getHashRecursive([]);
+    }
+    return GoalID._packedFingerprint;
   }
 }

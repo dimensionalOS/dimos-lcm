@@ -4,8 +4,9 @@ import { Header } from "../std_msgs/Header.ts";
 import { LaserEcho } from "./LaserEcho.ts";
 
 export class MultiEchoLaserScan {
-  static readonly _HASH = 0xdce6d2e8d2cae600n;
+  static readonly _HASH = 0xf02a6253849d18e2n;
   static readonly _NAME = "sensor_msgs.MultiEchoLaserScan";
+  private static _packedFingerprint: bigint | null = null;
 
   ranges_length: number;
   intensities_length: number;
@@ -39,11 +40,12 @@ export class MultiEchoLaserScan {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== MultiEchoLaserScan._HASH) {
-      throw new Error(`Hash mismatch: expected ${MultiEchoLaserScan._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = MultiEchoLaserScan._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new MultiEchoLaserScan();
@@ -91,8 +93,8 @@ export class MultiEchoLaserScan {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, MultiEchoLaserScan._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, MultiEchoLaserScan._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -147,5 +149,24 @@ export class MultiEchoLaserScan {
       size += this.intensities[i0]._encodedSize();
     }
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(MultiEchoLaserScan)) return 0n;
+    const newparents = [...parents, MultiEchoLaserScan];
+    let tmphash = MultiEchoLaserScan._HASH;
+    tmphash = (tmphash + Header._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + LaserEcho._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + LaserEcho._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (MultiEchoLaserScan._packedFingerprint === null) {
+      MultiEchoLaserScan._packedFingerprint = MultiEchoLaserScan._getHashRecursive([]);
+    }
+    return MultiEchoLaserScan._packedFingerprint;
   }
 }

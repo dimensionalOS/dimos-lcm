@@ -4,8 +4,9 @@ import { Header } from "../std_msgs/Header.ts";
 import { Polygon } from "./Polygon.ts";
 
 export class PolygonStamped {
-  static readonly _HASH = 0xdce0ded8f2cededcn;
+  static readonly _HASH = 0x413a2f753630b1d7n;
   static readonly _NAME = "geometry_msgs.PolygonStamped";
+  private static _packedFingerprint: bigint | null = null;
 
   header: Header;
   polygon: Polygon;
@@ -19,11 +20,12 @@ export class PolygonStamped {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== PolygonStamped._HASH) {
-      throw new Error(`Hash mismatch: expected ${PolygonStamped._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = PolygonStamped._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new PolygonStamped();
@@ -45,8 +47,8 @@ export class PolygonStamped {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, PolygonStamped._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, PolygonStamped._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -64,5 +66,23 @@ export class PolygonStamped {
     size += this.header._encodedSize();
     size += this.polygon._encodedSize();
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(PolygonStamped)) return 0n;
+    const newparents = [...parents, PolygonStamped];
+    let tmphash = PolygonStamped._HASH;
+    tmphash = (tmphash + Header._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Polygon._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (PolygonStamped._packedFingerprint === null) {
+      PolygonStamped._packedFingerprint = PolygonStamped._getHashRecursive([]);
+    }
+    return PolygonStamped._packedFingerprint;
   }
 }

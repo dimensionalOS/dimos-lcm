@@ -4,8 +4,9 @@ import { Header } from "../std_msgs/Header.ts";
 import { Wrench } from "./Wrench.ts";
 
 export class WrenchStamped {
-  static readonly _HASH = 0xc6d0eee4cadcc6d0n;
+  static readonly _HASH = 0xecb7c2d77fc5d5e0n;
   static readonly _NAME = "geometry_msgs.WrenchStamped";
+  private static _packedFingerprint: bigint | null = null;
 
   header: Header;
   wrench: Wrench;
@@ -19,11 +20,12 @@ export class WrenchStamped {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== WrenchStamped._HASH) {
-      throw new Error(`Hash mismatch: expected ${WrenchStamped._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = WrenchStamped._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new WrenchStamped();
@@ -45,8 +47,8 @@ export class WrenchStamped {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, WrenchStamped._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, WrenchStamped._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -64,5 +66,23 @@ export class WrenchStamped {
     size += this.header._encodedSize();
     size += this.wrench._encodedSize();
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(WrenchStamped)) return 0n;
+    const newparents = [...parents, WrenchStamped];
+    let tmphash = WrenchStamped._HASH;
+    tmphash = (tmphash + Header._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Wrench._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (WrenchStamped._packedFingerprint === null) {
+      WrenchStamped._packedFingerprint = WrenchStamped._getHashRecursive([]);
+    }
+    return WrenchStamped._packedFingerprint;
   }
 }

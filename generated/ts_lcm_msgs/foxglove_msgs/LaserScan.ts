@@ -4,8 +4,9 @@ import { Time } from "../builtin_interfaces/Time.ts";
 import { Pose } from "../geometry_msgs/Pose.ts";
 
 export class LaserScan {
-  static readonly _HASH = 0xdce6d2e8d2cae600n;
+  static readonly _HASH = 0x22e7c769ba6a90c2n;
   static readonly _NAME = "foxglove_msgs.LaserScan";
+  private static _packedFingerprint: bigint | null = null;
 
   ranges_length: number;
   intensities_length: number;
@@ -33,11 +34,12 @@ export class LaserScan {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== LaserScan._HASH) {
-      throw new Error(`Hash mismatch: expected ${LaserScan._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = LaserScan._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new LaserScan();
@@ -83,8 +85,8 @@ export class LaserScan {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, LaserScan._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, LaserScan._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -134,5 +136,23 @@ export class LaserScan {
     size += this.ranges_length * 8;
     size += this.intensities_length * 8;
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(LaserScan)) return 0n;
+    const newparents = [...parents, LaserScan];
+    let tmphash = LaserScan._HASH;
+    tmphash = (tmphash + Time._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Pose._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (LaserScan._packedFingerprint === null) {
+      LaserScan._packedFingerprint = LaserScan._getHashRecursive([]);
+    }
+    return LaserScan._packedFingerprint;
   }
 }

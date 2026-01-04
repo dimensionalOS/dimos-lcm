@@ -4,8 +4,9 @@ import { Point } from "./Point.ts";
 import { Quaternion } from "./Quaternion.ts";
 
 export class Pose {
-  static readonly _HASH = 0xcadce8c2e8d2dedcn;
+  static readonly _HASH = 0x2d70dd60bd541272n;
   static readonly _NAME = "geometry_msgs.Pose";
+  private static _packedFingerprint: bigint | null = null;
 
   position: Point;
   orientation: Quaternion;
@@ -19,11 +20,12 @@ export class Pose {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== Pose._HASH) {
-      throw new Error(`Hash mismatch: expected ${Pose._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = Pose._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new Pose();
@@ -45,8 +47,8 @@ export class Pose {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, Pose._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, Pose._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -64,5 +66,23 @@ export class Pose {
     size += this.position._encodedSize();
     size += this.orientation._encodedSize();
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(Pose)) return 0n;
+    const newparents = [...parents, Pose];
+    let tmphash = Pose._HASH;
+    tmphash = (tmphash + Point._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Quaternion._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (Pose._packedFingerprint === null) {
+      Pose._packedFingerprint = Pose._getHashRecursive([]);
+    }
+    return Pose._packedFingerprint;
   }
 }

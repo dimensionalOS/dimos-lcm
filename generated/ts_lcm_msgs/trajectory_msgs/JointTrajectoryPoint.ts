@@ -3,8 +3,9 @@
 import { Duration } from "../std_msgs/Duration.ts";
 
 export class JointTrajectoryPoint {
-  static readonly _HASH = 0xdedabee6e8c2e4e8n;
+  static readonly _HASH = 0x5f17dcae9da98292n;
   static readonly _NAME = "trajectory_msgs.JointTrajectoryPoint";
+  private static _packedFingerprint: bigint | null = null;
 
   positions_length: number;
   velocities_length: number;
@@ -32,11 +33,12 @@ export class JointTrajectoryPoint {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== JointTrajectoryPoint._HASH) {
-      throw new Error(`Hash mismatch: expected ${JointTrajectoryPoint._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = JointTrajectoryPoint._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new JointTrajectoryPoint();
@@ -84,8 +86,8 @@ export class JointTrajectoryPoint {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, JointTrajectoryPoint._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, JointTrajectoryPoint._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -133,5 +135,22 @@ export class JointTrajectoryPoint {
     size += this.effort_length * 8;
     size += this.time_from_start._encodedSize();
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(JointTrajectoryPoint)) return 0n;
+    const newparents = [...parents, JointTrajectoryPoint];
+    let tmphash = JointTrajectoryPoint._HASH;
+    tmphash = (tmphash + Duration._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (JointTrajectoryPoint._packedFingerprint === null) {
+      JointTrajectoryPoint._packedFingerprint = JointTrajectoryPoint._getHashRecursive([]);
+    }
+    return JointTrajectoryPoint._packedFingerprint;
   }
 }

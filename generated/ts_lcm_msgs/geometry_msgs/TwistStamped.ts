@@ -4,8 +4,9 @@ import { Header } from "../std_msgs/Header.ts";
 import { Twist } from "./Twist.ts";
 
 export class TwistStamped {
-  static readonly _HASH = 0xd2e6e8e8eed2e6e8n;
+  static readonly _HASH = 0xf01245422c7b28c2n;
   static readonly _NAME = "geometry_msgs.TwistStamped";
+  private static _packedFingerprint: bigint | null = null;
 
   header: Header;
   twist: Twist;
@@ -19,11 +20,12 @@ export class TwistStamped {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     let offset = 0;
 
-    // Verify fingerprint
+    // Verify fingerprint (recursive hash including nested types)
     const hash = view.getBigUint64(offset, false);
     offset += 8;
-    if (hash !== TwistStamped._HASH) {
-      throw new Error(`Hash mismatch: expected ${TwistStamped._HASH.toString(16)}, got ${hash.toString(16)}`);
+    const expectedHash = TwistStamped._getPackedFingerprint();
+    if (hash !== expectedHash) {
+      throw new Error(`Hash mismatch: expected ${expectedHash.toString(16)}, got ${hash.toString(16)}`);
     }
 
     const result = new TwistStamped();
@@ -45,8 +47,8 @@ export class TwistStamped {
     const view = new DataView(data.buffer);
     let offset = 0;
 
-    // Write fingerprint
-    view.setBigUint64(offset, TwistStamped._HASH, false);
+    // Write fingerprint (recursive hash including nested types)
+    view.setBigUint64(offset, TwistStamped._getPackedFingerprint(), false);
     offset += 8;
 
     offset = this._encodeOne(view, offset);
@@ -64,5 +66,23 @@ export class TwistStamped {
     size += this.header._encodedSize();
     size += this.twist._encodedSize();
     return size;
+  }
+
+  // deno-lint-ignore no-explicit-any
+  static _getHashRecursive(parents: any[]): bigint {
+    if (parents.includes(TwistStamped)) return 0n;
+    const newparents = [...parents, TwistStamped];
+    let tmphash = TwistStamped._HASH;
+    tmphash = (tmphash + Header._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + Twist._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
+    return tmphash;
+  }
+
+  static _getPackedFingerprint(): bigint {
+    if (TwistStamped._packedFingerprint === null) {
+      TwistStamped._packedFingerprint = TwistStamped._getHashRecursive([]);
+    }
+    return TwistStamped._packedFingerprint;
   }
 }
