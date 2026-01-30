@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dimos_lcm"
-version = "0.1.1"
+version = "0.1.2"
 description = "LCM-Foxglove bridge and message utilities for Dimensional Robotics"
 authors = [
     {name = "Dimensional Team", email = "build@dimensionalOS.com"},
@@ -61,6 +61,6 @@ packages = [
 [tool.setuptools.package-data]
 "dimos_lcm" = [
     "*.py",
-    "generated/python_lcm_msgs/**/*"
+    "generated/python_lcm_msgs/**/*",
+    "sources/ros_msgs/**/*.msg"
 ]
-
