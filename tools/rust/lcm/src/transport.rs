@@ -16,6 +16,7 @@ pub const DEFAULT_PORT: u16 = 7667;
 static SEQ: AtomicU32 = AtomicU32::new(0);
 
 /// Configuration for an LCM transport instance.
+#[derive(Debug, Clone)]
 pub struct LcmOptions {
     /// Multicast group address (default: 239.255.76.67).
     pub multicast_group: Ipv4Addr,
@@ -39,6 +40,7 @@ impl Default for LcmOptions {
 }
 
 /// A received LCM message.
+#[derive(Debug, Clone)]
 pub struct ReceivedMessage {
     /// Channel name (e.g., "/odom#geometry_msgs.PoseStamped").
     pub channel: String,

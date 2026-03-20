@@ -4,7 +4,7 @@ use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 use std::io::{self, Read, Write, Cursor};
 use std::sync::OnceLock;
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct Duration {
     pub sec: i32,
     pub nsec: i32,
@@ -34,7 +34,7 @@ impl Duration {
     pub fn encode(&self) -> Vec<u8> {
         let mut buf = Vec::with_capacity(8 + self.encoded_size());
         buf.write_u64::<BigEndian>(Self::packed_fingerprint()).unwrap();
-        self.encode_one(&mut buf);
+        self.encode_one(&mut buf).unwrap();
         buf
     }
 
@@ -49,9 +49,10 @@ impl Duration {
         Self::decode_one(&mut cursor)
     }
 
-    pub fn encode_one<W: Write>(&self, buf: &mut W) {
-        buf.write_i32::<BigEndian>(self.sec).unwrap();
-        buf.write_i32::<BigEndian>(self.nsec).unwrap();
+    pub fn encode_one<W: Write>(&self, buf: &mut W) -> io::Result<()> {
+        buf.write_i32::<BigEndian>(self.sec)?;
+        buf.write_i32::<BigEndian>(self.nsec)?;
+        Ok(())
     }
 
     pub fn decode_one<R: Read>(buf: &mut R) -> io::Result<Self> {

@@ -4,7 +4,7 @@ use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 use std::io::{self, Read, Write, Cursor};
 use std::sync::OnceLock;
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct Inertia {
     pub m: f64,
     pub com: crate::geometry_msgs::Vector3,
@@ -41,7 +41,7 @@ impl Inertia {
     pub fn encode(&self) -> Vec<u8> {
         let mut buf = Vec::with_capacity(8 + self.encoded_size());
         buf.write_u64::<BigEndian>(Self::packed_fingerprint()).unwrap();
-        self.encode_one(&mut buf);
+        self.encode_one(&mut buf).unwrap();
         buf
     }
 
@@ -56,15 +56,16 @@ impl Inertia {
         Self::decode_one(&mut cursor)
     }
 
-    pub fn encode_one<W: Write>(&self, buf: &mut W) {
-        buf.write_f64::<BigEndian>(self.m).unwrap();
-        self.com.encode_one(buf);
-        buf.write_f64::<BigEndian>(self.ixx).unwrap();
-        buf.write_f64::<BigEndian>(self.ixy).unwrap();
-        buf.write_f64::<BigEndian>(self.ixz).unwrap();
-        buf.write_f64::<BigEndian>(self.iyy).unwrap();
-        buf.write_f64::<BigEndian>(self.iyz).unwrap();
-        buf.write_f64::<BigEndian>(self.izz).unwrap();
+    pub fn encode_one<W: Write>(&self, buf: &mut W) -> io::Result<()> {
+        buf.write_f64::<BigEndian>(self.m)?;
+        self.com.encode_one(buf)?;
+        buf.write_f64::<BigEndian>(self.ixx)?;
+        buf.write_f64::<BigEndian>(self.ixy)?;
+        buf.write_f64::<BigEndian>(self.ixz)?;
+        buf.write_f64::<BigEndian>(self.iyy)?;
+        buf.write_f64::<BigEndian>(self.iyz)?;
+        buf.write_f64::<BigEndian>(self.izz)?;
+        Ok(())
     }
 
     pub fn decode_one<R: Read>(buf: &mut R) -> io::Result<Self> {

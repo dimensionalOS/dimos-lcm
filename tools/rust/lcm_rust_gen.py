@@ -359,9 +359,9 @@ def gen_struct(struct: LcmStruct, all_structs: dict[str, LcmStruct]) -> str:
 
     # Derive list
     if manual_default:
-        derives = "#[derive(Debug, Clone)]"
+        derives = "#[derive(Debug, Clone, PartialEq)]"
     else:
-        derives = "#[derive(Debug, Clone, Default)]"
+        derives = "#[derive(Debug, Clone, Default, PartialEq)]"
 
     lines.append(derives)
     lines.append(f"pub struct {struct.name} {{")
@@ -522,7 +522,7 @@ def gen_encode(lines: list[str], struct: LcmStruct, length_fields: set[str]):
     lines.append("    pub fn encode(&self) -> Vec<u8> {")
     lines.append("        let mut buf = Vec::with_capacity(8 + self.encoded_size());")
     lines.append("        buf.write_u64::<BigEndian>(Self::packed_fingerprint()).unwrap();")
-    lines.append("        self.encode_one(&mut buf);")
+    lines.append("        self.encode_one(&mut buf).unwrap();")
     lines.append("        buf")
     lines.append("    }")
     lines.append("")
@@ -548,16 +548,17 @@ def gen_encode_one(lines: list[str], struct: LcmStruct, length_fields: set[str],
     real_members = [m for m in struct.members if m.name not in length_fields]
     has_members = bool(struct.members)
     buf_name = "buf" if has_members else "_buf"
-    lines.append(f"    pub fn encode_one<W: Write>(&self, {buf_name}: &mut W) {{")
+    lines.append(f"    pub fn encode_one<W: Write>(&self, {buf_name}: &mut W) -> io::Result<()> {{")
     for member in struct.members:
         if member.name in length_fields:
             # Write the length from the corresponding Vec
             vec_member = find_vec_for_length(struct, member.name)
             if vec_member:
                 fname = rust_field_name(vec_member.name)
-                lines.append(f"        buf.write_i32::<BigEndian>(self.{fname}.len() as i32).unwrap();")
+                lines.append(f"        buf.write_i32::<BigEndian>(self.{fname}.len() as i32)?;")
             continue
         gen_encode_member(lines, member, struct.package, "self.", 2)
+    lines.append("        Ok(())")
     lines.append("    }")
     lines.append("")
 
@@ -587,31 +588,31 @@ def gen_encode_member(lines: list[str], member: LcmMember, pkg: str, prefix: str
 def gen_encode_primitive(lines: list[str], lcm_type: str, source: str, pkg: str, indent: int):
     ind = "    " * indent
     if lcm_type == "int8_t":
-        lines.append(f"{ind}buf.write_i8({source}).unwrap();")
+        lines.append(f"{ind}buf.write_i8({source})?;")
     elif lcm_type == "byte":
-        lines.append(f"{ind}buf.write_u8({source}).unwrap();")
+        lines.append(f"{ind}buf.write_u8({source})?;")
     elif lcm_type == "boolean":
-        lines.append(f"{ind}buf.write_i8(if {source} {{ 1 }} else {{ 0 }}).unwrap();")
+        lines.append(f"{ind}buf.write_i8(if {source} {{ 1 }} else {{ 0 }})?;")
     elif lcm_type == "int16_t":
-        lines.append(f"{ind}buf.write_i16::<BigEndian>({source}).unwrap();")
+        lines.append(f"{ind}buf.write_i16::<BigEndian>({source})?;")
     elif lcm_type == "int32_t":
-        lines.append(f"{ind}buf.write_i32::<BigEndian>({source}).unwrap();")
+        lines.append(f"{ind}buf.write_i32::<BigEndian>({source})?;")
     elif lcm_type == "int64_t":
-        lines.append(f"{ind}buf.write_i64::<BigEndian>({source}).unwrap();")
+        lines.append(f"{ind}buf.write_i64::<BigEndian>({source})?;")
     elif lcm_type == "float":
-        lines.append(f"{ind}buf.write_f32::<BigEndian>({source}).unwrap();")
+        lines.append(f"{ind}buf.write_f32::<BigEndian>({source})?;")
     elif lcm_type == "double":
-        lines.append(f"{ind}buf.write_f64::<BigEndian>({source}).unwrap();")
+        lines.append(f"{ind}buf.write_f64::<BigEndian>({source})?;")
     elif lcm_type == "string":
         lines.append(f"{ind}{{")
         lines.append(f"{ind}    let bytes = {source}.as_bytes();")
-        lines.append(f"{ind}    buf.write_u32::<BigEndian>((bytes.len() + 1) as u32).unwrap();")
-        lines.append(f"{ind}    buf.write_all(bytes).unwrap();")
-        lines.append(f"{ind}    buf.write_u8(0).unwrap();")
+        lines.append(f"{ind}    buf.write_u32::<BigEndian>((bytes.len() + 1) as u32)?;")
+        lines.append(f"{ind}    buf.write_all(bytes)?;")
+        lines.append(f"{ind}    buf.write_u8(0)?;")
         lines.append(f"{ind}}}")
     else:
         # Nested struct
-        lines.append(f"{ind}{source}.encode_one(buf);")
+        lines.append(f"{ind}{source}.encode_one(buf)?;")
 
 
 def gen_encode_array(lines: list[str], member: LcmMember, pkg: str,
@@ -624,9 +625,9 @@ def gen_encode_array(lines: list[str], member: LcmMember, pkg: str,
     if member.type == "byte" and is_last:
         # Byte array — write all at once
         if dim.is_constant:
-            lines.append(f"{ind}buf.write_all(&{source}).unwrap();")
+            lines.append(f"{ind}buf.write_all(&{source})?;")
         else:
-            lines.append(f"{ind}buf.write_all(&{source}).unwrap();")
+            lines.append(f"{ind}buf.write_all(&{source})?;")
         return
 
     lines.append(f"{ind}for {loop_var} in {source}.iter() {{")
@@ -704,7 +705,8 @@ def gen_decode_primitive(lines: list[str], lcm_type: str, var_name: str, pkg: st
         lines.append(f"{ind}    let len = buf.read_u32::<BigEndian>()? as usize;")
         lines.append(f"{ind}    let mut bytes = vec![0u8; len];")
         lines.append(f"{ind}    buf.read_exact(&mut bytes)?;")
-        lines.append(f"{ind}    std::string::String::from_utf8_lossy(&bytes[..len - 1]).into_owned()")
+        lines.append(f"{ind}    std::string::String::from_utf8(bytes[..len - 1].to_vec())")
+        lines.append(f"{ind}        .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?")
         lines.append(f"{ind}}};")
     else:
         # Nested struct

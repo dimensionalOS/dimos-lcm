@@ -4,7 +4,7 @@ use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 use std::io::{self, Read, Write, Cursor};
 use std::sync::OnceLock;
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct LinePrimitive {
     pub r#type: u8,
     pub pose: crate::geometry_msgs::Pose,
@@ -48,7 +48,7 @@ impl LinePrimitive {
     pub fn encode(&self) -> Vec<u8> {
         let mut buf = Vec::with_capacity(8 + self.encoded_size());
         buf.write_u64::<BigEndian>(Self::packed_fingerprint()).unwrap();
-        self.encode_one(&mut buf);
+        self.encode_one(&mut buf).unwrap();
         buf
     }
 
@@ -63,24 +63,25 @@ impl LinePrimitive {
         Self::decode_one(&mut cursor)
     }
 
-    pub fn encode_one<W: Write>(&self, buf: &mut W) {
-        buf.write_i32::<BigEndian>(self.points.len() as i32).unwrap();
-        buf.write_i32::<BigEndian>(self.colors.len() as i32).unwrap();
-        buf.write_i32::<BigEndian>(self.indices.len() as i32).unwrap();
-        buf.write_u8(self.r#type).unwrap();
-        self.pose.encode_one(buf);
-        buf.write_f64::<BigEndian>(self.thickness).unwrap();
-        buf.write_i8(if self.scale_invariant { 1 } else { 0 }).unwrap();
+    pub fn encode_one<W: Write>(&self, buf: &mut W) -> io::Result<()> {
+        buf.write_i32::<BigEndian>(self.points.len() as i32)?;
+        buf.write_i32::<BigEndian>(self.colors.len() as i32)?;
+        buf.write_i32::<BigEndian>(self.indices.len() as i32)?;
+        buf.write_u8(self.r#type)?;
+        self.pose.encode_one(buf)?;
+        buf.write_f64::<BigEndian>(self.thickness)?;
+        buf.write_i8(if self.scale_invariant { 1 } else { 0 })?;
         for v0 in self.points.iter() {
-            v0.encode_one(buf);
+            v0.encode_one(buf)?;
         }
-        self.color.encode_one(buf);
+        self.color.encode_one(buf)?;
         for v0 in self.colors.iter() {
-            v0.encode_one(buf);
+            v0.encode_one(buf)?;
         }
         for v0 in self.indices.iter() {
-            buf.write_i32::<BigEndian>(*v0).unwrap();
+            buf.write_i32::<BigEndian>(*v0)?;
         }
+        Ok(())
     }
 
     pub fn decode_one<R: Read>(buf: &mut R) -> io::Result<Self> {

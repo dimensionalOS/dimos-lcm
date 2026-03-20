@@ -4,7 +4,7 @@ use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 use std::io::{self, Read, Write, Cursor};
 use std::sync::OnceLock;
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct Accel {
     pub linear: crate::geometry_msgs::Vector3,
     pub angular: crate::geometry_msgs::Vector3,
@@ -36,7 +36,7 @@ impl Accel {
     pub fn encode(&self) -> Vec<u8> {
         let mut buf = Vec::with_capacity(8 + self.encoded_size());
         buf.write_u64::<BigEndian>(Self::packed_fingerprint()).unwrap();
-        self.encode_one(&mut buf);
+        self.encode_one(&mut buf).unwrap();
         buf
     }
 
@@ -51,9 +51,10 @@ impl Accel {
         Self::decode_one(&mut cursor)
     }
 
-    pub fn encode_one<W: Write>(&self, buf: &mut W) {
-        self.linear.encode_one(buf);
-        self.angular.encode_one(buf);
+    pub fn encode_one<W: Write>(&self, buf: &mut W) -> io::Result<()> {
+        self.linear.encode_one(buf)?;
+        self.angular.encode_one(buf)?;
+        Ok(())
     }
 
     pub fn decode_one<R: Read>(buf: &mut R) -> io::Result<Self> {

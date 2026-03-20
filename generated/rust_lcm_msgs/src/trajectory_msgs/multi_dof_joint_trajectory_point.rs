@@ -4,7 +4,7 @@ use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 use std::io::{self, Read, Write, Cursor};
 use std::sync::OnceLock;
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct MultiDOFJointTrajectoryPoint {
     pub transforms: Vec<crate::geometry_msgs::Transform>,
     pub velocities: Vec<crate::geometry_msgs::Twist>,
@@ -40,7 +40,7 @@ impl MultiDOFJointTrajectoryPoint {
     pub fn encode(&self) -> Vec<u8> {
         let mut buf = Vec::with_capacity(8 + self.encoded_size());
         buf.write_u64::<BigEndian>(Self::packed_fingerprint()).unwrap();
-        self.encode_one(&mut buf);
+        self.encode_one(&mut buf).unwrap();
         buf
     }
 
@@ -55,20 +55,21 @@ impl MultiDOFJointTrajectoryPoint {
         Self::decode_one(&mut cursor)
     }
 
-    pub fn encode_one<W: Write>(&self, buf: &mut W) {
-        buf.write_i32::<BigEndian>(self.transforms.len() as i32).unwrap();
-        buf.write_i32::<BigEndian>(self.velocities.len() as i32).unwrap();
-        buf.write_i32::<BigEndian>(self.accelerations.len() as i32).unwrap();
+    pub fn encode_one<W: Write>(&self, buf: &mut W) -> io::Result<()> {
+        buf.write_i32::<BigEndian>(self.transforms.len() as i32)?;
+        buf.write_i32::<BigEndian>(self.velocities.len() as i32)?;
+        buf.write_i32::<BigEndian>(self.accelerations.len() as i32)?;
         for v0 in self.transforms.iter() {
-            v0.encode_one(buf);
+            v0.encode_one(buf)?;
         }
         for v0 in self.velocities.iter() {
-            v0.encode_one(buf);
+            v0.encode_one(buf)?;
         }
         for v0 in self.accelerations.iter() {
-            v0.encode_one(buf);
+            v0.encode_one(buf)?;
         }
-        self.time_from_start.encode_one(buf);
+        self.time_from_start.encode_one(buf)?;
+        Ok(())
     }
 
     pub fn decode_one<R: Read>(buf: &mut R) -> io::Result<Self> {

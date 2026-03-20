@@ -4,7 +4,7 @@ use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 use std::io::{self, Read, Write, Cursor};
 use std::sync::OnceLock;
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct MagneticField {
     pub header: crate::std_msgs::Header,
     pub magnetic_field: crate::geometry_msgs::Vector3,
@@ -37,7 +37,7 @@ impl MagneticField {
     pub fn encode(&self) -> Vec<u8> {
         let mut buf = Vec::with_capacity(8 + self.encoded_size());
         buf.write_u64::<BigEndian>(Self::packed_fingerprint()).unwrap();
-        self.encode_one(&mut buf);
+        self.encode_one(&mut buf).unwrap();
         buf
     }
 
@@ -52,12 +52,13 @@ impl MagneticField {
         Self::decode_one(&mut cursor)
     }
 
-    pub fn encode_one<W: Write>(&self, buf: &mut W) {
-        self.header.encode_one(buf);
-        self.magnetic_field.encode_one(buf);
+    pub fn encode_one<W: Write>(&self, buf: &mut W) -> io::Result<()> {
+        self.header.encode_one(buf)?;
+        self.magnetic_field.encode_one(buf)?;
         for v0 in self.magnetic_field_covariance.iter() {
-            buf.write_f64::<BigEndian>(*v0).unwrap();
+            buf.write_f64::<BigEndian>(*v0)?;
         }
+        Ok(())
     }
 
     pub fn decode_one<R: Read>(buf: &mut R) -> io::Result<Self> {

@@ -4,7 +4,7 @@ use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 use std::io::{self, Read, Write, Cursor};
 use std::sync::OnceLock;
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct SolidPrimitive {
     pub r#type: u8,
     pub dimensions: Vec<f64>,
@@ -47,7 +47,7 @@ impl SolidPrimitive {
     pub fn encode(&self) -> Vec<u8> {
         let mut buf = Vec::with_capacity(8 + self.encoded_size());
         buf.write_u64::<BigEndian>(Self::packed_fingerprint()).unwrap();
-        self.encode_one(&mut buf);
+        self.encode_one(&mut buf).unwrap();
         buf
     }
 
@@ -62,12 +62,13 @@ impl SolidPrimitive {
         Self::decode_one(&mut cursor)
     }
 
-    pub fn encode_one<W: Write>(&self, buf: &mut W) {
-        buf.write_i32::<BigEndian>(self.dimensions.len() as i32).unwrap();
-        buf.write_u8(self.r#type).unwrap();
+    pub fn encode_one<W: Write>(&self, buf: &mut W) -> io::Result<()> {
+        buf.write_i32::<BigEndian>(self.dimensions.len() as i32)?;
+        buf.write_u8(self.r#type)?;
         for v0 in self.dimensions.iter() {
-            buf.write_f64::<BigEndian>(*v0).unwrap();
+            buf.write_f64::<BigEndian>(*v0)?;
         }
+        Ok(())
     }
 
     pub fn decode_one<R: Read>(buf: &mut R) -> io::Result<Self> {

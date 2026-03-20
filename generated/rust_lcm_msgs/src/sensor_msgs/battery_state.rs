@@ -4,7 +4,7 @@ use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 use std::io::{self, Read, Write, Cursor};
 use std::sync::OnceLock;
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct BatteryState {
     pub header: crate::std_msgs::Header,
     pub voltage: f32,
@@ -71,7 +71,7 @@ impl BatteryState {
     pub fn encode(&self) -> Vec<u8> {
         let mut buf = Vec::with_capacity(8 + self.encoded_size());
         buf.write_u64::<BigEndian>(Self::packed_fingerprint()).unwrap();
-        self.encode_one(&mut buf);
+        self.encode_one(&mut buf).unwrap();
         buf
     }
 
@@ -86,39 +86,40 @@ impl BatteryState {
         Self::decode_one(&mut cursor)
     }
 
-    pub fn encode_one<W: Write>(&self, buf: &mut W) {
-        buf.write_i32::<BigEndian>(self.cell_voltage.len() as i32).unwrap();
-        buf.write_i32::<BigEndian>(self.cell_temperature.len() as i32).unwrap();
-        self.header.encode_one(buf);
-        buf.write_f32::<BigEndian>(self.voltage).unwrap();
-        buf.write_f32::<BigEndian>(self.temperature).unwrap();
-        buf.write_f32::<BigEndian>(self.current).unwrap();
-        buf.write_f32::<BigEndian>(self.charge).unwrap();
-        buf.write_f32::<BigEndian>(self.capacity).unwrap();
-        buf.write_f32::<BigEndian>(self.design_capacity).unwrap();
-        buf.write_f32::<BigEndian>(self.percentage).unwrap();
-        buf.write_u8(self.power_supply_status).unwrap();
-        buf.write_u8(self.power_supply_health).unwrap();
-        buf.write_u8(self.power_supply_technology).unwrap();
-        buf.write_i8(if self.present { 1 } else { 0 }).unwrap();
+    pub fn encode_one<W: Write>(&self, buf: &mut W) -> io::Result<()> {
+        buf.write_i32::<BigEndian>(self.cell_voltage.len() as i32)?;
+        buf.write_i32::<BigEndian>(self.cell_temperature.len() as i32)?;
+        self.header.encode_one(buf)?;
+        buf.write_f32::<BigEndian>(self.voltage)?;
+        buf.write_f32::<BigEndian>(self.temperature)?;
+        buf.write_f32::<BigEndian>(self.current)?;
+        buf.write_f32::<BigEndian>(self.charge)?;
+        buf.write_f32::<BigEndian>(self.capacity)?;
+        buf.write_f32::<BigEndian>(self.design_capacity)?;
+        buf.write_f32::<BigEndian>(self.percentage)?;
+        buf.write_u8(self.power_supply_status)?;
+        buf.write_u8(self.power_supply_health)?;
+        buf.write_u8(self.power_supply_technology)?;
+        buf.write_i8(if self.present { 1 } else { 0 })?;
         for v0 in self.cell_voltage.iter() {
-            buf.write_f32::<BigEndian>(*v0).unwrap();
+            buf.write_f32::<BigEndian>(*v0)?;
         }
         for v0 in self.cell_temperature.iter() {
-            buf.write_f32::<BigEndian>(*v0).unwrap();
+            buf.write_f32::<BigEndian>(*v0)?;
         }
         {
             let bytes = self.location.as_bytes();
-            buf.write_u32::<BigEndian>((bytes.len() + 1) as u32).unwrap();
-            buf.write_all(bytes).unwrap();
-            buf.write_u8(0).unwrap();
+            buf.write_u32::<BigEndian>((bytes.len() + 1) as u32)?;
+            buf.write_all(bytes)?;
+            buf.write_u8(0)?;
         }
         {
             let bytes = self.serial_number.as_bytes();
-            buf.write_u32::<BigEndian>((bytes.len() + 1) as u32).unwrap();
-            buf.write_all(bytes).unwrap();
-            buf.write_u8(0).unwrap();
+            buf.write_u32::<BigEndian>((bytes.len() + 1) as u32)?;
+            buf.write_all(bytes)?;
+            buf.write_u8(0)?;
         }
+        Ok(())
     }
 
     pub fn decode_one<R: Read>(buf: &mut R) -> io::Result<Self> {
@@ -156,13 +157,15 @@ impl BatteryState {
             let len = buf.read_u32::<BigEndian>()? as usize;
             let mut bytes = vec![0u8; len];
             buf.read_exact(&mut bytes)?;
-            std::string::String::from_utf8_lossy(&bytes[..len - 1]).into_owned()
+            std::string::String::from_utf8(bytes[..len - 1].to_vec())
+                .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?
         };
         let serial_number = {
             let len = buf.read_u32::<BigEndian>()? as usize;
             let mut bytes = vec![0u8; len];
             buf.read_exact(&mut bytes)?;
-            std::string::String::from_utf8_lossy(&bytes[..len - 1]).into_owned()
+            std::string::String::from_utf8(bytes[..len - 1].to_vec())
+                .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?
         };
         Ok(Self {
             header,

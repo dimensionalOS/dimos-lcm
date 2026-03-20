@@ -4,7 +4,7 @@ use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 use std::io::{self, Read, Write, Cursor};
 use std::sync::OnceLock;
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct VisionInfo {
     pub header: crate::std_msgs::Header,
     pub method: std::string::String,
@@ -37,7 +37,7 @@ impl VisionInfo {
     pub fn encode(&self) -> Vec<u8> {
         let mut buf = Vec::with_capacity(8 + self.encoded_size());
         buf.write_u64::<BigEndian>(Self::packed_fingerprint()).unwrap();
-        self.encode_one(&mut buf);
+        self.encode_one(&mut buf).unwrap();
         buf
     }
 
@@ -52,21 +52,22 @@ impl VisionInfo {
         Self::decode_one(&mut cursor)
     }
 
-    pub fn encode_one<W: Write>(&self, buf: &mut W) {
-        self.header.encode_one(buf);
+    pub fn encode_one<W: Write>(&self, buf: &mut W) -> io::Result<()> {
+        self.header.encode_one(buf)?;
         {
             let bytes = self.method.as_bytes();
-            buf.write_u32::<BigEndian>((bytes.len() + 1) as u32).unwrap();
-            buf.write_all(bytes).unwrap();
-            buf.write_u8(0).unwrap();
+            buf.write_u32::<BigEndian>((bytes.len() + 1) as u32)?;
+            buf.write_all(bytes)?;
+            buf.write_u8(0)?;
         }
         {
             let bytes = self.database_location.as_bytes();
-            buf.write_u32::<BigEndian>((bytes.len() + 1) as u32).unwrap();
-            buf.write_all(bytes).unwrap();
-            buf.write_u8(0).unwrap();
+            buf.write_u32::<BigEndian>((bytes.len() + 1) as u32)?;
+            buf.write_all(bytes)?;
+            buf.write_u8(0)?;
         }
-        buf.write_i32::<BigEndian>(self.database_version).unwrap();
+        buf.write_i32::<BigEndian>(self.database_version)?;
+        Ok(())
     }
 
     pub fn decode_one<R: Read>(buf: &mut R) -> io::Result<Self> {
@@ -75,13 +76,15 @@ impl VisionInfo {
             let len = buf.read_u32::<BigEndian>()? as usize;
             let mut bytes = vec![0u8; len];
             buf.read_exact(&mut bytes)?;
-            std::string::String::from_utf8_lossy(&bytes[..len - 1]).into_owned()
+            std::string::String::from_utf8(bytes[..len - 1].to_vec())
+                .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?
         };
         let database_location = {
             let len = buf.read_u32::<BigEndian>()? as usize;
             let mut bytes = vec![0u8; len];
             buf.read_exact(&mut bytes)?;
-            std::string::String::from_utf8_lossy(&bytes[..len - 1]).into_owned()
+            std::string::String::from_utf8(bytes[..len - 1].to_vec())
+                .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?
         };
         let database_version = buf.read_i32::<BigEndian>()?;
         Ok(Self {

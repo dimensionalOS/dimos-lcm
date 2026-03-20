@@ -4,7 +4,7 @@ use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 use std::io::{self, Read, Write, Cursor};
 use std::sync::OnceLock;
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct InteractiveMarkerUpdate {
     pub server_id: std::string::String,
     pub seq_num: i64,
@@ -43,7 +43,7 @@ impl InteractiveMarkerUpdate {
     pub fn encode(&self) -> Vec<u8> {
         let mut buf = Vec::with_capacity(8 + self.encoded_size());
         buf.write_u64::<BigEndian>(Self::packed_fingerprint()).unwrap();
-        self.encode_one(&mut buf);
+        self.encode_one(&mut buf).unwrap();
         buf
     }
 
@@ -58,32 +58,33 @@ impl InteractiveMarkerUpdate {
         Self::decode_one(&mut cursor)
     }
 
-    pub fn encode_one<W: Write>(&self, buf: &mut W) {
-        buf.write_i32::<BigEndian>(self.markers.len() as i32).unwrap();
-        buf.write_i32::<BigEndian>(self.poses.len() as i32).unwrap();
-        buf.write_i32::<BigEndian>(self.erases.len() as i32).unwrap();
+    pub fn encode_one<W: Write>(&self, buf: &mut W) -> io::Result<()> {
+        buf.write_i32::<BigEndian>(self.markers.len() as i32)?;
+        buf.write_i32::<BigEndian>(self.poses.len() as i32)?;
+        buf.write_i32::<BigEndian>(self.erases.len() as i32)?;
         {
             let bytes = self.server_id.as_bytes();
-            buf.write_u32::<BigEndian>((bytes.len() + 1) as u32).unwrap();
-            buf.write_all(bytes).unwrap();
-            buf.write_u8(0).unwrap();
+            buf.write_u32::<BigEndian>((bytes.len() + 1) as u32)?;
+            buf.write_all(bytes)?;
+            buf.write_u8(0)?;
         }
-        buf.write_i64::<BigEndian>(self.seq_num).unwrap();
-        buf.write_u8(self.r#type).unwrap();
+        buf.write_i64::<BigEndian>(self.seq_num)?;
+        buf.write_u8(self.r#type)?;
         for v0 in self.markers.iter() {
-            v0.encode_one(buf);
+            v0.encode_one(buf)?;
         }
         for v0 in self.poses.iter() {
-            v0.encode_one(buf);
+            v0.encode_one(buf)?;
         }
         for v0 in self.erases.iter() {
             {
                 let bytes = v0.as_bytes();
-                buf.write_u32::<BigEndian>((bytes.len() + 1) as u32).unwrap();
-                buf.write_all(bytes).unwrap();
-                buf.write_u8(0).unwrap();
+                buf.write_u32::<BigEndian>((bytes.len() + 1) as u32)?;
+                buf.write_all(bytes)?;
+                buf.write_u8(0)?;
             }
         }
+        Ok(())
     }
 
     pub fn decode_one<R: Read>(buf: &mut R) -> io::Result<Self> {
@@ -94,7 +95,8 @@ impl InteractiveMarkerUpdate {
             let len = buf.read_u32::<BigEndian>()? as usize;
             let mut bytes = vec![0u8; len];
             buf.read_exact(&mut bytes)?;
-            std::string::String::from_utf8_lossy(&bytes[..len - 1]).into_owned()
+            std::string::String::from_utf8(bytes[..len - 1].to_vec())
+                .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?
         };
         let seq_num = buf.read_i64::<BigEndian>()?;
         let r#type = buf.read_u8()?;
@@ -121,7 +123,8 @@ impl InteractiveMarkerUpdate {
                     let len = buf.read_u32::<BigEndian>()? as usize;
                     let mut bytes = vec![0u8; len];
                     buf.read_exact(&mut bytes)?;
-                    std::string::String::from_utf8_lossy(&bytes[..len - 1]).into_owned()
+                    std::string::String::from_utf8(bytes[..len - 1].to_vec())
+                        .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?
                 };
                 v.push(_elem_0);
             }

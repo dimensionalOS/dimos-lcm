@@ -4,7 +4,7 @@ use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 use std::io::{self, Read, Write, Cursor};
 use std::sync::OnceLock;
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct RawAudio {
     pub timestamp: crate::builtin_interfaces::Time,
     pub data: Vec<u8>,
@@ -38,7 +38,7 @@ impl RawAudio {
     pub fn encode(&self) -> Vec<u8> {
         let mut buf = Vec::with_capacity(8 + self.encoded_size());
         buf.write_u64::<BigEndian>(Self::packed_fingerprint()).unwrap();
-        self.encode_one(&mut buf);
+        self.encode_one(&mut buf).unwrap();
         buf
     }
 
@@ -53,18 +53,19 @@ impl RawAudio {
         Self::decode_one(&mut cursor)
     }
 
-    pub fn encode_one<W: Write>(&self, buf: &mut W) {
-        buf.write_i32::<BigEndian>(self.data.len() as i32).unwrap();
-        self.timestamp.encode_one(buf);
-        buf.write_all(&self.data).unwrap();
+    pub fn encode_one<W: Write>(&self, buf: &mut W) -> io::Result<()> {
+        buf.write_i32::<BigEndian>(self.data.len() as i32)?;
+        self.timestamp.encode_one(buf)?;
+        buf.write_all(&self.data)?;
         {
             let bytes = self.format.as_bytes();
-            buf.write_u32::<BigEndian>((bytes.len() + 1) as u32).unwrap();
-            buf.write_all(bytes).unwrap();
-            buf.write_u8(0).unwrap();
+            buf.write_u32::<BigEndian>((bytes.len() + 1) as u32)?;
+            buf.write_all(bytes)?;
+            buf.write_u8(0)?;
         }
-        buf.write_i32::<BigEndian>(self.sample_rate).unwrap();
-        buf.write_i32::<BigEndian>(self.number_of_channels).unwrap();
+        buf.write_i32::<BigEndian>(self.sample_rate)?;
+        buf.write_i32::<BigEndian>(self.number_of_channels)?;
+        Ok(())
     }
 
     pub fn decode_one<R: Read>(buf: &mut R) -> io::Result<Self> {
@@ -79,7 +80,8 @@ impl RawAudio {
             let len = buf.read_u32::<BigEndian>()? as usize;
             let mut bytes = vec![0u8; len];
             buf.read_exact(&mut bytes)?;
-            std::string::String::from_utf8_lossy(&bytes[..len - 1]).into_owned()
+            std::string::String::from_utf8(bytes[..len - 1].to_vec())
+                .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?
         };
         let sample_rate = buf.read_i32::<BigEndian>()?;
         let number_of_channels = buf.read_i32::<BigEndian>()?;

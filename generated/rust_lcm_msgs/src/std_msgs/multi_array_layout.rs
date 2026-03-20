@@ -4,7 +4,7 @@ use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 use std::io::{self, Read, Write, Cursor};
 use std::sync::OnceLock;
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct MultiArrayLayout {
     pub dim: Vec<crate::std_msgs::MultiArrayDimension>,
     pub data_offset: i32,
@@ -35,7 +35,7 @@ impl MultiArrayLayout {
     pub fn encode(&self) -> Vec<u8> {
         let mut buf = Vec::with_capacity(8 + self.encoded_size());
         buf.write_u64::<BigEndian>(Self::packed_fingerprint()).unwrap();
-        self.encode_one(&mut buf);
+        self.encode_one(&mut buf).unwrap();
         buf
     }
 
@@ -50,12 +50,13 @@ impl MultiArrayLayout {
         Self::decode_one(&mut cursor)
     }
 
-    pub fn encode_one<W: Write>(&self, buf: &mut W) {
-        buf.write_i32::<BigEndian>(self.dim.len() as i32).unwrap();
+    pub fn encode_one<W: Write>(&self, buf: &mut W) -> io::Result<()> {
+        buf.write_i32::<BigEndian>(self.dim.len() as i32)?;
         for v0 in self.dim.iter() {
-            v0.encode_one(buf);
+            v0.encode_one(buf)?;
         }
-        buf.write_i32::<BigEndian>(self.data_offset).unwrap();
+        buf.write_i32::<BigEndian>(self.data_offset)?;
+        Ok(())
     }
 
     pub fn decode_one<R: Read>(buf: &mut R) -> io::Result<Self> {

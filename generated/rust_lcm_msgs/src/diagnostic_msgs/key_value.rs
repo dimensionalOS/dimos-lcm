@@ -4,7 +4,7 @@ use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 use std::io::{self, Read, Write, Cursor};
 use std::sync::OnceLock;
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct KeyValue {
     pub key: std::string::String,
     pub value: std::string::String,
@@ -34,7 +34,7 @@ impl KeyValue {
     pub fn encode(&self) -> Vec<u8> {
         let mut buf = Vec::with_capacity(8 + self.encoded_size());
         buf.write_u64::<BigEndian>(Self::packed_fingerprint()).unwrap();
-        self.encode_one(&mut buf);
+        self.encode_one(&mut buf).unwrap();
         buf
     }
 
@@ -49,19 +49,20 @@ impl KeyValue {
         Self::decode_one(&mut cursor)
     }
 
-    pub fn encode_one<W: Write>(&self, buf: &mut W) {
+    pub fn encode_one<W: Write>(&self, buf: &mut W) -> io::Result<()> {
         {
             let bytes = self.key.as_bytes();
-            buf.write_u32::<BigEndian>((bytes.len() + 1) as u32).unwrap();
-            buf.write_all(bytes).unwrap();
-            buf.write_u8(0).unwrap();
+            buf.write_u32::<BigEndian>((bytes.len() + 1) as u32)?;
+            buf.write_all(bytes)?;
+            buf.write_u8(0)?;
         }
         {
             let bytes = self.value.as_bytes();
-            buf.write_u32::<BigEndian>((bytes.len() + 1) as u32).unwrap();
-            buf.write_all(bytes).unwrap();
-            buf.write_u8(0).unwrap();
+            buf.write_u32::<BigEndian>((bytes.len() + 1) as u32)?;
+            buf.write_all(bytes)?;
+            buf.write_u8(0)?;
         }
+        Ok(())
     }
 
     pub fn decode_one<R: Read>(buf: &mut R) -> io::Result<Self> {
@@ -69,13 +70,15 @@ impl KeyValue {
             let len = buf.read_u32::<BigEndian>()? as usize;
             let mut bytes = vec![0u8; len];
             buf.read_exact(&mut bytes)?;
-            std::string::String::from_utf8_lossy(&bytes[..len - 1]).into_owned()
+            std::string::String::from_utf8(bytes[..len - 1].to_vec())
+                .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?
         };
         let value = {
             let len = buf.read_u32::<BigEndian>()? as usize;
             let mut bytes = vec![0u8; len];
             buf.read_exact(&mut bytes)?;
-            std::string::String::from_utf8_lossy(&bytes[..len - 1]).into_owned()
+            std::string::String::from_utf8(bytes[..len - 1].to_vec())
+                .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?
         };
         Ok(Self {
             key,

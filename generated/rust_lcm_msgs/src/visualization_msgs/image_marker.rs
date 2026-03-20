@@ -4,7 +4,7 @@ use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 use std::io::{self, Read, Write, Cursor};
 use std::sync::OnceLock;
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct ImageMarker {
     pub header: crate::std_msgs::Header,
     pub ns: std::string::String,
@@ -60,7 +60,7 @@ impl ImageMarker {
     pub fn encode(&self) -> Vec<u8> {
         let mut buf = Vec::with_capacity(8 + self.encoded_size());
         buf.write_u64::<BigEndian>(Self::packed_fingerprint()).unwrap();
-        self.encode_one(&mut buf);
+        self.encode_one(&mut buf).unwrap();
         buf
     }
 
@@ -75,31 +75,32 @@ impl ImageMarker {
         Self::decode_one(&mut cursor)
     }
 
-    pub fn encode_one<W: Write>(&self, buf: &mut W) {
-        buf.write_i32::<BigEndian>(self.points.len() as i32).unwrap();
-        buf.write_i32::<BigEndian>(self.outline_colors.len() as i32).unwrap();
-        self.header.encode_one(buf);
+    pub fn encode_one<W: Write>(&self, buf: &mut W) -> io::Result<()> {
+        buf.write_i32::<BigEndian>(self.points.len() as i32)?;
+        buf.write_i32::<BigEndian>(self.outline_colors.len() as i32)?;
+        self.header.encode_one(buf)?;
         {
             let bytes = self.ns.as_bytes();
-            buf.write_u32::<BigEndian>((bytes.len() + 1) as u32).unwrap();
-            buf.write_all(bytes).unwrap();
-            buf.write_u8(0).unwrap();
+            buf.write_u32::<BigEndian>((bytes.len() + 1) as u32)?;
+            buf.write_all(bytes)?;
+            buf.write_u8(0)?;
         }
-        buf.write_i32::<BigEndian>(self.id).unwrap();
-        buf.write_i32::<BigEndian>(self.r#type).unwrap();
-        buf.write_i32::<BigEndian>(self.action).unwrap();
-        self.position.encode_one(buf);
-        buf.write_f32::<BigEndian>(self.scale).unwrap();
-        self.outline_color.encode_one(buf);
-        buf.write_u8(self.filled).unwrap();
-        self.fill_color.encode_one(buf);
-        self.lifetime.encode_one(buf);
+        buf.write_i32::<BigEndian>(self.id)?;
+        buf.write_i32::<BigEndian>(self.r#type)?;
+        buf.write_i32::<BigEndian>(self.action)?;
+        self.position.encode_one(buf)?;
+        buf.write_f32::<BigEndian>(self.scale)?;
+        self.outline_color.encode_one(buf)?;
+        buf.write_u8(self.filled)?;
+        self.fill_color.encode_one(buf)?;
+        self.lifetime.encode_one(buf)?;
         for v0 in self.points.iter() {
-            v0.encode_one(buf);
+            v0.encode_one(buf)?;
         }
         for v0 in self.outline_colors.iter() {
-            v0.encode_one(buf);
+            v0.encode_one(buf)?;
         }
+        Ok(())
     }
 
     pub fn decode_one<R: Read>(buf: &mut R) -> io::Result<Self> {
@@ -110,7 +111,8 @@ impl ImageMarker {
             let len = buf.read_u32::<BigEndian>()? as usize;
             let mut bytes = vec![0u8; len];
             buf.read_exact(&mut bytes)?;
-            std::string::String::from_utf8_lossy(&bytes[..len - 1]).into_owned()
+            std::string::String::from_utf8(bytes[..len - 1].to_vec())
+                .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?
         };
         let id = buf.read_i32::<BigEndian>()?;
         let r#type = buf.read_i32::<BigEndian>()?;

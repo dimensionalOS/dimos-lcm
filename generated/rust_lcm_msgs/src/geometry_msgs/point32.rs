@@ -4,7 +4,7 @@ use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 use std::io::{self, Read, Write, Cursor};
 use std::sync::OnceLock;
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct Point32 {
     pub x: f32,
     pub y: f32,
@@ -35,7 +35,7 @@ impl Point32 {
     pub fn encode(&self) -> Vec<u8> {
         let mut buf = Vec::with_capacity(8 + self.encoded_size());
         buf.write_u64::<BigEndian>(Self::packed_fingerprint()).unwrap();
-        self.encode_one(&mut buf);
+        self.encode_one(&mut buf).unwrap();
         buf
     }
 
@@ -50,10 +50,11 @@ impl Point32 {
         Self::decode_one(&mut cursor)
     }
 
-    pub fn encode_one<W: Write>(&self, buf: &mut W) {
-        buf.write_f32::<BigEndian>(self.x).unwrap();
-        buf.write_f32::<BigEndian>(self.y).unwrap();
-        buf.write_f32::<BigEndian>(self.z).unwrap();
+    pub fn encode_one<W: Write>(&self, buf: &mut W) -> io::Result<()> {
+        buf.write_f32::<BigEndian>(self.x)?;
+        buf.write_f32::<BigEndian>(self.y)?;
+        buf.write_f32::<BigEndian>(self.z)?;
+        Ok(())
     }
 
     pub fn decode_one<R: Read>(buf: &mut R) -> io::Result<Self> {

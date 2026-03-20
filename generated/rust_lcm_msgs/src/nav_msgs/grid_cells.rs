@@ -4,7 +4,7 @@ use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 use std::io::{self, Read, Write, Cursor};
 use std::sync::OnceLock;
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct GridCells {
     pub header: crate::std_msgs::Header,
     pub cell_width: f32,
@@ -38,7 +38,7 @@ impl GridCells {
     pub fn encode(&self) -> Vec<u8> {
         let mut buf = Vec::with_capacity(8 + self.encoded_size());
         buf.write_u64::<BigEndian>(Self::packed_fingerprint()).unwrap();
-        self.encode_one(&mut buf);
+        self.encode_one(&mut buf).unwrap();
         buf
     }
 
@@ -53,14 +53,15 @@ impl GridCells {
         Self::decode_one(&mut cursor)
     }
 
-    pub fn encode_one<W: Write>(&self, buf: &mut W) {
-        buf.write_i32::<BigEndian>(self.cells.len() as i32).unwrap();
-        self.header.encode_one(buf);
-        buf.write_f32::<BigEndian>(self.cell_width).unwrap();
-        buf.write_f32::<BigEndian>(self.cell_height).unwrap();
+    pub fn encode_one<W: Write>(&self, buf: &mut W) -> io::Result<()> {
+        buf.write_i32::<BigEndian>(self.cells.len() as i32)?;
+        self.header.encode_one(buf)?;
+        buf.write_f32::<BigEndian>(self.cell_width)?;
+        buf.write_f32::<BigEndian>(self.cell_height)?;
         for v0 in self.cells.iter() {
-            v0.encode_one(buf);
+            v0.encode_one(buf)?;
         }
+        Ok(())
     }
 
     pub fn decode_one<R: Read>(buf: &mut R) -> io::Result<Self> {

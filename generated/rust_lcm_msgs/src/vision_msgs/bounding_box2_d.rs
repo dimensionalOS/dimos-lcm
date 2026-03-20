@@ -4,7 +4,7 @@ use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 use std::io::{self, Read, Write, Cursor};
 use std::sync::OnceLock;
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct BoundingBox2D {
     pub center: crate::vision_msgs::Pose2D,
     pub size_x: f64,
@@ -36,7 +36,7 @@ impl BoundingBox2D {
     pub fn encode(&self) -> Vec<u8> {
         let mut buf = Vec::with_capacity(8 + self.encoded_size());
         buf.write_u64::<BigEndian>(Self::packed_fingerprint()).unwrap();
-        self.encode_one(&mut buf);
+        self.encode_one(&mut buf).unwrap();
         buf
     }
 
@@ -51,10 +51,11 @@ impl BoundingBox2D {
         Self::decode_one(&mut cursor)
     }
 
-    pub fn encode_one<W: Write>(&self, buf: &mut W) {
-        self.center.encode_one(buf);
-        buf.write_f64::<BigEndian>(self.size_x).unwrap();
-        buf.write_f64::<BigEndian>(self.size_y).unwrap();
+    pub fn encode_one<W: Write>(&self, buf: &mut W) -> io::Result<()> {
+        self.center.encode_one(buf)?;
+        buf.write_f64::<BigEndian>(self.size_x)?;
+        buf.write_f64::<BigEndian>(self.size_y)?;
+        Ok(())
     }
 
     pub fn decode_one<R: Read>(buf: &mut R) -> io::Result<Self> {
