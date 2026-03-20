@@ -41,3 +41,9 @@ deno run --allow-read --allow-write "$SCRIPT_DIR/tools/ts/gen/mod.ts" -q -o "$SC
 rm -rf "$SCRIPT_DIR/tools/ts/msgs/generated"
 cp -r "$SCRIPT_DIR/generated/ts_lcm_msgs" "$SCRIPT_DIR/tools/ts/msgs/generated"
 echo -e "\033[32mLCM -> TypeScript done\033[0m"
+
+# Generate Rust bindings
+rm -rf "$SCRIPT_DIR/generated/rust_lcm_msgs"
+python3 "$SCRIPT_DIR/tools/rust/lcm_rust_gen.py" "$SCRIPT_DIR/lcm_types" -o "$SCRIPT_DIR/generated/rust_lcm_msgs"
+(cd "$SCRIPT_DIR/generated/rust_lcm_msgs" && cargo check --quiet)
+echo -e "\033[32mLCM -> Rust done\033[0m"
