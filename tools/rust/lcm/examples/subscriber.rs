@@ -9,7 +9,7 @@ const CHANNEL: &str = "/vector#geometry_msgs.Vector3";
 
 #[tokio::main]
 async fn main() {
-    let lcm = Lcm::new().await.expect("Failed to create LCM transport");
+    let mut lcm = Lcm::new().await.expect("Failed to create LCM transport");
 
     println!("Listening for Vector3 on '/vector'...");
     println!("Press Ctrl+C to stop.\n");

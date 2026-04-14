@@ -5,7 +5,7 @@ use tokio::time::Duration;
 #[tokio::test]
 async fn test_publish_and_receive_vector3() {
     let sender = Lcm::new().await.unwrap();
-    let receiver = Lcm::new().await.unwrap();
+    let mut receiver = Lcm::new().await.unwrap();
 
     let encoded = Vector3 { x: 1.5, y: 2.5, z: 3.5 }.encode();
 
@@ -30,7 +30,7 @@ async fn test_publish_and_receive_vector3() {
 #[tokio::test]
 async fn test_publish_and_receive_twist() {
     let sender = Lcm::new().await.unwrap();
-    let receiver = Lcm::new().await.unwrap();
+    let mut receiver = Lcm::new().await.unwrap();
 
     let encoded = Twist {
         linear: Vector3 { x: 1.0, y: 0.0, z: 0.0 },
@@ -60,7 +60,7 @@ async fn test_publish_and_receive_twist() {
 #[tokio::test]
 async fn test_publish_raw_bytes_and_receive() {
     let sender = Lcm::new().await.unwrap();
-    let receiver = Lcm::new().await.unwrap();
+    let mut receiver = Lcm::new().await.unwrap();
 
     let raw = vec![0xDE, 0xAD, 0xBE, 0xEF, 0x01, 0x02, 0x03];
 
@@ -81,7 +81,7 @@ async fn test_publish_raw_bytes_and_receive() {
 #[tokio::test]
 async fn test_publish_and_receive_large_message() {
     let sender = Lcm::new().await.unwrap();
-    let receiver = Lcm::new().await.unwrap();
+    let mut receiver = Lcm::new().await.unwrap();
 
     let large_message = vec![0x2Au8; 1024 * 1024];
 

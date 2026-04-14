@@ -8,14 +8,16 @@
 //! ```no_run
 //! use dimos_lcm::Lcm;
 //!
-//! let lcm = Lcm::new().unwrap();
+//! #[tokio::main]
+//! async fn main() {
+//!     let mut lcm = Lcm::new().await.unwrap();
 //!
-//! // Publish
-//! let data = vec![1, 2, 3];
-//! lcm.publish("EXAMPLE", &data).unwrap();
+//!     // Publish
+//!     let data = vec![1, 2, 3];
+//!     lcm.publish("EXAMPLE", &data).await.unwrap();
 //!
-//! // Receive (non-blocking)
-//! if let Ok(Some(msg)) = lcm.try_recv() {
+//!     // Receive
+//!     let msg = lcm.recv().await.unwrap();
 //!     println!("{}: {} bytes", msg.channel, msg.data.len());
 //! }
 //! ```

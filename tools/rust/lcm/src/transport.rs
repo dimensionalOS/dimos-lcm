@@ -1,12 +1,16 @@
 use byteorder::{BigEndian, ByteOrder};
 use socket2::{Domain, Protocol, Socket, Type};
 use tokio::net::UdpSocket;
+use std::collections::HashMap;
 use std::io;
-use std::net::{Ipv4Addr, SocketAddrV4};
+use std::net::{Ipv4Addr, SocketAddr, SocketAddrV4};
 use std::sync::atomic::{AtomicU32, Ordering};
 
 const MAGIC_SHORT: u32 = 0x4c433032; // "LC02"
+const MAGIC_LONG: u32 = 0x4c433033;  // "LC03"
 const SHORT_HEADER_SIZE: usize = 8;
+const FRAGMENT_HEADER_SIZE: usize = 20;
+const MAX_DATAGRAM_SIZE: usize = 65507;
 
 /// Default LCM multicast group address.
 pub const DEFAULT_MULTICAST_GROUP: Ipv4Addr = Ipv4Addr::new(239, 255, 76, 67);
@@ -14,6 +18,14 @@ pub const DEFAULT_MULTICAST_GROUP: Ipv4Addr = Ipv4Addr::new(239, 255, 76, 67);
 pub const DEFAULT_PORT: u16 = 7667;
 
 static SEQ: AtomicU32 = AtomicU32::new(0);
+
+
+struct FragmentBuffer {
+    channel: String,
+    num_fragments: u16,
+    received: u16,
+    data: Vec<u8>,
+}
 
 /// Configuration for an LCM transport instance.
 #[derive(Debug, Clone)]
@@ -48,13 +60,23 @@ pub struct ReceivedMessage {
     pub data: Vec<u8>,
 }
 
+/// Returns the first and subsequent payload sizes, and the number of fragments
+fn fragment_params(msg_size: usize, channel_len: usize) -> (usize, usize, usize) {
+    let first_payload_size = MAX_DATAGRAM_SIZE - FRAGMENT_HEADER_SIZE - channel_len - 1;
+    let subsequent_payload_size = MAX_DATAGRAM_SIZE - FRAGMENT_HEADER_SIZE;
+    let num_fragments = if msg_size <= first_payload_size {
+        1
+    } else {
+        1 + msg_size.saturating_sub(first_payload_size).div_ceil(subsequent_payload_size)
+    };
+    (first_payload_size, subsequent_payload_size, num_fragments)
+}
+
 /// Pure Rust LCM UDP multicast transport.
-///
-/// Supports small-message encode/decode (no fragmentation).
-/// This covers the vast majority of robotics control messages.
 pub struct Lcm {
     socket: UdpSocket,
     multicast_addr: SocketAddrV4,
+    reassembly: HashMap<(SocketAddr, u32), FragmentBuffer>,
 }
 
 impl Lcm {
@@ -83,6 +105,7 @@ impl Lcm {
         Ok(Self {
             socket,
             multicast_addr: SocketAddrV4::new(opts.multicast_group, opts.port),
+            reassembly: HashMap::new(),
         })
     }
 
@@ -90,10 +113,21 @@ impl Lcm {
     pub async fn publish(&self, channel: &str, data: &[u8]) -> io::Result<()> {
         let channel_bytes = channel.as_bytes();
         let total = SHORT_HEADER_SIZE + channel_bytes.len() + 1 + data.len();
+        let seqno = SEQ.fetch_add(1, Ordering::Relaxed);
+
+        if total > MAX_DATAGRAM_SIZE {
+            self.publish_fragmented(channel_bytes, data, seqno).await
+        } else {
+            self.publish_small(channel_bytes, data, seqno).await
+        }
+    }
+
+    async fn publish_small(&self, channel_bytes: &[u8], data: &[u8], seqno: u32) -> io::Result<()> {
+        let total = SHORT_HEADER_SIZE + channel_bytes.len() + 1 + data.len();
         let mut buf = vec![0u8; total];
 
         BigEndian::write_u32(&mut buf[0..4], MAGIC_SHORT);
-        BigEndian::write_u32(&mut buf[4..8], SEQ.fetch_add(1, Ordering::Relaxed));
+        BigEndian::write_u32(&mut buf[4..8], seqno);
 
         buf[SHORT_HEADER_SIZE..SHORT_HEADER_SIZE + channel_bytes.len()]
             .copy_from_slice(channel_bytes);
@@ -105,28 +139,131 @@ impl Lcm {
         Ok(())
     }
 
+    async fn publish_fragmented(&self, channel_bytes: &[u8], data: &[u8], seqno: u32) -> io::Result<()> {
+        let msg_size = data.len();
+        let (first_payload_size, subsequent_payload_size, num_fragments) =
+            fragment_params(msg_size, channel_bytes.len());
+
+        let mut payload_offset = 0;
+
+        for fragment_no in 0..num_fragments {
+            let is_first = fragment_no == 0;
+            let channel_size = if is_first { channel_bytes.len() + 1 } else { 0 };
+            let max_payload = if is_first { first_payload_size } else { subsequent_payload_size };
+            let payload_len = (msg_size - payload_offset).min(max_payload);
+
+            let datagram_size = FRAGMENT_HEADER_SIZE + channel_size + payload_len;
+            let mut buf = vec![0u8; datagram_size];
+
+            BigEndian::write_u32(&mut buf[0..4],   MAGIC_LONG);
+            BigEndian::write_u32(&mut buf[4..8],   seqno);
+            BigEndian::write_u32(&mut buf[8..12],  msg_size as u32);
+            BigEndian::write_u32(&mut buf[12..16], payload_offset as u32);
+            BigEndian::write_u16(&mut buf[16..18], fragment_no as u16);
+            BigEndian::write_u16(&mut buf[18..20], num_fragments as u16);
+
+            let mut offset = FRAGMENT_HEADER_SIZE;
+
+            if is_first {
+                buf[offset..offset + channel_bytes.len()].copy_from_slice(channel_bytes);
+                // null terminator already 0
+                offset += channel_bytes.len() + 1;
+            }
+
+            buf[offset..offset + payload_len]
+                .copy_from_slice(&data[payload_offset..payload_offset + payload_len]);
+
+            self.socket.send_to(&buf, self.multicast_addr).await?;
+            payload_offset += payload_len;
+        }
+
+        Ok(())
+    }
 
     /// Receive one LCM message asynchronously.
     ///
-    /// Waits until a complete message arrives.
-    pub async fn recv(&self) -> io::Result<ReceivedMessage> {
-        let mut buf = vec![0u8; 65536];
+    /// Waits until a complete message arrives, reassembling fragments if necessary.
+    pub async fn recv(&mut self) -> io::Result<ReceivedMessage> {
+        let mut buf = vec![0u8; MAX_DATAGRAM_SIZE];
         loop {
-            let n = self.socket.recv(&mut buf).await?;
-            if let Some(msg) = Self::decode_small(&buf[..n])? {
-                return Ok(msg);
+            let (n, sender) = self.socket.recv_from(&mut buf).await?;
+            let pkt = &buf[..n];
+
+            if pkt.len() < 4 { continue; }
+            let magic = BigEndian::read_u32(&pkt[0..4]);
+
+            if magic == MAGIC_SHORT {
+                if let Some(msg) = Self::decode_small(pkt)? {
+                    return Ok(msg);
+                }
+            } else if magic == MAGIC_LONG {
+                if let Some(msg) = self.process_fragment(sender, pkt)? {
+                    return Ok(msg);
+                }
             }
-            // Malformed or unknown packet — wait for the next one
+            // Unknown magic or incomplete fragment — wait for the next datagram
         }
     }
 
-    fn decode_small(buf: &[u8]) -> io::Result<Option<ReceivedMessage>> {
-        if buf.len() < SHORT_HEADER_SIZE {
+    fn process_fragment(&mut self, sender: SocketAddr, buf: &[u8]) -> io::Result<Option<ReceivedMessage>> {
+        if buf.len() < FRAGMENT_HEADER_SIZE {
             return Ok(None);
         }
-        let magic = BigEndian::read_u32(&buf[0..4]);
-        if magic != MAGIC_SHORT {
-            return Ok(None); // skip fragmented / unknown messages
+
+        let seqno           = BigEndian::read_u32(&buf[4..8]);
+        let total_size      = BigEndian::read_u32(&buf[8..12]) as usize;
+        let fragment_offset = BigEndian::read_u32(&buf[12..16]) as usize;
+        let fragment_no     = BigEndian::read_u16(&buf[16..18]);
+        let num_fragments   = BigEndian::read_u16(&buf[18..20]);
+
+        let mut offset = FRAGMENT_HEADER_SIZE;
+
+        // First fragment carries the channel name
+        let channel = if fragment_no == 0 {
+            let channel_end = match buf[offset..].iter().position(|&b| b == 0) {
+                Some(pos) => offset + pos,
+                None => return Ok(None),
+            };
+            let ch = String::from_utf8_lossy(&buf[offset..channel_end]).into_owned();
+            offset = channel_end + 1;
+            Some(ch)
+        } else {
+            None
+        };
+
+        let payload = &buf[offset..];
+
+        let key = (sender, seqno);
+        let entry = self.reassembly.entry(key).or_insert_with(|| FragmentBuffer {
+            channel: channel.clone().unwrap_or_default(),
+            num_fragments,
+            received: 0,
+            data: vec![0u8; total_size],
+        });
+
+        // First fragment also sets the channel name on an existing entry
+        if let Some(ch) = channel {
+            entry.channel = ch;
+        }
+
+        let end = (fragment_offset + payload.len()).min(total_size);
+        entry.data[fragment_offset..end].copy_from_slice(&payload[..end - fragment_offset]);
+        entry.received += 1;
+
+        if entry.received == entry.num_fragments {
+            let complete = self.reassembly.remove(&key).unwrap();
+            return Ok(Some(ReceivedMessage {
+                channel: complete.channel,
+                data: complete.data,
+            }));
+        }
+
+        Ok(None)
+    }
+
+    fn decode_small(buf: &[u8]) -> io::Result<Option<ReceivedMessage>> {
+        if buf.len() < SHORT_HEADER_SIZE || BigEndian::read_u32(&buf[0..4]) != MAGIC_SHORT {
+            return Ok(None);
         }
         let channel_start = SHORT_HEADER_SIZE;
         let channel_end = match buf[channel_start..].iter().position(|&b| b == 0) {
@@ -136,5 +273,38 @@ impl Lcm {
         let channel = String::from_utf8_lossy(&buf[channel_start..channel_end]).into_owned();
         let data = buf[channel_end + 1..].to_vec();
         Ok(Some(ReceivedMessage { channel, data }))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const TEST_CHANNEL_LEN: usize = 13; // "/test_channel"
+    const FIRST_PAYLOAD: usize = MAX_DATAGRAM_SIZE - FRAGMENT_HEADER_SIZE - TEST_CHANNEL_LEN - 1;
+    const SUBSEQUENT_PAYLOAD: usize = MAX_DATAGRAM_SIZE - FRAGMENT_HEADER_SIZE;
+
+    #[test]
+    fn fragment_count_fits_in_one() {
+        let (_, _, n) = fragment_params(FIRST_PAYLOAD, TEST_CHANNEL_LEN);
+        assert_eq!(n, 1);
+    }
+
+    #[test]
+    fn fragment_count_spills_into_two() {
+        let (_, _, n) = fragment_params(FIRST_PAYLOAD + 1, TEST_CHANNEL_LEN);
+        assert_eq!(n, 2);
+    }
+
+    #[test]
+    fn fragment_count_spills_into_three() {
+        let (_, _, n) = fragment_params(FIRST_PAYLOAD + SUBSEQUENT_PAYLOAD + 1, TEST_CHANNEL_LEN);
+        assert_eq!(n, 3);
+    }
+
+    #[test]
+    fn fragment_count_one_mb() {
+        let (_, _, n) = fragment_params(1024 * 1024, TEST_CHANNEL_LEN);
+        assert_eq!(n, 17);
     }
 }
