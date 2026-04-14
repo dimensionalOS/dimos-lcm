@@ -1,7 +1,7 @@
 use byteorder::{BigEndian, ByteOrder};
 use socket2::{Domain, Protocol, Socket, Type};
+use tokio::net::UdpSocket;
 use std::io;
-use std::mem::MaybeUninit;
 use std::net::{Ipv4Addr, SocketAddrV4};
 use std::sync::atomic::{AtomicU32, Ordering};
 
@@ -53,27 +53,31 @@ pub struct ReceivedMessage {
 /// Supports small-message encode/decode (no fragmentation).
 /// This covers the vast majority of robotics control messages.
 pub struct Lcm {
-    socket: Socket,
+    socket: UdpSocket,
     multicast_addr: SocketAddrV4,
 }
 
 impl Lcm {
     /// Create a new LCM transport with default options.
-    pub fn new() -> io::Result<Self> {
-        Self::with_options(LcmOptions::default())
+    pub async fn new() -> io::Result<Self> {
+        Self::with_options(LcmOptions::default()).await
     }
 
     /// Create a new LCM transport with custom options.
-    pub fn with_options(opts: LcmOptions) -> io::Result<Self> {
-        let socket = Socket::new(Domain::IPV4, Type::DGRAM, Some(Protocol::UDP))?;
-        socket.set_reuse_address(true)?;
+    pub async fn with_options(opts: LcmOptions) -> io::Result<Self> {
+        let s2 = Socket::new(Domain::IPV4, Type::DGRAM, Some(Protocol::UDP))?;
+        s2.set_reuse_address(true)?;
         #[cfg(not(target_os = "windows"))]
-        socket.set_reuse_port(true)?;
-        socket.set_nonblocking(true)?;
+        s2.set_reuse_port(true)?;
 
         let bind_addr = SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, opts.port);
-        socket.bind(&bind_addr.into())?;
-        socket.join_multicast_v4(&opts.multicast_group, &opts.interface)?;
+        s2.bind(&bind_addr.into())?;
+
+        let std_socket: std::net::UdpSocket = s2.into();
+        std_socket.set_nonblocking(true)?;
+        let socket = UdpSocket::from_std(std_socket)?;
+
+        socket.join_multicast_v4(opts.multicast_group, opts.interface)?;
         socket.set_multicast_ttl_v4(opts.ttl)?;
 
         Ok(Self {
@@ -83,7 +87,7 @@ impl Lcm {
     }
 
     /// Publish encoded message data on the given channel.
-    pub fn publish(&self, channel: &str, data: &[u8]) -> io::Result<()> {
+    pub async fn publish(&self, channel: &str, data: &[u8]) -> io::Result<()> {
         let channel_bytes = channel.as_bytes();
         let total = SHORT_HEADER_SIZE + channel_bytes.len() + 1 + data.len();
         let mut buf = vec![0u8; total];
@@ -97,24 +101,22 @@ impl Lcm {
         let payload_start = SHORT_HEADER_SIZE + channel_bytes.len() + 1;
         buf[payload_start..].copy_from_slice(data);
 
-        self.socket.send_to(&buf, &self.multicast_addr.into())?;
+        self.socket.send_to(&buf, self.multicast_addr).await?;
         Ok(())
     }
 
-    /// Try to receive one LCM message (non-blocking).
+
+    /// Receive one LCM message asynchronously.
     ///
-    /// Returns `Ok(None)` if no data is available.
-    pub fn try_recv(&self) -> io::Result<Option<ReceivedMessage>> {
-        let mut buf = [MaybeUninit::<u8>::uninit(); 65536];
-        match self.socket.recv(&mut buf) {
-            Ok(n) => {
-                // SAFETY: socket2::recv guarantees the first `n` bytes are initialized.
-                let buf =
-                    unsafe { &*(&buf[..n] as *const [MaybeUninit<u8>] as *const [u8]) };
-                Self::decode_small(buf)
+    /// Waits until a complete message arrives.
+    pub async fn recv(&self) -> io::Result<ReceivedMessage> {
+        let mut buf = vec![0u8; 65536];
+        loop {
+            let n = self.socket.recv(&mut buf).await?;
+            if let Some(msg) = Self::decode_small(&buf[..n])? {
+                return Ok(msg);
             }
-            Err(e) if e.kind() == io::ErrorKind::WouldBlock => Ok(None),
-            Err(e) => Err(e),
+            // Malformed or unknown packet — wait for the next one
         }
     }
 
