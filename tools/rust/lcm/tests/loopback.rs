@@ -99,3 +99,18 @@ fn test_publish_raw_bytes_and_receive() {
     assert_eq!(msg.channel, "RAW_TEST");
     assert_eq!(msg.data, raw);
 }
+
+#[test]
+fn test_publish_and_receive_large_message() {
+    let sender = Lcm::new().unwrap();
+    let receiver = Lcm::new().unwrap();
+
+    while let Ok(Some(_)) = receiver.try_recv() {}
+
+    let large_message = vec![0x2Au8; 1024 * 1024];
+    sender.publish("LARGE_TEST", &large_message).unwrap();
+
+    let msg = recv_with_timeout(&receiver, "LARGE_TEST", 500).expect("timed out waiting for LARGE_TEST");
+    assert_eq!(msg.channel, "LARGE_TEST");
+    assert_eq!(msg.data, large_message);
+}
