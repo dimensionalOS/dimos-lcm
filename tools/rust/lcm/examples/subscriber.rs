@@ -1,38 +1,38 @@
 // Simple LCM Subscriber Example
-// Receives Vector3 messages with typed decoding
+// Receives Vector3 messages
 
-use dimos_lcm::LcmModule;
+use dimos_lcm::Lcm;
 use lcm_msgs::geometry_msgs::Vector3;
 use std::time::Instant;
 
+const TOPIC: &str = "/vector#geometry_msgs.Vector3";
+
 #[tokio::main]
 async fn main() {
-    let mut subscriber = LcmModule::new().await.expect("Failed to create LcmModule (subscriber)");
-    
-    // in a Native Module, this will be handled by parsing the args
-    subscriber.map_topic("vector", "/vector#geometry_msgs.Vector3");
+    let mut lcm = Lcm::new().await.expect("Failed to create Lcm");
 
-    let mut vector = subscriber.input("vector", Vector3::decode);
-    let _handle = subscriber.spawn();
-
-    println!("Listening for Vector3 on {}", vector.topic);
+    println!("Listening for Vector3 on {TOPIC}");
     println!("Press Ctrl+C to stop\n");
 
     let mut last = Instant::now();
 
     loop {
-        // run the processing on whichever topic receives a message first
-        tokio::select! {
-            Some(vec) = vector.recv() => {
-                // processing for message goes here
-                // can either do here, or move to a separate thread if cpu heavy
-                let interval = last.elapsed();
-                println!("Received: x={:.2} y={:.2} z={:.2} (interval {:.1}ms)",
-                    vec.x, vec.y, vec.z, interval.as_secs_f64() * 1000.0
-                );
-                last = Instant::now();
+        match lcm.recv().await {
+            Ok(msg) if msg.channel == TOPIC => {
+                match Vector3::decode(&msg.data) {
+                    Ok(vec) => {
+                        let interval = last.elapsed();
+                        println!(
+                            "Received: x={:.2} y={:.2} z={:.2} (interval {:.1}ms)",
+                            vec.x, vec.y, vec.z, interval.as_secs_f64() * 1000.0
+                        );
+                        last = Instant::now();
+                    }
+                    Err(e) => eprintln!("Decode error: {e}"),
+                }
             }
-            // other subscribed topics are added here with the same pattern...
+            Ok(_) => {}
+            Err(e) => eprintln!("Recv error: {e}"),
         }
     }
 }

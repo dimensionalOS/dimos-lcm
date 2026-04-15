@@ -23,7 +23,5 @@
 //! ```
 
 mod transport;
-mod module;
 
 pub use transport::{Lcm, LcmOptions, ReceivedMessage};
-pub use module::{Input, LcmModule, LcmModuleHandle, Output};
