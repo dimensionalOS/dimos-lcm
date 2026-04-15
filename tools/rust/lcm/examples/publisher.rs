@@ -1,16 +1,22 @@
 // Simple LCM Publisher Example
 // Publishes Vector3 messages at 10 Hz
 
-use dimos_lcm::Lcm;
+use dimos_lcm::LcmModule;
 use lcm_msgs::geometry_msgs::Vector3;
 use tokio::time::{sleep, Duration, Instant};
 
 #[tokio::main]
 async fn main() {
-    let lcm = Lcm::new().await.expect("Failed to create LCM transport");
+    let mut publisher = LcmModule::new().await.expect("Failed to create LcmModule (publisher)");
 
-    println!("Publishing Vector3 on '/vector'...");
-    println!("Press Ctrl+C to stop.\n");
+    // in a Native Module, this will be handled by parsing the args
+    publisher.map_topic("vector", "/vector#geometry_msgs.Vector3");
+
+    let vector = publisher.output("vector", Vector3::encode);
+    let _handle = publisher.spawn();
+
+    println!("Publishing Vector3 on {}", vector.topic);
+    println!("Press Ctrl+C to stop\n");
 
     let mut t: f64 = 0.0;
     let mut last = Instant::now();
@@ -25,10 +31,7 @@ async fn main() {
         let interval = last.elapsed();
         last = Instant::now();
 
-        let data = vec.encode();
-        lcm.publish("/vector#geometry_msgs.Vector3", &data)
-            .await
-            .expect("publish failed");
+        let _ = vector.publish(&vec).await;
 
         println!(
             "Published: x={:.2} y={:.2} z={:.2} (interval {:.1}ms)",
