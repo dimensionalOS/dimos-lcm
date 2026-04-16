@@ -307,4 +307,53 @@ mod tests {
         let (_, _, n) = fragment_params(1024 * 1024, TEST_CHANNEL_LEN);
         assert_eq!(n, 17);
     }
+
+    fn make_small_packet(channel: &[u8], payload: &[u8]) -> Vec<u8> {
+        let mut buf = vec![0u8; SHORT_HEADER_SIZE + channel.len() + 1 + payload.len()];
+        BigEndian::write_u32(&mut buf[0..4], MAGIC_SHORT);
+        BigEndian::write_u32(&mut buf[4..8], 0);
+        buf[SHORT_HEADER_SIZE..SHORT_HEADER_SIZE + channel.len()].copy_from_slice(channel);
+        buf[SHORT_HEADER_SIZE + channel.len() + 1..].copy_from_slice(payload);
+        buf
+    }
+
+    #[test]
+    fn decode_small_known_good() {
+        let buf = make_small_packet(b"CHAN", &[1, 2, 3]);
+        let msg = Lcm::decode_small(&buf).unwrap().unwrap();
+        assert_eq!(msg.channel, "CHAN");
+        assert_eq!(msg.data, [1u8, 2, 3]);
+    }
+
+    #[test]
+    fn decode_small_empty_payload() {
+        let buf = make_small_packet(b"CHAN", &[]);
+        let msg = Lcm::decode_small(&buf).unwrap().unwrap();
+        assert_eq!(msg.channel, "CHAN");
+        assert!(msg.data.is_empty());
+    }
+
+    #[test]
+    fn decode_small_wrong_magic() {
+        let mut buf = make_small_packet(b"CHAN", &[1, 2, 3]);
+        BigEndian::write_u32(&mut buf[0..4], 0xDEADBEEF);
+        assert!(Lcm::decode_small(&buf).unwrap().is_none());
+    }
+
+    #[test]
+    fn decode_small_truncated() {
+        // Shorter than SHORT_HEADER_SIZE
+        let buf = vec![0x4C, 0x43, 0x30, 0x32, 0x00];
+        assert!(Lcm::decode_small(&buf).unwrap().is_none());
+    }
+
+    #[test]
+    fn decode_small_missing_null_terminator() {
+        // Valid header but channel bytes have no null terminator
+        let mut buf = vec![0u8; SHORT_HEADER_SIZE + 4];
+        BigEndian::write_u32(&mut buf[0..4], MAGIC_SHORT);
+        BigEndian::write_u32(&mut buf[4..8], 0);
+        buf[SHORT_HEADER_SIZE..SHORT_HEADER_SIZE + 4].copy_from_slice(b"CHAN");
+        assert!(Lcm::decode_small(&buf).unwrap().is_none());
+    }
 }

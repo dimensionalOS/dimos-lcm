@@ -1,60 +1,53 @@
 use dimos_lcm::Lcm;
-use lcm_msgs::geometry_msgs::{Twist, Vector3};
 use tokio::time::Duration;
 
-#[tokio::test]
-async fn test_publish_and_receive_vector3() {
-    let sender = Lcm::new().await.unwrap();
-    let mut receiver = Lcm::new().await.unwrap();
+const TIMEOUT: Duration = Duration::from_secs(2);
 
-    let encoded = Vector3 { x: 1.5, y: 2.5, z: 3.5 }.encode();
-
-    tokio::spawn(async move {
-        // give the subscriber time to start before publishing
-        tokio::time::sleep(Duration::from_millis(10)).await;
-        sender.publish("VECTOR3_TEST", &encoded).await.unwrap();
-    });
-
+async fn recv_channel(receiver: &mut Lcm, channel: &str) -> Vec<u8> {
     loop {
         let msg = receiver.recv().await.unwrap();
-        if msg.channel == "VECTOR3_TEST" {
-            let decoded = Vector3::decode(&msg.data).unwrap();
-            assert_eq!(decoded.x.to_bits(), 1.5f64.to_bits());
-            assert_eq!(decoded.y.to_bits(), 2.5f64.to_bits());
-            assert_eq!(decoded.z.to_bits(), 3.5f64.to_bits());
-            break;
+        if msg.channel == channel {
+            return msg.data;
         }
     }
 }
 
 #[tokio::test]
-async fn test_publish_and_receive_twist() {
+async fn test_small_message_round_trip() {
     let sender = Lcm::new().await.unwrap();
     let mut receiver = Lcm::new().await.unwrap();
-
-    let encoded = Twist {
-        linear: Vector3 { x: 1.0, y: 0.0, z: 0.0 },
-        angular: Vector3 { x: 0.0, y: 0.0, z: 0.5 },
-    }.encode();
+    let payload = b"hello lcm transport".to_vec();
+    let expected = payload.clone();
 
     tokio::spawn(async move {
         tokio::time::sleep(Duration::from_millis(10)).await;
-        sender.publish("/cmd_vel", &encoded).await.unwrap();
+        sender.publish("SMALL_TRIP", &payload).await.unwrap();
     });
 
-    loop {
-        let msg = receiver.recv().await.unwrap();
-        if msg.channel == "/cmd_vel" {
-            let decoded = Twist::decode(&msg.data).unwrap();
-            assert_eq!(decoded.linear.x.to_bits(), 1.0f64.to_bits());
-            assert_eq!(decoded.linear.y.to_bits(), 0.0f64.to_bits());
-            assert_eq!(decoded.linear.z.to_bits(), 0.0f64.to_bits());
-            assert_eq!(decoded.angular.x.to_bits(), 0.0f64.to_bits());
-            assert_eq!(decoded.angular.y.to_bits(), 0.0f64.to_bits());
-            assert_eq!(decoded.angular.z.to_bits(), 0.5f64.to_bits());
-            break;
-        }
-    }
+    tokio::time::timeout(TIMEOUT, async {
+        assert_eq!(recv_channel(&mut receiver, "SMALL_TRIP").await, expected);
+    })
+    .await
+    .expect("timed out waiting for SMALL_TRIP");
+}
+
+#[tokio::test]
+async fn test_binary_payload_round_trip() {
+    let sender = Lcm::new().await.unwrap();
+    let mut receiver = Lcm::new().await.unwrap();
+    let payload: Vec<u8> = (0u8..=255).collect();
+    let expected = payload.clone();
+
+    tokio::spawn(async move {
+        tokio::time::sleep(Duration::from_millis(10)).await;
+        sender.publish("BIN_TRIP", &payload).await.unwrap();
+    });
+
+    tokio::time::timeout(TIMEOUT, async {
+        assert_eq!(recv_channel(&mut receiver, "BIN_TRIP").await, expected);
+    })
+    .await
+    .expect("timed out waiting for BIN_TRIP");
 }
 
 #[tokio::test]
@@ -63,19 +56,61 @@ async fn test_publish_raw_bytes_and_receive() {
     let mut receiver = Lcm::new().await.unwrap();
 
     let raw = vec![0xDE, 0xAD, 0xBE, 0xEF, 0x01, 0x02, 0x03];
+    let expected = raw.clone();
 
     tokio::spawn(async move {
         tokio::time::sleep(Duration::from_millis(10)).await;
         sender.publish("RAW_TEST", &raw).await.unwrap();
     });
 
-    loop {
-        let msg = receiver.recv().await.unwrap();
-        if msg.channel == "RAW_TEST" {
-            assert_eq!(msg.data, vec![0xDE, 0xAD, 0xBE, 0xEF, 0x01, 0x02, 0x03]);
-            break;
+    tokio::time::timeout(TIMEOUT, async {
+        assert_eq!(recv_channel(&mut receiver, "RAW_TEST").await, expected);
+    })
+    .await
+    .expect("timed out waiting for RAW_TEST");
+}
+
+#[tokio::test]
+async fn test_empty_payload_round_trip() {
+    let sender = Lcm::new().await.unwrap();
+    let mut receiver = Lcm::new().await.unwrap();
+
+    tokio::spawn(async move {
+        tokio::time::sleep(Duration::from_millis(10)).await;
+        sender.publish("EMPTY_TEST", &[]).await.unwrap();
+    });
+
+    tokio::time::timeout(TIMEOUT, async {
+        assert!(recv_channel(&mut receiver, "EMPTY_TEST").await.is_empty());
+    })
+    .await
+    .expect("timed out waiting for EMPTY_TEST");
+}
+
+#[tokio::test]
+async fn test_multiple_sequential_messages() {
+    let sender = Lcm::new().await.unwrap();
+    let mut receiver = Lcm::new().await.unwrap();
+
+    tokio::spawn(async move {
+        tokio::time::sleep(Duration::from_millis(10)).await;
+        for i in 0u8..5 {
+            sender.publish("MULTI_TEST", &[i]).await.unwrap();
         }
-    }
+    });
+
+    tokio::time::timeout(TIMEOUT, async {
+        let mut received = Vec::new();
+        while received.len() < 5 {
+            let msg = receiver.recv().await.unwrap();
+            if msg.channel == "MULTI_TEST" {
+                received.push(msg.data[0]);
+            }
+        }
+        assert_eq!(received, vec![0, 1, 2, 3, 4]);
+    })
+    .await
+    .expect("timed out waiting for MULTI_TEST");
 }
 
 #[tokio::test]
@@ -84,20 +119,15 @@ async fn test_publish_and_receive_large_message() {
     let mut receiver = Lcm::new().await.unwrap();
 
     let large_message = vec![0x2Au8; 1024 * 1024];
+    let expected = large_message.clone();
 
     let handle = tokio::spawn(async move {
         tokio::time::sleep(Duration::from_millis(10)).await;
         sender.publish("LARGE_TEST", &large_message).await.unwrap();
     });
 
-    tokio::time::timeout(Duration::from_secs(2), async {
-        loop {
-            let msg = receiver.recv().await.unwrap();
-            if msg.channel == "LARGE_TEST" {
-                assert_eq!(msg.data, vec![0x2Au8; 1024 * 1024]);
-                break;
-            }
-        }
+    tokio::time::timeout(TIMEOUT, async {
+        assert_eq!(recv_channel(&mut receiver, "LARGE_TEST").await, expected);
     })
     .await
     .expect("timed out waiting for LARGE_TEST");
