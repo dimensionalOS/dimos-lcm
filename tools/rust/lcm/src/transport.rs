@@ -54,7 +54,7 @@ impl Default for LcmOptions {
 /// A received LCM message.
 #[derive(Debug, Clone)]
 pub struct ReceivedMessage {
-    /// Channel name (e.g., "/odom#geometry_msgs.PoseStamped").
+    /// Channel name.
     pub channel: String,
     /// Encoded message payload.
     pub data: Vec<u8>,
