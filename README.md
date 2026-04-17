@@ -21,6 +21,7 @@ This will:
 4. Generate C# bindings (`generated/cs_lcm_msgs/`)
 5. Generate Java bindings (`generated/java_lcm_msgs/`)
 6. Generate Typescript bindings (`generated/ts_lcm_msgs/`)
+7. Generate Rust bindings (`generated/rust_lcm_msgs/`)
 
 ## Directory Structure
 
