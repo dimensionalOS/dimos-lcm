@@ -40,6 +40,21 @@ static inline int dimos_msg__Time__decode(const void *buf, int offset,
     return pos;
 }
 
+/* LCM fingerprint hash — matches C++ Time::getHash() */
+static inline int64_t dimos_msg__Time__fingerprint(void) {
+    return (int64_t)-4883510275265172335LL;
+}
+
+/* Type descriptor for dimos_lcm_pubsub — include dimos_lcm_pubsub.h first */
+#ifdef DIMOS_LCM_PUBSUB_H
+static const dimos_lcm_type_t dimos_msg__Time__type = {
+    /* name */          "std_msgs.Time",
+    /* fingerprint */   (int64_t)-4883510275265172335LL,
+    /* encoded_size */  8,
+    /* decode */        (int (*)(const void *, int, int, void *))dimos_msg__Time__decode
+};
+#endif
+
 #ifdef __cplusplus
 }
 #endif

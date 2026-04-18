@@ -50,6 +50,21 @@ static inline int dimos_msg__ColorRGBA__decode(const void *buf, int offset,
     return pos;
 }
 
+/* LCM fingerprint hash — matches C++ ColorRGBA::getHash() */
+static inline int64_t dimos_msg__ColorRGBA__fingerprint(void) {
+    return (int64_t)7940549966018511412LL;
+}
+
+/* Type descriptor for dimos_lcm_pubsub — include dimos_lcm_pubsub.h first */
+#ifdef DIMOS_LCM_PUBSUB_H
+static const dimos_lcm_type_t dimos_msg__ColorRGBA__type = {
+    /* name */          "std_msgs.ColorRGBA",
+    /* fingerprint */   (int64_t)7940549966018511412LL,
+    /* encoded_size */  16,
+    /* decode */        (int (*)(const void *, int, int, void *))dimos_msg__ColorRGBA__decode
+};
+#endif
+
 #ifdef __cplusplus
 }
 #endif

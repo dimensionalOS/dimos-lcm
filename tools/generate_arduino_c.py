@@ -7,6 +7,8 @@ Reads .lcm type definitions and emits lightweight C headers with:
   - encoded_size()  (compile-time constant)
   - encode()        (big-endian, LCM wire format without fingerprint)
   - decode()
+  - LCM fingerprint hash constant (matching C++ getHash())
+  - dimos_lcm_type_t type descriptor for the pubsub layer
 
 Only fixed-size types are supported (no strings, no variable-length arrays).
 Types with unsupported fields are skipped with a warning.
@@ -157,7 +159,11 @@ def c_field_name(pkg: str, struct_name: str, field_name: str) -> str:
     return FIELD_NAME_OVERRIDES.get((pkg, struct_name, field_name), field_name)
 
 
-def generate_header(struct: LcmStruct, all_structs: dict[tuple[str, str], LcmStruct]) -> str:
+def generate_header(
+    struct: LcmStruct,
+    all_structs: dict[tuple[str, str], LcmStruct],
+    fingerprints: dict[str, int] | None = None,
+) -> str:
     """Generate the full C header for one struct."""
     pkg = struct.package
     name = struct.name
@@ -318,6 +324,33 @@ def generate_header(struct: LcmStruct, all_structs: dict[tuple[str, str], LcmStr
     lines.append(f"}}")
     lines.append(f"")
 
+    # LCM fingerprint hash constant
+    fq_name = f"{pkg}.{name}"
+    fp_val = fingerprints.get(fq_name, 0) if fingerprints else 0
+    # Convert to signed int64_t for C (matching C++ getHash() return type)
+    if fp_val >= 0x8000000000000000:
+        signed_fp = fp_val - 0x10000000000000000
+    else:
+        signed_fp = fp_val
+
+    lines.append(f"/* LCM fingerprint hash — matches C++ {name}::getHash() */")
+    lines.append(f"static inline int64_t {prefix}__fingerprint(void) {{")
+    lines.append(f"    return (int64_t){signed_fp}LL;")
+    lines.append(f"}}")
+    lines.append(f"")
+
+    # Type descriptor for the pubsub layer (requires dimos_lcm_pubsub.h)
+    lines.append(f"/* Type descriptor for dimos_lcm_pubsub — include dimos_lcm_pubsub.h first */")
+    lines.append(f"#ifdef DIMOS_LCM_PUBSUB_H")
+    lines.append(f"static const dimos_lcm_type_t {prefix}__type = {{")
+    lines.append(f'    /* name */          "{fq_name}",')
+    lines.append(f"    /* fingerprint */   (int64_t){signed_fp}LL,")
+    lines.append(f"    /* encoded_size */  {total_size},")
+    lines.append(f"    /* decode */        (int (*)(const void *, int, int, void *)){prefix}__decode")
+    lines.append(f"}};")
+    lines.append(f"#endif")
+    lines.append(f"")
+
     lines.append(f"#ifdef __cplusplus")
     lines.append(f"}}")
     lines.append(f"#endif")
@@ -326,6 +359,87 @@ def generate_header(struct: LcmStruct, all_structs: dict[tuple[str, str], LcmStr
     lines.append(f"")
 
     return "\n".join(lines)
+
+
+def extract_base_hashes(cpp_dir: Path) -> dict[str, dict]:
+    """Extract base hash constants and dependencies from generated C++ headers.
+
+    Returns a dict keyed by "package.TypeName" with:
+      - 'base': uint64_t base hash constant
+      - 'deps': list of "package.TypeName" dependencies (in order)
+    """
+    import glob as _glob
+    result = {}
+    for f in sorted(_glob.glob(str(cpp_dir / "*" / "*.hpp"))):
+        type_name = f.replace(str(cpp_dir) + "/", "").replace(".hpp", "").replace("/", ".")
+        text = open(f).read()
+
+        short_name = type_name.split(".")[-1]
+        idx = text.find(short_name + "::_computeHash(")
+        if idx < 0:
+            continue
+
+        # Find function body by brace matching
+        brace_start = text.find("{", idx)
+        if brace_start < 0:
+            continue
+        depth = 0
+        end = brace_start
+        for i in range(brace_start, len(text)):
+            if text[i] == "{":
+                depth += 1
+            elif text[i] == "}":
+                depth -= 1
+            if depth == 0:
+                end = i
+                break
+        body = text[brace_start : end + 1]
+
+        base_m = re.search(r"(0x[0-9a-fA-F]+)LL", body)
+        if base_m is None:
+            continue
+        base = int(base_m.group(1), 16)
+
+        deps = re.findall(r"(\w+)::(\w+)::_computeHash", body)
+        dep_list = [f"{ns}.{cls}" for ns, cls in deps]
+
+        result[type_name] = {"base": base, "deps": dep_list}
+    return result
+
+
+def compute_fingerprints(
+    hash_info: dict[str, dict],
+) -> dict[str, int]:
+    """Compute LCM fingerprint hashes matching C++ getHash() output.
+
+    Returns dict of "package.TypeName" -> uint64_t hash value.
+    """
+    computed: dict[str, int] = {}
+
+    def _compute(type_name: str, visited: set[str] | None = None) -> int:
+        if type_name in computed:
+            return computed[type_name]
+        if visited is None:
+            visited = set()
+        if type_name in visited:
+            return 0  # cycle detection (matches C++ linked-list check)
+        visited = visited | {type_name}
+
+        info = hash_info.get(type_name)
+        if info is None:
+            return 0
+
+        h = info["base"]
+        for dep in info["deps"]:
+            h = (h + _compute(dep, visited)) & 0xFFFFFFFFFFFFFFFF
+        h = ((h << 1) | (h >> 63)) & 0xFFFFFFFFFFFFFFFF
+
+        computed[type_name] = h
+        return h
+
+    for name in hash_info:
+        _compute(name)
+    return computed
 
 
 def topological_sort(structs: dict[tuple[str, str], LcmStruct]) -> list[LcmStruct]:
@@ -351,11 +465,12 @@ def topological_sort(structs: dict[tuple[str, str], LcmStruct]) -> list[LcmStruc
 
 def main():
     if len(sys.argv) < 3:
-        print(f"Usage: {sys.argv[0]} <lcm_types_dir> <output_dir>", file=sys.stderr)
+        print(f"Usage: {sys.argv[0]} <lcm_types_dir> <output_dir> [cpp_headers_dir]", file=sys.stderr)
         sys.exit(1)
 
     lcm_dir = Path(sys.argv[1])
     out_dir = Path(sys.argv[2])
+    cpp_dir = Path(sys.argv[3]) if len(sys.argv) > 3 else None
 
     # Parse all .lcm files
     all_structs: dict[tuple[str, str], LcmStruct] = {}
@@ -376,11 +491,20 @@ def main():
         for pkg, name in sorted(skipped):
             print(f"  {pkg}/{name}", file=sys.stderr)
 
+    # Compute LCM fingerprint hashes from C++ generated headers
+    fingerprints: dict[str, int] | None = None
+    if cpp_dir and cpp_dir.is_dir():
+        hash_info = extract_base_hashes(cpp_dir)
+        fingerprints = compute_fingerprints(hash_info)
+        print(f"Computed {len(fingerprints)} fingerprint hashes from {cpp_dir}", file=sys.stderr)
+    else:
+        print("Warning: no C++ headers dir provided, fingerprints will be 0", file=sys.stderr)
+
     # Generate in topological order
     sorted_structs = topological_sort(compatible)
     generated = 0
     for s in sorted_structs:
-        header = generate_header(s, compatible)
+        header = generate_header(s, compatible, fingerprints)
         pkg_dir = out_dir / s.package
         pkg_dir.mkdir(parents=True, exist_ok=True)
         out_file = pkg_dir / f"{s.name}.h"

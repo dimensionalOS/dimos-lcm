@@ -41,6 +41,21 @@ static inline int dimos_msg__BoundingBox3D__decode(const void *buf, int offset,
     return pos;
 }
 
+/* LCM fingerprint hash — matches C++ BoundingBox3D::getHash() */
+static inline int64_t dimos_msg__BoundingBox3D__fingerprint(void) {
+    return (int64_t)7478515651293570543LL;
+}
+
+/* Type descriptor for dimos_lcm_pubsub — include dimos_lcm_pubsub.h first */
+#ifdef DIMOS_LCM_PUBSUB_H
+static const dimos_lcm_type_t dimos_msg__BoundingBox3D__type = {
+    /* name */          "vision_msgs.BoundingBox3D",
+    /* fingerprint */   (int64_t)7478515651293570543LL,
+    /* encoded_size */  80,
+    /* decode */        (int (*)(const void *, int, int, void *))dimos_msg__BoundingBox3D__decode
+};
+#endif
+
 #ifdef __cplusplus
 }
 #endif

@@ -40,6 +40,21 @@ static inline int dimos_msg__PoseWithCovariance__decode(const void *buf, int off
     return pos;
 }
 
+/* LCM fingerprint hash — matches C++ PoseWithCovariance::getHash() */
+static inline int64_t dimos_msg__PoseWithCovariance__fingerprint(void) {
+    return (int64_t)-3574687462882993318LL;
+}
+
+/* Type descriptor for dimos_lcm_pubsub — include dimos_lcm_pubsub.h first */
+#ifdef DIMOS_LCM_PUBSUB_H
+static const dimos_lcm_type_t dimos_msg__PoseWithCovariance__type = {
+    /* name */          "geometry_msgs.PoseWithCovariance",
+    /* fingerprint */   (int64_t)-3574687462882993318LL,
+    /* encoded_size */  344,
+    /* decode */        (int (*)(const void *, int, int, void *))dimos_msg__PoseWithCovariance__decode
+};
+#endif
+
 #ifdef __cplusplus
 }
 #endif

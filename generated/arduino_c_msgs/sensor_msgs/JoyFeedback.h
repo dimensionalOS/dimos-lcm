@@ -45,6 +45,21 @@ static inline int dimos_msg__JoyFeedback__decode(const void *buf, int offset,
     return pos;
 }
 
+/* LCM fingerprint hash — matches C++ JoyFeedback::getHash() */
+static inline int64_t dimos_msg__JoyFeedback__fingerprint(void) {
+    return (int64_t)5230447590260245546LL;
+}
+
+/* Type descriptor for dimos_lcm_pubsub — include dimos_lcm_pubsub.h first */
+#ifdef DIMOS_LCM_PUBSUB_H
+static const dimos_lcm_type_t dimos_msg__JoyFeedback__type = {
+    /* name */          "sensor_msgs.JoyFeedback",
+    /* fingerprint */   (int64_t)5230447590260245546LL,
+    /* encoded_size */  6,
+    /* decode */        (int (*)(const void *, int, int, void *))dimos_msg__JoyFeedback__decode
+};
+#endif
+
 #ifdef __cplusplus
 }
 #endif

@@ -62,6 +62,21 @@ static inline int dimos_msg__CircleAnnotation__decode(const void *buf, int offse
     return pos;
 }
 
+/* LCM fingerprint hash — matches C++ CircleAnnotation::getHash() */
+static inline int64_t dimos_msg__CircleAnnotation__fingerprint(void) {
+    return (int64_t)7120207774344483495LL;
+}
+
+/* Type descriptor for dimos_lcm_pubsub — include dimos_lcm_pubsub.h first */
+#ifdef DIMOS_LCM_PUBSUB_H
+static const dimos_lcm_type_t dimos_msg__CircleAnnotation__type = {
+    /* name */          "foxglove_msgs.CircleAnnotation",
+    /* fingerprint */   (int64_t)7120207774344483495LL,
+    /* encoded_size */  104,
+    /* decode */        (int (*)(const void *, int, int, void *))dimos_msg__CircleAnnotation__decode
+};
+#endif
+
 #ifdef __cplusplus
 }
 #endif

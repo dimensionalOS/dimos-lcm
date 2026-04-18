@@ -40,6 +40,21 @@ static inline int dimos_msg__AccelWithCovariance__decode(const void *buf, int of
     return pos;
 }
 
+/* LCM fingerprint hash — matches C++ AccelWithCovariance::getHash() */
+static inline int64_t dimos_msg__AccelWithCovariance__fingerprint(void) {
+    return (int64_t)411725922729650825LL;
+}
+
+/* Type descriptor for dimos_lcm_pubsub — include dimos_lcm_pubsub.h first */
+#ifdef DIMOS_LCM_PUBSUB_H
+static const dimos_lcm_type_t dimos_msg__AccelWithCovariance__type = {
+    /* name */          "geometry_msgs.AccelWithCovariance",
+    /* fingerprint */   (int64_t)411725922729650825LL,
+    /* encoded_size */  336,
+    /* decode */        (int (*)(const void *, int, int, void *))dimos_msg__AccelWithCovariance__decode
+};
+#endif
+
 #ifdef __cplusplus
 }
 #endif

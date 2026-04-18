@@ -29,6 +29,21 @@ static inline int dimos_msg__UInt16__decode(const void *buf, int offset,
     return __int16_t_decode_array(buf, offset, maxlen, &p->data, 1);
 }
 
+/* LCM fingerprint hash — matches C++ UInt16::getHash() */
+static inline int64_t dimos_msg__UInt16__fingerprint(void) {
+    return (int64_t)3223726259432391230LL;
+}
+
+/* Type descriptor for dimos_lcm_pubsub — include dimos_lcm_pubsub.h first */
+#ifdef DIMOS_LCM_PUBSUB_H
+static const dimos_lcm_type_t dimos_msg__UInt16__type = {
+    /* name */          "std_msgs.UInt16",
+    /* fingerprint */   (int64_t)3223726259432391230LL,
+    /* encoded_size */  2,
+    /* decode */        (int (*)(const void *, int, int, void *))dimos_msg__UInt16__decode
+};
+#endif
+
 #ifdef __cplusplus
 }
 #endif

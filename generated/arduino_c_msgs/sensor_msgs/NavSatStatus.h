@@ -40,6 +40,21 @@ static inline int dimos_msg__NavSatStatus__decode(const void *buf, int offset,
     return pos;
 }
 
+/* LCM fingerprint hash — matches C++ NavSatStatus::getHash() */
+static inline int64_t dimos_msg__NavSatStatus__fingerprint(void) {
+    return (int64_t)-1340827276200410186LL;
+}
+
+/* Type descriptor for dimos_lcm_pubsub — include dimos_lcm_pubsub.h first */
+#ifdef DIMOS_LCM_PUBSUB_H
+static const dimos_lcm_type_t dimos_msg__NavSatStatus__type = {
+    /* name */          "sensor_msgs.NavSatStatus",
+    /* fingerprint */   (int64_t)-1340827276200410186LL,
+    /* encoded_size */  3,
+    /* decode */        (int (*)(const void *, int, int, void *))dimos_msg__NavSatStatus__decode
+};
+#endif
+
 #ifdef __cplusplus
 }
 #endif

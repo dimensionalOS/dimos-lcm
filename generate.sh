@@ -38,7 +38,8 @@ echo -e "\033[32mLCM -> Lua done\033[0m"
 rm -rf "$SCRIPT_DIR/generated/arduino_c_msgs"
 mkdir -p "$SCRIPT_DIR/generated/arduino_c_msgs"
 cp "$SCRIPT_DIR/tools/lcm_coretypes_arduino.h" "$SCRIPT_DIR/generated/arduino_c_msgs/"
-python3 "$SCRIPT_DIR/tools/generate_arduino_c.py" "$SCRIPT_DIR/lcm_types" "$SCRIPT_DIR/generated/arduino_c_msgs"
+cp "$SCRIPT_DIR/tools/dimos_lcm_pubsub.h" "$SCRIPT_DIR/generated/arduino_c_msgs/"
+python3 "$SCRIPT_DIR/tools/generate_arduino_c.py" "$SCRIPT_DIR/lcm_types" "$SCRIPT_DIR/generated/arduino_c_msgs" "$SCRIPT_DIR/generated/cpp_lcm_msgs"
 echo -e "\033[32mLCM -> Arduino C done\033[0m"
 
 # Generate TypeScript bindings

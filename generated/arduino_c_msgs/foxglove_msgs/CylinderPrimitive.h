@@ -57,6 +57,21 @@ static inline int dimos_msg__CylinderPrimitive__decode(const void *buf, int offs
     return pos;
 }
 
+/* LCM fingerprint hash — matches C++ CylinderPrimitive::getHash() */
+static inline int64_t dimos_msg__CylinderPrimitive__fingerprint(void) {
+    return (int64_t)6192457399107281287LL;
+}
+
+/* Type descriptor for dimos_lcm_pubsub — include dimos_lcm_pubsub.h first */
+#ifdef DIMOS_LCM_PUBSUB_H
+static const dimos_lcm_type_t dimos_msg__CylinderPrimitive__type = {
+    /* name */          "foxglove_msgs.CylinderPrimitive",
+    /* fingerprint */   (int64_t)6192457399107281287LL,
+    /* encoded_size */  128,
+    /* decode */        (int (*)(const void *, int, int, void *))dimos_msg__CylinderPrimitive__decode
+};
+#endif
+
 #ifdef __cplusplus
 }
 #endif

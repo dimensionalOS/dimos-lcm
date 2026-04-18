@@ -41,6 +41,21 @@ static inline int dimos_msg__Transform__decode(const void *buf, int offset,
     return pos;
 }
 
+/* LCM fingerprint hash — matches C++ Transform::getHash() */
+static inline int64_t dimos_msg__Transform__fingerprint(void) {
+    return (int64_t)-1270028124645539951LL;
+}
+
+/* Type descriptor for dimos_lcm_pubsub — include dimos_lcm_pubsub.h first */
+#ifdef DIMOS_LCM_PUBSUB_H
+static const dimos_lcm_type_t dimos_msg__Transform__type = {
+    /* name */          "geometry_msgs.Transform",
+    /* fingerprint */   (int64_t)-1270028124645539951LL,
+    /* encoded_size */  56,
+    /* decode */        (int (*)(const void *, int, int, void *))dimos_msg__Transform__decode
+};
+#endif
+
 #ifdef __cplusplus
 }
 #endif
