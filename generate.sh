@@ -34,6 +34,13 @@ rm -rf "$SCRIPT_DIR/generated/lua_lcm_msgs"
 "$SCRIPT_DIR/sources/lcm_to_generated.sh" -l "$SCRIPT_DIR/lcm_types" -o "$SCRIPT_DIR/generated/lua_lcm_msgs"
 echo -e "\033[32mLCM -> Lua done\033[0m"
 
+# Generate Arduino C bindings
+rm -rf "$SCRIPT_DIR/generated/arduino_c_msgs"
+mkdir -p "$SCRIPT_DIR/generated/arduino_c_msgs"
+cp "$SCRIPT_DIR/tools/lcm_coretypes_arduino.h" "$SCRIPT_DIR/generated/arduino_c_msgs/"
+python3 "$SCRIPT_DIR/tools/generate_arduino_c.py" "$SCRIPT_DIR/lcm_types" "$SCRIPT_DIR/generated/arduino_c_msgs"
+echo -e "\033[32mLCM -> Arduino C done\033[0m"
+
 # Generate TypeScript bindings
 rm -rf "$SCRIPT_DIR/generated/ts_lcm_msgs"
 deno run --allow-read --allow-write "$SCRIPT_DIR/tools/ts/gen/mod.ts" -q -o "$SCRIPT_DIR/generated/ts_lcm_msgs" "$SCRIPT_DIR/lcm_types"/*.lcm

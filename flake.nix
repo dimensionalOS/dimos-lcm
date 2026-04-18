@@ -19,8 +19,14 @@
             lcmgen
             pkgs.python3
             pkgs.python3Packages.build
+            (pkgs.python3.withPackages (ps: [ ps.numpy ps.pip ps.virtualenv ]))
             pkgs.ruff
             pkgs.deno
+<<<<<<< Updated upstream
+=======
+            pkgs.pkg-config
+            pkgs.cmake
+>>>>>>> Stashed changes
           ];
         };
       });
