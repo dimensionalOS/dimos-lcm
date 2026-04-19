@@ -31,12 +31,20 @@
 
 /** Maximum number of active subscriptions. */
 #ifndef DIMOS_LCM_MAX_SUBS
-#define DIMOS_LCM_MAX_SUBS 16
+  #ifdef __AVR__
+    #define DIMOS_LCM_MAX_SUBS 4
+  #else
+    #define DIMOS_LCM_MAX_SUBS 16
+  #endif
 #endif
 
 /** Maximum number of pending outbound messages in the outbox. */
 #ifndef DIMOS_LCM_MAX_PENDING
-#define DIMOS_LCM_MAX_PENDING 8
+  #ifdef __AVR__
+    #define DIMOS_LCM_MAX_PENDING 2
+  #else
+    #define DIMOS_LCM_MAX_PENDING 8
+  #endif
 #endif
 
 /**
@@ -44,11 +52,12 @@
  * Also used as the decode staging buffer size, so it must be at least as
  * large as the biggest decoded struct you will handle.
  *
- * On AVR, default to 256 bytes to conserve SRAM.
+ * On AVR, default to 64 bytes to conserve SRAM.  Override via
+ * -DDIMOS_LCM_MAX_MSG_SIZE=<N> for chips with more SRAM (e.g. Mega 2560).
  */
 #ifndef DIMOS_LCM_MAX_MSG_SIZE
   #ifdef __AVR__
-    #define DIMOS_LCM_MAX_MSG_SIZE 256
+    #define DIMOS_LCM_MAX_MSG_SIZE 64
   #else
     #define DIMOS_LCM_MAX_MSG_SIZE 512
   #endif
