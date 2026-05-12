@@ -4,6 +4,7 @@ use tokio::net::UdpSocket;
 use std::collections::HashMap;
 use std::io;
 use std::net::{Ipv4Addr, SocketAddr, SocketAddrV4};
+use std::sync::Mutex;
 use std::sync::atomic::{AtomicU32, Ordering};
 
 const MAGIC_SHORT: u32 = 0x4c433032; // "LC02"
@@ -76,7 +77,7 @@ fn fragment_params(msg_size: usize, channel_len: usize) -> (usize, usize, usize)
 pub struct Lcm {
     socket: UdpSocket,
     multicast_addr: SocketAddrV4,
-    reassembly: HashMap<(SocketAddr, u32), FragmentBuffer>,
+    reassembly: Mutex<HashMap<(SocketAddr, u32), FragmentBuffer>>,
 }
 
 impl Lcm {
@@ -105,7 +106,7 @@ impl Lcm {
         Ok(Self {
             socket,
             multicast_addr: SocketAddrV4::new(opts.multicast_group, opts.port),
-            reassembly: HashMap::new(),
+            reassembly: Mutex::new(HashMap::new()),
         })
     }
 
@@ -183,7 +184,7 @@ impl Lcm {
     /// Receive one LCM message asynchronously.
     ///
     /// Waits until a complete message arrives, reassembling fragments if necessary.
-    pub async fn recv(&mut self) -> io::Result<ReceivedMessage> {
+    pub async fn recv(&self) -> io::Result<ReceivedMessage> {
         let mut buf = vec![0u8; MAX_DATAGRAM_SIZE];
         loop {
             let (n, sender) = self.socket.recv_from(&mut buf).await?;
@@ -205,7 +206,7 @@ impl Lcm {
         }
     }
 
-    fn process_fragment(&mut self, sender: SocketAddr, buf: &[u8]) -> io::Result<Option<ReceivedMessage>> {
+    fn process_fragment(&self, sender: SocketAddr, buf: &[u8]) -> io::Result<Option<ReceivedMessage>> {
         if buf.len() < FRAGMENT_HEADER_SIZE {
             return Ok(None);
         }
@@ -234,7 +235,9 @@ impl Lcm {
         let payload = &buf[offset..];
 
         let key = (sender, seqno);
-        let entry = self.reassembly.entry(key).or_insert_with(|| FragmentBuffer {
+
+        let mut reassembly = self.reassembly.lock().unwrap();
+        let entry = reassembly.entry(key).or_insert_with(|| FragmentBuffer {
             channel: channel.clone().unwrap_or_default(),
             num_fragments,
             received: 0,
@@ -251,7 +254,7 @@ impl Lcm {
         entry.received += 1;
 
         if entry.received == entry.num_fragments {
-            let complete = self.reassembly.remove(&key).unwrap();
+            let complete = reassembly.remove(&key).unwrap();
             return Ok(Some(ReceivedMessage {
                 channel: complete.channel,
                 data: complete.data,
