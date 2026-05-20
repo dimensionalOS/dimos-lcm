@@ -94,6 +94,12 @@ pub struct LcmOptions {
     pub ttl: u32,
     /// Network interface to bind to (default: any).
     pub interface: Ipv4Addr,
+    /// Receive socket buffer size in bytes. None = leave at OS default
+    /// (`net.core.rmem_default` on Linux). For high-rate publishers of
+    /// large fragmented messages (~500 KB PointCloud2 at 10 Hz), the
+    /// kernel default may be far too small. Set this to 16-64 MB to
+    /// match the matching `BufferConfiguratorLinux` sysctl value.
+    pub recv_buf_size: Option<usize>,
 }
 
 impl Default for LcmOptions {
@@ -103,6 +109,7 @@ impl Default for LcmOptions {
             port: DEFAULT_PORT,
             ttl: 1,
             interface: Ipv4Addr::UNSPECIFIED,
+            recv_buf_size: None,
         }
     }
 }
@@ -147,6 +154,17 @@ impl Lcm {
         s2.set_reuse_address(true)?;
         #[cfg(not(target_os = "windows"))]
         s2.set_reuse_port(true)?;
+        if let Some(size) = opts.recv_buf_size {
+            // socket2's set_recv_buffer_size silently clamps to
+            // net.core.rmem_max on Linux. Failing the call is non-fatal;
+            // log via stderr and continue with whatever the OS gave us.
+            if let Err(err) = s2.set_recv_buffer_size(size) {
+                eprintln!(
+                    "lcm: failed to set SO_RCVBUF={}: {} (continuing with OS default)",
+                    size, err,
+                );
+            }
+        }
 
         let bind_addr = SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, opts.port);
         s2.bind(&bind_addr.into())?;
