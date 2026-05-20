@@ -1,14 +1,7 @@
-//! LCM burst test — characterizes how many large messages LCM can
-//! reliably deliver under various burst conditions on loopback.
-//!
-//! Run with two processes:
-//!   $ cargo run --release --example burst_test -- receiver
-//!   $ cargo run --release --example burst_test -- sender <MSG_SIZE_BYTES> <COUNT> <INTERVAL_MS>
-//!
-//! Or single-process mode (sender + receiver in the same tokio runtime):
-//!   $ cargo run --release --example burst_test -- both <MSG_SIZE_BYTES> <COUNT> <INTERVAL_MS>
-//!
-//! Reports: messages received vs sent, drop rate, per-message latency stats.
+//! LCM throughput test. Run two processes:
+//!   $ cargo run --release --example burst_test receiver <COUNT>
+//!   $ cargo run --release --example burst_test sender <MSG_BYTES> <COUNT> <INTERVAL_MS>
+//! Or run both in one process via the `both` or `slow_receiver` mode.
 
 use dimos_lcm::{Lcm, LcmOptions};
 use std::env;
@@ -33,9 +26,6 @@ fn parse_seq(buf: &[u8]) -> Option<u32> {
 }
 
 async fn run_slow_receiver(expected: u32, duration: Duration, handler_ms: u64) -> (u32, Vec<u32>) {
-    // Same as run_receiver but the recv task sleeps `handler_ms` after each
-    // message to simulate a slow application handler. Used to test whether
-    // sender-fast / receiver-slow scenarios cause LCM-level drops.
     let mut opts = LcmOptions::default();
     opts.recv_buf_size = Some(64 * 1024 * 1024);
     let lcm = Lcm::with_options(opts).await.expect("create lcm");
@@ -84,7 +74,6 @@ async fn run_slow_receiver(expected: u32, duration: Duration, handler_ms: u64) -
 }
 
 async fn run_receiver(expected: u32, duration: Duration) -> (u32, Vec<u32>) {
-    // Bump SO_RCVBUF to match what production dimos uses
     let mut opts = LcmOptions::default();
     opts.recv_buf_size = Some(64 * 1024 * 1024);
     let lcm = Lcm::with_options(opts).await.expect("create lcm");
@@ -134,7 +123,6 @@ async fn run_receiver(expected: u32, duration: Duration) -> (u32, Vec<u32>) {
 
 async fn run_sender(msg_size: usize, count: u32, interval_ms: u64) {
     let lcm = Lcm::new().await.expect("create lcm");
-    // Brief warmup pause so any pre-existing subscriber is in its receive loop
     sleep(Duration::from_millis(200)).await;
     let start = Instant::now();
     for seq in 0..count {
@@ -170,7 +158,6 @@ async fn main() {
     match mode.as_str() {
         "sender" => run_sender(msg_size, count, interval_ms).await,
         "slow_receiver" => {
-            // args: slow_receiver <count> <handler_ms>
             let recv_count: u32 = args.get(2).and_then(|s| s.parse().ok()).unwrap_or(100);
             let handler_ms: u64 = args.get(3).and_then(|s| s.parse().ok()).unwrap_or(100);
             let max_duration = Duration::from_secs(120);
@@ -195,7 +182,6 @@ async fn main() {
                 count,
                 100.0 * (count as f64 - unique.len() as f64) / count as f64,
             );
-            // Print gaps in sequence for diagnostic
             let mut sorted: Vec<u32> = unique.into_iter().collect();
             sorted.sort();
             let mut gaps = Vec::new();
@@ -224,7 +210,6 @@ async fn main() {
             }
         }
         "both" => {
-            // Spawn receiver first, give it 100ms to subscribe, then start sender
             let recv_count = count;
             let recv_task = tokio::spawn(async move {
                 run_receiver(recv_count, Duration::from_secs(120)).await

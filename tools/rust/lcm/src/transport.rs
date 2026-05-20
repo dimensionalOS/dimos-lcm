@@ -14,15 +14,8 @@ const SHORT_HEADER_SIZE: usize = 8;
 const FRAGMENT_HEADER_SIZE: usize = 20;
 const MAX_DATAGRAM_SIZE: usize = 65507;
 
-// Reassembly buffer caps. Mirrors the C LCM library's
-// MAX_FRAG_BUF_TOTAL_SIZE / MAX_NUM_FRAG_BUFS in `udpm_util.h`. When either
-// limit is exceeded, the least-recently-updated entry is evicted to make
-// room — preventing the reassembly map from growing unbounded when fragments
-// are dropped at the UDP layer (any of N datagrams lost = the other N-1
-// stuck in the map). Without eviction, a single dropped packet leaks ~500 KB
-// forever, and over a sustained large-message stream the map fills, lock
-// contention degrades the receive thread, and drop rates cascade.
-const MAX_FRAG_BUF_TOTAL_BYTES: usize = 16 * 1024 * 1024; // 16 MiB
+// Reassembly buffer caps; matches C LCM's `udpm_util.h`.
+const MAX_FRAG_BUF_TOTAL_BYTES: usize = 16 * 1024 * 1024;
 const MAX_NUM_FRAG_BUFS: usize = 1000;
 
 /// Default LCM multicast group address.
@@ -38,15 +31,12 @@ struct FragmentBuffer {
     num_fragments: u16,
     received: u16,
     data: Vec<u8>,
-    /// Monotonic time of the last fragment arrival on this entry. Used to
-    /// pick the LRU entry for eviction when the reassembly map fills.
     last_update: Instant,
 }
 
-/// Container for in-flight fragment buffers, with LRU eviction. Wraps a
-/// `HashMap` keyed by `(sender, seqno)` and tracks total buffered bytes so
-/// we can enforce both an entry-count cap and a memory cap. Mirrors the
-/// behavior of `lcm_frag_buf_store` in upstream LCM's `udpm_util.{c,h}`.
+/// In-flight fragment buffers with LRU eviction. Same idea as C LCM's
+/// `lcm_frag_buf_store`: cap total bytes and entry count, evict oldest
+/// when over.
 struct FragStore {
     map: HashMap<(SocketAddr, u32), FragmentBuffer>,
     total_bytes: usize,
@@ -57,8 +47,6 @@ impl FragStore {
         Self { map: HashMap::new(), total_bytes: 0 }
     }
 
-    /// Evict the single least-recently-updated entry, returning true if one
-    /// was found. Caller loops until both caps are satisfied.
     fn evict_lru(&mut self) -> bool {
         let lru_key = self.map.iter()
             .min_by_key(|(_, fb)| fb.last_update)
@@ -72,9 +60,6 @@ impl FragStore {
         false
     }
 
-    /// Ensure both caps are honored. Eviction continues until the store
-    /// fits within `max_total_bytes` AND `max_entries`. Called after each
-    /// new entry insert.
     fn enforce_caps(&mut self) {
         while (self.total_bytes > MAX_FRAG_BUF_TOTAL_BYTES
             || self.map.len() > MAX_NUM_FRAG_BUFS)
@@ -94,11 +79,8 @@ pub struct LcmOptions {
     pub ttl: u32,
     /// Network interface to bind to (default: any).
     pub interface: Ipv4Addr,
-    /// Receive socket buffer size in bytes. None = leave at OS default
-    /// (`net.core.rmem_default` on Linux). For high-rate publishers of
-    /// large fragmented messages (~500 KB PointCloud2 at 10 Hz), the
-    /// kernel default may be far too small. Set this to 16-64 MB to
-    /// match the matching `BufferConfiguratorLinux` sysctl value.
+    /// SO_RCVBUF in bytes. None = OS default. Set to 16-64 MB for
+    /// sustained large fragmented messages.
     pub recv_buf_size: Option<usize>,
 }
 
@@ -155,14 +137,8 @@ impl Lcm {
         #[cfg(not(target_os = "windows"))]
         s2.set_reuse_port(true)?;
         if let Some(size) = opts.recv_buf_size {
-            // socket2's set_recv_buffer_size silently clamps to
-            // net.core.rmem_max on Linux. Failing the call is non-fatal;
-            // log via stderr and continue with whatever the OS gave us.
             if let Err(err) = s2.set_recv_buffer_size(size) {
-                eprintln!(
-                    "lcm: failed to set SO_RCVBUF={}: {} (continuing with OS default)",
-                    size, err,
-                );
+                eprintln!("lcm: failed to set SO_RCVBUF={}: {}", size, err);
             }
         }
 
@@ -342,10 +318,6 @@ impl Lcm {
             }));
         }
 
-        // Apply the LRU eviction caps. Done on every fragment so a single
-        // long-lived dropped-fragment entry doesn't persist past ~1000
-        // subsequent messages or 16 MB of accumulated incomplete payloads.
-        // Mirrors lcm_frag_buf_store_add in upstream LCM's udpm_util.c.
         if is_new {
             reassembly.enforce_caps();
         }
@@ -449,7 +421,7 @@ mod tests {
         assert!(Lcm::decode_small(&buf).unwrap().is_none());
     }
 
-    // --- FragStore (reassembly map) tests ---
+    // FragStore tests
 
     fn make_buf(data_size: usize) -> FragmentBuffer {
         FragmentBuffer {
@@ -463,37 +435,21 @@ mod tests {
 
     #[test]
     fn frag_store_evicts_when_over_byte_cap() {
-        // Insert entries totaling more than MAX_FRAG_BUF_TOTAL_BYTES,
-        // verify the oldest are evicted to bring total under the cap.
         let mut store = FragStore::new();
-        let big = MAX_FRAG_BUF_TOTAL_BYTES / 2 + 1; // each entry > half the cap
+        let big = MAX_FRAG_BUF_TOTAL_BYTES / 2 + 1;
         for i in 0..3 {
             let buf = make_buf(big);
             store.total_bytes += buf.data.len();
-            // Use a u32 seqno; sender is the same for all to test eviction
-            // happens regardless of sender identity.
             store.map.insert((SocketAddr::from(([127, 0, 0, 1], 0)), i), buf);
-            // Stagger update timestamps so LRU has a stable order.
             std::thread::sleep(std::time::Duration::from_millis(1));
             store.enforce_caps();
         }
-        assert!(
-            store.total_bytes <= MAX_FRAG_BUF_TOTAL_BYTES,
-            "total {} must be <= cap {}",
-            store.total_bytes,
-            MAX_FRAG_BUF_TOTAL_BYTES,
-        );
-        assert!(
-            store.map.len() < 3,
-            "at least one entry must have been evicted; got {} entries",
-            store.map.len(),
-        );
+        assert!(store.total_bytes <= MAX_FRAG_BUF_TOTAL_BYTES);
+        assert!(store.map.len() < 3);
     }
 
     #[test]
     fn frag_store_evicts_when_over_entry_cap() {
-        // Insert MAX_NUM_FRAG_BUFS + 5 small entries, verify count is
-        // bounded at MAX_NUM_FRAG_BUFS after enforce_caps runs.
         let mut store = FragStore::new();
         for i in 0..(MAX_NUM_FRAG_BUFS as u32 + 5) {
             let buf = make_buf(8);
@@ -501,24 +457,15 @@ mod tests {
             store.map.insert((SocketAddr::from(([127, 0, 0, 1], 0)), i), buf);
             store.enforce_caps();
         }
-        assert_eq!(
-            store.map.len(),
-            MAX_NUM_FRAG_BUFS,
-            "entry count must be exactly the cap after enforce_caps",
-        );
+        assert_eq!(store.map.len(), MAX_NUM_FRAG_BUFS);
     }
 
     #[test]
     fn frag_store_evict_lru_picks_oldest() {
-        // The eviction picks the entry whose `last_update` is oldest, not
-        // (e.g.) by insertion order or by hash position.
         let mut store = FragStore::new();
-        let mut older = make_buf(8);
-        older.last_update = Instant::now();
-        // Make a slightly newer one
+        let older = make_buf(8);
         std::thread::sleep(std::time::Duration::from_millis(2));
-        let mut newer = make_buf(8);
-        newer.last_update = Instant::now();
+        let newer = make_buf(8);
         let older_key = (SocketAddr::from(([127, 0, 0, 1], 0)), 1u32);
         let newer_key = (SocketAddr::from(([127, 0, 0, 1], 0)), 2u32);
         store.map.insert(older_key, older);
