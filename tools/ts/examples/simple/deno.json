@@ -1,0 +1,6 @@
+{
+  "tasks": {
+    "pub": "deno run --allow-net --unstable-net publisher.ts",
+    "sub": "deno run --allow-net --unstable-net subscriber.ts"
+  }
+}

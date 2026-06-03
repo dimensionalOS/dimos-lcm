@@ -1,0 +1,14 @@
+{
+  "workspace": [
+    "./lcm",
+    "./gen",
+    "./msgs",
+    "./examples/simple",
+    "./examples/web"
+  ],
+  "imports": {
+    "@dimos/lcm": "./lcm/mod.ts",
+    "@dimos/msgs": "./msgs/mod.ts",
+    "@dimos/msgs/": "./msgs/generated/"
+  }
+}

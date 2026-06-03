@@ -1,0 +1,9 @@
+{
+  "name": "@dimos/example-web",
+  "version": "0.1.0",
+  "exports": "./server.ts",
+  "tasks": {
+    "start": "deno run --allow-net --allow-read --unstable-net server.ts",
+    "dev": "deno run --watch --allow-net --allow-read --unstable-net server.ts"
+  }
+}

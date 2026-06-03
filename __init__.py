@@ -21,7 +21,7 @@ def _setup_lcm_msgs_path():
         # If import fails, add the local python_lcm_msgs to path
         # ensures internal imports like "from lcm_msgs import std_msgs" work
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        lcm_module_dir = os.path.join(current_dir, "python_lcm_msgs")
+        lcm_module_dir = os.path.join(current_dir, "generated/python_lcm_msgs")
         if os.path.exists(lcm_module_dir):
             if lcm_module_dir not in sys.path:
                 sys.path.insert(0, lcm_module_dir)
