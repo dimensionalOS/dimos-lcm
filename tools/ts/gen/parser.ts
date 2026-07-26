@@ -22,7 +22,7 @@ class Tokenizer {
 
   private tokenize(): void {
     const pattern =
-      /\/\/[^\n]*|\/\*[\s\S]*?\*\/|"[^"]*"|'[^']*'|[a-zA-Z_][a-zA-Z0-9_]*|0x[0-9a-fA-F]+|[0-9]+\.?[0-9]*(?:[eE][+-]?[0-9]+)?|[{}\[\];,=.]/g;
+      /\/\/[^\n]*|\/\*[\s\S]*?\*\/|"[^"]*"|'[^']*'|[a-zA-Z_][a-zA-Z0-9_]*|0x[0-9a-fA-F]+|[0-9]+\.?[0-9]*(?:[eE][+-]?[0-9]+)?|[{}\[\];,=.-]/g;
     let match;
     while ((match = pattern.exec(this.source)) !== null) {
       const token = match[0];

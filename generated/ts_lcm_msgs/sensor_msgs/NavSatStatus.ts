@@ -5,7 +5,7 @@ export class NavSatStatus {
   static readonly _NAME = "sensor_msgs.NavSatStatus";
   private static _packedFingerprint: bigint | null = null;
 
-  static readonly STATUS_NO_FIX = 1;
+  static readonly STATUS_NO_FIX = -1;
   static readonly STATUS_FIX = 0;
   static readonly STATUS_SBAS_FIX = 1;
   static readonly STATUS_GBAS_FIX = 2;
