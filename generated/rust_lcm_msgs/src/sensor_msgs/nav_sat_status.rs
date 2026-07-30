@@ -14,7 +14,7 @@ impl NavSatStatus {
     pub const HASH: i64 = 0x76B236592075C1DBu64 as i64;
     pub const NAME: &str = "sensor_msgs.NavSatStatus";
 
-    pub const STATUS_NO_FIX: i8 = 1;
+    pub const STATUS_NO_FIX: i8 = -1;
     pub const STATUS_FIX: i8 = 0;
     pub const STATUS_SBAS_FIX: i8 = 1;
     pub const STATUS_GBAS_FIX: i8 = 2;
