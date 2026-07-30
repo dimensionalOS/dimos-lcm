@@ -53,7 +53,7 @@ function RouteSegment:new()
   obj.props_length = 0
   obj.id = nil
   obj.start = nil
-  obj.end = nil
+  obj["end"] = nil
   obj.props = {}
 
   setmetatable(obj, self)
@@ -96,7 +96,7 @@ function RouteSegment:_encode_one()
   table.insert(buf_table, lcm._pack.pack('>i', self.props_length))
   table.insert(buf_table, self.id:_encode_one())
   table.insert(buf_table, self.start:_encode_one())
-  table.insert(buf_table, self.end:_encode_one())
+  table.insert(buf_table, self["end"]:_encode_one())
   for i0 = 1, self.props_length do
     table.insert(buf_table, self.props[i0]:_encode_one())
   end
@@ -124,7 +124,7 @@ function RouteSegment._decode_one(data)
   obj.props_length = lcm._pack.unpack('>i', data:read(4))
   obj.id = uuid_msgs_UniqueID._decode_one(data)
   obj.start = uuid_msgs_UniqueID._decode_one(data)
-  obj.end = uuid_msgs_UniqueID._decode_one(data)
+  obj["end"] = uuid_msgs_UniqueID._decode_one(data)
   obj.props = {}
   for i0 = 1, obj.props_length do
     obj.props[i0] = geographic_msgs_KeyValue._decode_one(data)
