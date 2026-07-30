@@ -5,7 +5,8 @@ This package provides utility tools for dimensional robotics projects,
 including LCM-Foxglove bridge functionality and LCM message definitions.
 """
 
-__version__ = "0.1.0"
+# Keep in sync with [project].version in pyproject.toml
+__version__ = "0.1.4"
 
 import os
 import sys

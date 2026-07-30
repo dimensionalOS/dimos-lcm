@@ -1,6 +1,6 @@
 {
   "name": "@dimos/msgs",
-  "version": "0.1.2",
+  "version": "0.1.5",
   "license": "Apache-2.0",
   "exports": {
     ".": "./mod.ts",
@@ -8,6 +8,7 @@
     "./builtin_interfaces": "./builtin_interfaces/mod.ts",
     "./diagnostic_msgs": "./diagnostic_msgs/mod.ts",
     "./foxglove_msgs": "./foxglove_msgs/mod.ts",
+    "./geographic_msgs": "./geographic_msgs/mod.ts",
     "./geometry_msgs": "./geometry_msgs/mod.ts",
     "./nav_msgs": "./nav_msgs/mod.ts",
     "./sensor_msgs": "./sensor_msgs/mod.ts",
@@ -16,6 +17,7 @@
     "./stereo_msgs": "./stereo_msgs/mod.ts",
     "./tf2_msgs": "./tf2_msgs/mod.ts",
     "./trajectory_msgs": "./trajectory_msgs/mod.ts",
+    "./uuid_msgs": "./uuid_msgs/mod.ts",
     "./vision_msgs": "./vision_msgs/mod.ts",
     "./visualization_msgs": "./visualization_msgs/mod.ts"
   },

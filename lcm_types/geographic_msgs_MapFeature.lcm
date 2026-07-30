@@ -1,0 +1,9 @@
+package geographic_msgs;
+
+struct MapFeature {
+    int32_t components_length;
+    int32_t props_length;
+    uuid_msgs.UniqueID id;
+    uuid_msgs.UniqueID components[components_length];
+    KeyValue props[props_length];
+}

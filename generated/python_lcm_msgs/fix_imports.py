@@ -19,11 +19,13 @@ MSG_PACKAGES = [
     "builtin_interfaces",
     "diagnostic_msgs", 
     "foxglove_msgs",
+    "geographic_msgs",
     "nav_msgs",
     "shape_msgs",
     "stereo_msgs",
     "tf2_msgs",
     "trajectory_msgs",
+    "uuid_msgs",
     "vision_msgs",
     "visualization_msgs",
 ]

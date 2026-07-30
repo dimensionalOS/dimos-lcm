@@ -1,0 +1,10 @@
+package geographic_msgs;
+
+struct RoutePath {
+    int32_t segments_length;
+    int32_t props_length;
+    std_msgs.Header header;
+    uuid_msgs.UniqueID network;
+    uuid_msgs.UniqueID segments[segments_length];
+    KeyValue props[props_length];
+}

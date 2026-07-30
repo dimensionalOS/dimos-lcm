@@ -1,0 +1,13 @@
+package geographic_msgs;
+
+struct RouteNetwork {
+    int32_t points_length;
+    int32_t segments_length;
+    int32_t props_length;
+    std_msgs.Header header;
+    uuid_msgs.UniqueID id;
+    BoundingBox bounds;
+    WayPoint points[points_length];
+    RouteSegment segments[segments_length];
+    KeyValue props[props_length];
+}
