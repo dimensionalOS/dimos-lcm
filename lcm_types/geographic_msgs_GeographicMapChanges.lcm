@@ -1,0 +1,8 @@
+package geographic_msgs;
+
+struct GeographicMapChanges {
+    int32_t deletes_length;
+    std_msgs.Header header;
+    GeographicMap diffs;
+    uuid_msgs.UniqueID deletes[deletes_length];
+}

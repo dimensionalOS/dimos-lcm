@@ -1,0 +1,8 @@
+package geographic_msgs;
+
+struct WayPoint {
+    int32_t props_length;
+    uuid_msgs.UniqueID id;
+    GeoPoint position;
+    KeyValue props[props_length];
+}
