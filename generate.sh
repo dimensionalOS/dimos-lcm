@@ -35,15 +35,21 @@ rm -rf "$SCRIPT_DIR/generated/lua_lcm_msgs"
 echo -e "\033[32mLCM -> Lua done\033[0m"
 
 # Generate TypeScript bindings
-rm -rf "$SCRIPT_DIR/generated/ts_lcm_msgs"
+# Only the per-package directories are generated; anything else in there is
+# hand-written, so clear the packages instead of the whole tree.
+mkdir -p "$SCRIPT_DIR/generated/ts_lcm_msgs"
+find "$SCRIPT_DIR/generated/ts_lcm_msgs" -mindepth 1 -maxdepth 1 -type d -exec rm -rf {} +
 deno run --allow-read --allow-write "$SCRIPT_DIR/tools/ts/gen/mod.ts" -q -o "$SCRIPT_DIR/generated/ts_lcm_msgs" "$SCRIPT_DIR/lcm_types"/*.lcm
 # Copy to msgs package (for JSR publishing - symlinks not supported)
 rm -rf "$SCRIPT_DIR/tools/ts/msgs/generated"
-cp -r "$SCRIPT_DIR/generated/ts_lcm_msgs" "$SCRIPT_DIR/tools/ts/msgs/generated"
+mkdir -p "$SCRIPT_DIR/tools/ts/msgs/generated"
+cp -r "$SCRIPT_DIR/generated/ts_lcm_msgs"/*/ "$SCRIPT_DIR/tools/ts/msgs/generated/"
 echo -e "\033[32mLCM -> TypeScript done\033[0m"
 
 # Generate Rust bindings
-rm -rf "$SCRIPT_DIR/generated/rust_lcm_msgs"
+# The generator owns src/ and Cargo.toml; tests/, Cargo.lock and .gitignore are
+# hand-written, so only clear src/ rather than the whole crate.
+rm -rf "$SCRIPT_DIR/generated/rust_lcm_msgs/src"
 python3 "$SCRIPT_DIR/tools/rust/lcm_rust_gen.py" "$SCRIPT_DIR/lcm_types" -o "$SCRIPT_DIR/generated/rust_lcm_msgs"
 (cd "$SCRIPT_DIR/generated/rust_lcm_msgs" && cargo check --quiet)
 echo -e "\033[32mLCM -> Rust done\033[0m"
