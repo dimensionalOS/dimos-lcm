@@ -6,12 +6,17 @@ use std::io;
 use std::net::{Ipv4Addr, SocketAddr, SocketAddrV4};
 use std::sync::Mutex;
 use std::sync::atomic::{AtomicU32, Ordering};
+use std::time::Instant;
 
 const MAGIC_SHORT: u32 = 0x4c433032; // "LC02"
 const MAGIC_LONG: u32 = 0x4c433033;  // "LC03"
 const SHORT_HEADER_SIZE: usize = 8;
 const FRAGMENT_HEADER_SIZE: usize = 20;
 const MAX_DATAGRAM_SIZE: usize = 65507;
+
+// Reassembly buffer caps; matches C LCM's `udpm_util.h`.
+const MAX_FRAG_BUF_TOTAL_BYTES: usize = 16 * 1024 * 1024;
+const MAX_NUM_FRAG_BUFS: usize = 1000;
 
 /// Default LCM multicast group address.
 pub const DEFAULT_MULTICAST_GROUP: Ipv4Addr = Ipv4Addr::new(239, 255, 76, 67);
@@ -26,6 +31,41 @@ struct FragmentBuffer {
     num_fragments: u16,
     received: u16,
     data: Vec<u8>,
+    last_update: Instant,
+}
+
+/// In-flight fragment buffers with LRU eviction. Same idea as C LCM's
+/// `lcm_frag_buf_store`: cap total bytes and entry count, evict oldest
+/// when over.
+struct FragStore {
+    map: HashMap<(SocketAddr, u32), FragmentBuffer>,
+    total_bytes: usize,
+}
+
+impl FragStore {
+    fn new() -> Self {
+        Self { map: HashMap::new(), total_bytes: 0 }
+    }
+
+    fn evict_lru(&mut self) -> bool {
+        let lru_key = self.map.iter()
+            .min_by_key(|(_, fb)| fb.last_update)
+            .map(|(key, _)| *key);
+        if let Some(key) = lru_key {
+            if let Some(fb) = self.map.remove(&key) {
+                self.total_bytes = self.total_bytes.saturating_sub(fb.data.len());
+                return true;
+            }
+        }
+        false
+    }
+
+    fn enforce_caps(&mut self) {
+        while (self.total_bytes > MAX_FRAG_BUF_TOTAL_BYTES
+            || self.map.len() > MAX_NUM_FRAG_BUFS)
+            && self.evict_lru()
+        {}
+    }
 }
 
 /// Configuration for an LCM transport instance.
@@ -39,6 +79,9 @@ pub struct LcmOptions {
     pub ttl: u32,
     /// Network interface to bind to (default: any).
     pub interface: Ipv4Addr,
+    /// SO_RCVBUF in bytes. None = OS default. Set to 16-64 MB for
+    /// sustained large fragmented messages.
+    pub recv_buf_size: Option<usize>,
 }
 
 impl Default for LcmOptions {
@@ -48,6 +91,7 @@ impl Default for LcmOptions {
             port: DEFAULT_PORT,
             ttl: 1,
             interface: Ipv4Addr::UNSPECIFIED,
+            recv_buf_size: None,
         }
     }
 }
@@ -77,7 +121,7 @@ fn fragment_params(msg_size: usize, channel_len: usize) -> (usize, usize, usize)
 pub struct Lcm {
     socket: UdpSocket,
     multicast_addr: SocketAddrV4,
-    reassembly: Mutex<HashMap<(SocketAddr, u32), FragmentBuffer>>,
+    reassembly: Mutex<FragStore>,
 }
 
 impl Lcm {
@@ -92,6 +136,11 @@ impl Lcm {
         s2.set_reuse_address(true)?;
         #[cfg(not(target_os = "windows"))]
         s2.set_reuse_port(true)?;
+        if let Some(size) = opts.recv_buf_size {
+            if let Err(err) = s2.set_recv_buffer_size(size) {
+                eprintln!("lcm: failed to set SO_RCVBUF={}: {}", size, err);
+            }
+        }
 
         let bind_addr = SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, opts.port);
         s2.bind(&bind_addr.into())?;
@@ -106,7 +155,7 @@ impl Lcm {
         Ok(Self {
             socket,
             multicast_addr: SocketAddrV4::new(opts.multicast_group, opts.port),
-            reassembly: Mutex::new(HashMap::new()),
+            reassembly: Mutex::new(FragStore::new()),
         })
     }
 
@@ -237,12 +286,18 @@ impl Lcm {
         let key = (sender, seqno);
 
         let mut reassembly = self.reassembly.lock().unwrap();
-        let entry = reassembly.entry(key).or_insert_with(|| FragmentBuffer {
+        let is_new = !reassembly.map.contains_key(&key);
+        reassembly.map.entry(key).or_insert_with(|| FragmentBuffer {
             channel: channel.clone().unwrap_or_default(),
             num_fragments,
             received: 0,
             data: vec![0u8; total_size],
+            last_update: Instant::now(),
         });
+        if is_new {
+            reassembly.total_bytes = reassembly.total_bytes.saturating_add(total_size);
+        }
+        let entry = reassembly.map.get_mut(&key).unwrap();
 
         // First fragment also sets the channel name on an existing entry
         if let Some(ch) = channel {
@@ -252,13 +307,19 @@ impl Lcm {
         let end = (fragment_offset + payload.len()).min(total_size);
         entry.data[fragment_offset..end].copy_from_slice(&payload[..end - fragment_offset]);
         entry.received += 1;
+        entry.last_update = Instant::now();
 
         if entry.received == entry.num_fragments {
-            let complete = reassembly.remove(&key).unwrap();
+            let complete = reassembly.map.remove(&key).unwrap();
+            reassembly.total_bytes = reassembly.total_bytes.saturating_sub(complete.data.len());
             return Ok(Some(ReceivedMessage {
                 channel: complete.channel,
                 data: complete.data,
             }));
+        }
+
+        if is_new {
+            reassembly.enforce_caps();
         }
 
         Ok(None)
@@ -358,5 +419,67 @@ mod tests {
         BigEndian::write_u32(&mut buf[4..8], 0);
         buf[SHORT_HEADER_SIZE..SHORT_HEADER_SIZE + 4].copy_from_slice(b"CHAN");
         assert!(Lcm::decode_small(&buf).unwrap().is_none());
+    }
+
+    // FragStore tests
+
+    fn make_buf(data_size: usize) -> FragmentBuffer {
+        FragmentBuffer {
+            channel: String::new(),
+            num_fragments: 2,
+            received: 0,
+            data: vec![0u8; data_size],
+            last_update: Instant::now(),
+        }
+    }
+
+    #[test]
+    fn frag_store_evicts_when_over_byte_cap() {
+        let mut store = FragStore::new();
+        let big = MAX_FRAG_BUF_TOTAL_BYTES / 2 + 1;
+        for i in 0..3 {
+            let buf = make_buf(big);
+            store.total_bytes += buf.data.len();
+            store.map.insert((SocketAddr::from(([127, 0, 0, 1], 0)), i), buf);
+            std::thread::sleep(std::time::Duration::from_millis(1));
+            store.enforce_caps();
+        }
+        assert!(store.total_bytes <= MAX_FRAG_BUF_TOTAL_BYTES);
+        assert!(store.map.len() < 3);
+    }
+
+    #[test]
+    fn frag_store_evicts_when_over_entry_cap() {
+        let mut store = FragStore::new();
+        for i in 0..(MAX_NUM_FRAG_BUFS as u32 + 5) {
+            let buf = make_buf(8);
+            store.total_bytes += buf.data.len();
+            store.map.insert((SocketAddr::from(([127, 0, 0, 1], 0)), i), buf);
+            store.enforce_caps();
+        }
+        assert_eq!(store.map.len(), MAX_NUM_FRAG_BUFS);
+    }
+
+    #[test]
+    fn frag_store_evict_lru_picks_oldest() {
+        let mut store = FragStore::new();
+        let older = make_buf(8);
+        std::thread::sleep(std::time::Duration::from_millis(2));
+        let newer = make_buf(8);
+        let older_key = (SocketAddr::from(([127, 0, 0, 1], 0)), 1u32);
+        let newer_key = (SocketAddr::from(([127, 0, 0, 1], 0)), 2u32);
+        store.map.insert(older_key, older);
+        store.map.insert(newer_key, newer);
+        store.total_bytes = 16;
+        assert!(store.evict_lru());
+        assert!(
+            !store.map.contains_key(&older_key),
+            "older entry should have been evicted; map: {:?}",
+            store.map.keys().collect::<Vec<_>>(),
+        );
+        assert!(
+            store.map.contains_key(&newer_key),
+            "newer entry should still be present",
+        );
     }
 }
