@@ -14,6 +14,7 @@ from pathlib import Path
 MSG_PACKAGES = [
     "sensor_msgs",
     "geometry_msgs", 
+    "imitation_msgs",
     "std_msgs",
     "actionlib_msgs",
     "builtin_interfaces",

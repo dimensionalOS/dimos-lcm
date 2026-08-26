@@ -7,9 +7,7 @@ from io import BytesIO
 import struct
 import sys
 
-import std_msgs
-
-
+from lcm_msgs import std_msgs
 class EpisodeStatus(object):
     msg_name = "imitation_msgs.EpisodeStatus"
 
