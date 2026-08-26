@@ -1,0 +1,10 @@
+package imitation_msgs;
+
+struct EpisodeStatus {
+    std_msgs.Header header;
+    string state;
+    int32_t episodes_saved;
+    int32_t episodes_discarded;
+    string last_event;
+    string task_label;
+}
