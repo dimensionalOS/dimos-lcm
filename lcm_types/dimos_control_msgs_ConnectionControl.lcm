@@ -1,0 +1,18 @@
+package dimos_control_msgs;
+
+struct ConnectionControl {
+    const int8_t PREPARE_ARM = 1;
+    const int8_t COMMIT_ARM = 2;
+    const int8_t ABORT_ARM = 3;
+    const int8_t SAFE_STOP = 4;
+    const int8_t CLEAR_SAFE_STOP = 5;
+    const int8_t ESTOP = 6;
+    const int8_t CLEAR_ESTOP = 7;
+
+    int32_t target_sources_length;
+    string target_sources[target_sources_length];
+    int64_t operation_id;
+    int8_t operation;
+    int64_t proposed_control_epoch;
+    string reason;
+}

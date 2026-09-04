@@ -1,0 +1,10 @@
+package dimos_core_msgs;
+
+struct ModuleReadiness {
+    string source;
+    int64_t generation;
+    int64_t sequence;
+    double source_ts;
+    boolean ready;
+    string reason;
+}

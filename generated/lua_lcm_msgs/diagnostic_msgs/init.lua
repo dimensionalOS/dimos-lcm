@@ -8,8 +8,8 @@ lcm-gen 1.5.2
 local M = {}
 
 M.DiagnosticStatus = require('diagnostic_msgs.DiagnosticStatus')
-M.DiagnosticArray = require('diagnostic_msgs.DiagnosticArray')
 M.KeyValue = require('diagnostic_msgs.KeyValue')
+M.DiagnosticArray = require('diagnostic_msgs.DiagnosticArray')
 
 return M
 

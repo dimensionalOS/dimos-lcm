@@ -7,10 +7,10 @@ lcm-gen 1.5.2
 
 local M = {}
 
-M.MultiDOFJointTrajectory = require('trajectory_msgs.MultiDOFJointTrajectory')
-M.MultiDOFJointTrajectoryPoint = require('trajectory_msgs.MultiDOFJointTrajectoryPoint')
-M.JointTrajectory = require('trajectory_msgs.JointTrajectory')
 M.JointTrajectoryPoint = require('trajectory_msgs.JointTrajectoryPoint')
+M.MultiDOFJointTrajectoryPoint = require('trajectory_msgs.MultiDOFJointTrajectoryPoint')
+M.MultiDOFJointTrajectory = require('trajectory_msgs.MultiDOFJointTrajectory')
+M.JointTrajectory = require('trajectory_msgs.JointTrajectory')
 
 return M
 

@@ -1,0 +1,32 @@
+package dimos_control_msgs;
+
+struct ConnectionDescription {
+    const int8_t DIRECT = 1;
+    const int8_t OPERATOR_CONFIRMED = 2;
+
+    const int8_t APPLY_OMISSION = 1;
+    const int8_t ARMED_IDLE_SAFE_STOP = 2;
+
+    const int8_t NATIVE_WATCHDOG = 1;
+    const int8_t EXTERNAL_SUPERVISOR = 2;
+    const int8_t INTRINSICALLY_SAFE = 3;
+    const int8_t SIMULATION = 4;
+    const int8_t UNPROTECTED = 5;
+
+    string source;
+    int64_t description_epoch;
+    int32_t resources_length;
+    int32_t interfaces_length;
+    int32_t command_profiles_length;
+    ResourceDescription resources[resources_length];
+    InterfaceDescription interfaces[interfaces_length];
+    CommandProfile command_profiles[command_profiles_length];
+    double expected_state_rate_hz;
+    double state_stale_timeout_s;
+    double command_watchdog_timeout_s;
+    int8_t activation_policy;
+    int8_t armed_idle_policy;
+    string safe_stop_behavior;
+    int8_t process_loss_classification;
+    string process_loss_evidence;
+}

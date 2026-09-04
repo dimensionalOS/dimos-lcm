@@ -1,0 +1,12 @@
+package dimos_control_msgs;
+
+struct ResourceDescription {
+    const int8_t JOINT = 1;
+    const int8_t GRIPPER = 2;
+    const int8_t BASE = 3;
+    const int8_t IMU = 4;
+
+    string name;
+    int8_t resource_type;
+    string group_name;
+}

@@ -7,8 +7,8 @@ lcm-gen 1.5.2
 
 local M = {}
 
-M.TF2Error = require('tf2_msgs.TF2Error')
 M.TFMessage = require('tf2_msgs.TFMessage')
+M.TF2Error = require('tf2_msgs.TF2Error')
 
 return M
 
