@@ -10,13 +10,13 @@ local M = {}
 M.InteractiveMarkerControl = require('visualization_msgs.InteractiveMarkerControl')
 M.MarkerArray = require('visualization_msgs.MarkerArray')
 M.InteractiveMarkerFeedback = require('visualization_msgs.InteractiveMarkerFeedback')
-M.ImageMarker = require('visualization_msgs.ImageMarker')
 M.InteractiveMarkerInit = require('visualization_msgs.InteractiveMarkerInit')
 M.InteractiveMarkerUpdate = require('visualization_msgs.InteractiveMarkerUpdate')
 M.Marker = require('visualization_msgs.Marker')
-M.InteractiveMarkerPose = require('visualization_msgs.InteractiveMarkerPose')
 M.InteractiveMarker = require('visualization_msgs.InteractiveMarker')
+M.InteractiveMarkerPose = require('visualization_msgs.InteractiveMarkerPose')
 M.MenuEntry = require('visualization_msgs.MenuEntry')
+M.ImageMarker = require('visualization_msgs.ImageMarker')
 
 return M
 

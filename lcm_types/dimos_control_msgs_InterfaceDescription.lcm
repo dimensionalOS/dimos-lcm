@@ -1,0 +1,23 @@
+package dimos_control_msgs;
+
+struct InterfaceDescription {
+    const int8_t HOLD_LAST = 1;
+    const int8_t ZERO = 2;
+    const int8_t SAFE_STOP = 3;
+
+    string name;
+    string resource;
+    string field;
+    string unit;
+    boolean state;
+    boolean command;
+    boolean has_hard_min;
+    double hard_min;
+    boolean has_hard_max;
+    double hard_max;
+    boolean has_soft_min;
+    double soft_min;
+    boolean has_soft_max;
+    double soft_max;
+    int8_t omission_policy;
+}

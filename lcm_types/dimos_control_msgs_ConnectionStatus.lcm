@@ -1,0 +1,26 @@
+package dimos_control_msgs;
+
+struct ConnectionStatus {
+    const int8_t STANDBY = 1;
+    const int8_t PREPARING = 2;
+    const int8_t PREPARED = 3;
+    const int8_t COMMITTING = 4;
+    const int8_t ARMED = 5;
+    const int8_t SAFE_STOPPED = 6;
+    const int8_t ESTOPPED = 7;
+
+    const int8_t NONE = 0;
+    const int8_t PENDING = 1;
+    const int8_t SUCCEEDED = 2;
+    const int8_t REJECTED = 3;
+
+    string source;
+    double source_ts;
+    int8_t lifecycle_state;
+    int64_t description_epoch;
+    int64_t control_epoch;
+    int64_t last_operation_id;
+    int8_t last_operation;
+    int8_t acknowledgement;
+    string fault;
+}

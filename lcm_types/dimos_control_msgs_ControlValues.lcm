@@ -1,0 +1,12 @@
+package dimos_control_msgs;
+
+struct ControlValues {
+    string source;
+    double source_ts;
+    int64_t epoch;
+    int64_t sequence;
+    int32_t interface_names_length;
+    int32_t values_length;
+    string interface_names[interface_names_length];
+    double values[values_length];
+}

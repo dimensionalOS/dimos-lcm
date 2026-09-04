@@ -7,9 +7,9 @@ lcm-gen 1.5.2
 
 local M = {}
 
+M.GoalStatusArray = require('actionlib_msgs.GoalStatusArray')
 M.GoalStatus = require('actionlib_msgs.GoalStatus')
 M.GoalID = require('actionlib_msgs.GoalID')
-M.GoalStatusArray = require('actionlib_msgs.GoalStatusArray')
 
 return M
 

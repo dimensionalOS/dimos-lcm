@@ -1,0 +1,10 @@
+package dimos_control_msgs;
+
+struct CommandProfile {
+    string name;
+    int32_t required_fields_length;
+    int32_t optional_fields_length;
+    string required_fields[required_fields_length];
+    string optional_fields[optional_fields_length];
+    boolean uniform_across_resources;
+}

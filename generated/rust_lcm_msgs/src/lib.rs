@@ -4,6 +4,8 @@
 pub mod actionlib_msgs;
 pub mod builtin_interfaces;
 pub mod diagnostic_msgs;
+pub mod dimos_control_msgs;
+pub mod dimos_core_msgs;
 pub mod foxglove_msgs;
 pub mod geometry_msgs;
 pub mod nav_msgs;
