@@ -7,12 +7,6 @@ lcm-gen 1.5.2
 
 local M = {}
 
-M.ConnectionControl = require('dimos_control_msgs.ConnectionControl')
-M.ConnectionStatus = require('dimos_control_msgs.ConnectionStatus')
-M.ResourceDescription = require('dimos_control_msgs.ResourceDescription')
-M.ConnectionDescription = require('dimos_control_msgs.ConnectionDescription')
-M.InterfaceDescription = require('dimos_control_msgs.InterfaceDescription')
-M.CommandProfile = require('dimos_control_msgs.CommandProfile')
 M.ControlValues = require('dimos_control_msgs.ControlValues')
 
 return M

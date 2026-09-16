@@ -4,10 +4,4 @@ DO NOT MODIFY BY HAND!!!!
 lcm-gen 1.5.2
 """
 
-from .ConnectionStatus import ConnectionStatus as ConnectionStatus
-from .ConnectionControl import ConnectionControl as ConnectionControl
-from .ConnectionDescription import ConnectionDescription as ConnectionDescription
-from .CommandProfile import CommandProfile as CommandProfile
-from .InterfaceDescription import InterfaceDescription as InterfaceDescription
-from .ResourceDescription import ResourceDescription as ResourceDescription
 from .ControlValues import ControlValues as ControlValues

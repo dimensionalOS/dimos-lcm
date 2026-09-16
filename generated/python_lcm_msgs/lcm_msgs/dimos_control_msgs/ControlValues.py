@@ -9,6 +9,11 @@ import sys
 
 
 class ControlValues(object):
+    """
+    Continuous command or state data. Capabilities come from startup
+    configuration; lifecycle requests and their results use RPC.
+    """
+
     msg_name = "dimos_control_msgs.ControlValues"
 
     __slots__ = [
@@ -64,15 +69,29 @@ class ControlValues(object):
         interface_names=[],
         values=[],
     ):
-        # LCM Type: string
+        """
+        Publisher identity, not a hardware-specific routing identifier.
+        LCM Type: string
+        """
         self.source = source
-        # LCM Type: double
+        """
+        Publisher Unix timestamp in seconds; not proof of receiver-side freshness.
+        LCM Type: double
+        """
         self.source_ts = source_ts
-        # LCM Type: int64_t
+        """
+        Identifies the state generation or command session. Established outside
+        this data message; sequences are compared only within the same epoch.
+        LCM Type: int64_t
+        """
         self.epoch = epoch
         # LCM Type: int64_t
         self.sequence = sequence
-        # LCM Type: int32_t
+        """
+        Parallel arrays: publishers and consumers must validate equal lengths,
+        unique declared names, and finite values. Empty arrays are encodable.
+        LCM Type: int32_t
+        """
         self.interface_names_length = interface_names_length
         # LCM Type: int32_t
         self.values_length = values_length

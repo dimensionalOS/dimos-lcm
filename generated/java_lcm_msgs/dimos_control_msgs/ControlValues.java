@@ -10,16 +10,34 @@ import java.io.*;
 import java.util.*;
 import lcm.lcm.*;
  
+/**
+ * Continuous command or state data. Capabilities come from startup
+ * configuration; lifecycle requests and their results use RPC.
+ */
 public final class ControlValues implements lcm.lcm.LCMEncodable
 {
+    /**
+     * Publisher identity, not a hardware-specific routing identifier.
+     */
     public String source;
 
+    /**
+     * Publisher Unix timestamp in seconds; not proof of receiver-side freshness.
+     */
     public double source_ts;
 
+    /**
+     * Identifies the state generation or command session. Established outside
+     * this data message; sequences are compared only within the same epoch.
+     */
     public long epoch;
 
     public long sequence;
 
+    /**
+     * Parallel arrays: publishers and consumers must validate equal lengths,
+     * unique declared names, and finite values. Empty arrays are encodable.
+     */
     public int interface_names_length;
 
     public int values_length;

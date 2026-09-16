@@ -7,6 +7,7 @@
     "./actionlib_msgs": "./generated/actionlib_msgs/mod.ts",
     "./builtin_interfaces": "./generated/builtin_interfaces/mod.ts",
     "./diagnostic_msgs": "./generated/diagnostic_msgs/mod.ts",
+    "./dimos_control_msgs": "./generated/dimos_control_msgs/mod.ts",
     "./foxglove_msgs": "./generated/foxglove_msgs/mod.ts",
     "./geometry_msgs": "./generated/geometry_msgs/mod.ts",
     "./nav_msgs": "./generated/nav_msgs/mod.ts",
