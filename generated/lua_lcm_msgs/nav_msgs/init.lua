@@ -8,10 +8,10 @@ lcm-gen 1.5.2
 local M = {}
 
 M.OccupancyGrid = require('nav_msgs.OccupancyGrid')
-M.GridCells = require('nav_msgs.GridCells')
 M.Path = require('nav_msgs.Path')
-M.Odometry = require('nav_msgs.Odometry')
 M.MapMetaData = require('nav_msgs.MapMetaData')
+M.Odometry = require('nav_msgs.Odometry')
+M.GridCells = require('nav_msgs.GridCells')
 
 return M
 

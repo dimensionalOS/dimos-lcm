@@ -4,5 +4,4 @@ DO NOT MODIFY BY HAND!!!!
 lcm-gen 1.5.2
 """
 
-from .TFMessage import TFMessage as TFMessage
-from .TF2Error import TF2Error as TF2Error
+from .ControlValues import ControlValues as ControlValues

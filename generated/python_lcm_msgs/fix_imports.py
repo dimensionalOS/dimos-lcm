@@ -12,6 +12,7 @@ from pathlib import Path
 
 # Message packages to update imports for
 MSG_PACKAGES = [
+    "dimos_control_msgs",
     "sensor_msgs",
     "geometry_msgs", 
     "std_msgs",
@@ -61,7 +62,7 @@ def fix_file_imports(file_path):
             matches = re.findall(pattern, content)
             for match in matches:
                 # Skip if this is part of msg_name assignment
-                msg_name_pattern = fr'msg_name\s*=\s*["\']' + re.escape(match) + r'["\']'
+                msg_name_pattern = r'msg_name\s*=\s*["\']' + re.escape(match) + r'["\']'
                 if re.search(msg_name_pattern, content):
                     print(f"Skipping {match} as it's part of msg_name")
                     continue
