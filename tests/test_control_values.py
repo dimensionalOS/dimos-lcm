@@ -9,7 +9,7 @@ sys.path.insert(
     str(Path(__file__).parents[1] / "generated" / "python_lcm_msgs" / "lcm_msgs"),
 )
 
-from dimos_control_msgs import ControlValues  # noqa: E402
+from control_msgs import ControlValues  # noqa: E402
 
 
 class ControlValuesTest(unittest.TestCase):

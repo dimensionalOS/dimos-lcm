@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using LCM.LCM;
  
-namespace dimos_control_msgs
+namespace control_msgs
 {
     public sealed class ControlValues : LCM.LCM.LCMEncodable
     {
@@ -35,10 +35,10 @@ namespace dimos_control_msgs
  
         public static ulong _hashRecursive(List<String> classes)
         {
-            if (classes.Contains("dimos_control_msgs.ControlValues"))
+            if (classes.Contains("control_msgs.ControlValues"))
                 return 0L;
  
-            classes.Add("dimos_control_msgs.ControlValues");
+            classes.Add("control_msgs.ControlValues");
             ulong hash = LCM_FINGERPRINT_BASE
                 ;
             classes.RemoveAt(classes.Count - 1);
@@ -88,9 +88,9 @@ namespace dimos_control_msgs
             _decodeRecursive(ins);
         }
  
-        public static dimos_control_msgs.ControlValues _decodeRecursiveFactory(LCMDataInputStream ins)
+        public static control_msgs.ControlValues _decodeRecursiveFactory(LCMDataInputStream ins)
         {
-            dimos_control_msgs.ControlValues o = new dimos_control_msgs.ControlValues();
+            control_msgs.ControlValues o = new control_msgs.ControlValues();
             o._decodeRecursive(ins);
             return o;
         }
@@ -122,9 +122,9 @@ namespace dimos_control_msgs
  
         }
  
-        public dimos_control_msgs.ControlValues Copy()
+        public control_msgs.ControlValues Copy()
         {
-            dimos_control_msgs.ControlValues outobj = new dimos_control_msgs.ControlValues();
+            control_msgs.ControlValues outobj = new control_msgs.ControlValues();
             outobj.source = this.source;
  
             outobj.source_ts = this.source_ts;

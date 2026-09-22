@@ -36,7 +36,7 @@ It is not very useful standalone and is meant to be used in conjuction with actu
 
 ## Control values
 
-`dimos_control_msgs.ControlValues` carries continuous command or state data
+`control_msgs.ControlValues` carries continuous command or state data
 between a control coordinator and device-owning connections. The stream/topic
 determines the direction; both use the same wire type.
 

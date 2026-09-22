@@ -1,4 +1,4 @@
-package dimos_control_msgs;
+package control_msgs;
 
 // Continuous command or state data. Capabilities come from startup
 // configuration; lifecycle requests and their results use RPC.

@@ -7,7 +7,7 @@ lcm-gen 1.5.2
 
 local M = {}
 
-M.ControlValues = require('dimos_control_msgs.ControlValues')
+M.ControlValues = require('control_msgs.ControlValues')
 
 return M
 

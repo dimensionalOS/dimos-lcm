@@ -5,7 +5,7 @@
 export * as actionlib_msgs from "./generated/actionlib_msgs/mod.ts";
 export * as builtin_interfaces from "./generated/builtin_interfaces/mod.ts";
 export * as diagnostic_msgs from "./generated/diagnostic_msgs/mod.ts";
-export * as dimos_control_msgs from "./generated/dimos_control_msgs/mod.ts";
+export * as control_msgs from "./generated/control_msgs/mod.ts";
 export * as foxglove_msgs from "./generated/foxglove_msgs/mod.ts";
 export * as geometry_msgs from "./generated/geometry_msgs/mod.ts";
 export * as nav_msgs from "./generated/nav_msgs/mod.ts";
@@ -22,7 +22,7 @@ export * as visualization_msgs from "./generated/visualization_msgs/mod.ts";
 import * as actionlib_msgs from "./generated/actionlib_msgs/mod.ts";
 import * as builtin_interfaces from "./generated/builtin_interfaces/mod.ts";
 import * as diagnostic_msgs from "./generated/diagnostic_msgs/mod.ts";
-import * as dimos_control_msgs from "./generated/dimos_control_msgs/mod.ts";
+import * as control_msgs from "./generated/control_msgs/mod.ts";
 import * as foxglove_msgs from "./generated/foxglove_msgs/mod.ts";
 import * as geometry_msgs from "./generated/geometry_msgs/mod.ts";
 import * as nav_msgs from "./generated/nav_msgs/mod.ts";
@@ -59,7 +59,7 @@ function _registerPackage(pkg: Record<string, unknown>): void {
 _registerPackage(actionlib_msgs);
 _registerPackage(builtin_interfaces);
 _registerPackage(diagnostic_msgs);
-_registerPackage(dimos_control_msgs);
+_registerPackage(control_msgs);
 _registerPackage(foxglove_msgs);
 _registerPackage(geometry_msgs);
 _registerPackage(nav_msgs);

@@ -7,7 +7,7 @@
     "./actionlib_msgs": "./actionlib_msgs/mod.ts",
     "./builtin_interfaces": "./builtin_interfaces/mod.ts",
     "./diagnostic_msgs": "./diagnostic_msgs/mod.ts",
-    "./dimos_control_msgs": "./dimos_control_msgs/mod.ts",
+    "./control_msgs": "./control_msgs/mod.ts",
     "./foxglove_msgs": "./foxglove_msgs/mod.ts",
     "./geometry_msgs": "./geometry_msgs/mod.ts",
     "./nav_msgs": "./nav_msgs/mod.ts",
