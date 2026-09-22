@@ -3,7 +3,7 @@ import * as standalone from "../generated/ts_lcm_msgs/mod.ts";
 import * as published from "../tools/ts/msgs/mod.ts";
 
 Deno.test("both TypeScript entrypoints decode ControlValues", () => {
-  const original = new published.dimos_control_msgs.ControlValues({
+  const original = new published.control_msgs.ControlValues({
     source: "cc",
     epoch: (1n << 60n) + 3n,
     sequence: (1n << 60n) + 4n,
@@ -13,7 +13,7 @@ Deno.test("both TypeScript entrypoints decode ControlValues", () => {
     values: [0.5],
   });
 
-  const decoded = standalone.decode(original.encode()) as standalone.dimos_control_msgs.ControlValues;
+  const decoded = standalone.decode(original.encode()) as standalone.control_msgs.ControlValues;
 
   assertEquals(decoded.epoch, original.epoch);
   assertEquals(decoded.sequence, original.sequence);

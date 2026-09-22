@@ -4,7 +4,7 @@
  * lcm-gen 1.5.2
  */
 
-package dimos_control_msgs;
+package control_msgs;
  
 import java.io.*;
 import java.util.*;
@@ -66,10 +66,10 @@ public final class ControlValues implements lcm.lcm.LCMEncodable
  
     public static long _hashRecursive(ArrayList<Class<?>> classes)
     {
-        if (classes.contains(dimos_control_msgs.ControlValues.class))
+        if (classes.contains(control_msgs.ControlValues.class))
             return 0L;
  
-        classes.add(dimos_control_msgs.ControlValues.class);
+        classes.add(control_msgs.ControlValues.class);
         long hash = LCM_FINGERPRINT_BASE
             ;
         classes.remove(classes.size() - 1);
@@ -120,9 +120,9 @@ public final class ControlValues implements lcm.lcm.LCMEncodable
         _decodeRecursive(ins);
     }
  
-    public static dimos_control_msgs.ControlValues _decodeRecursiveFactory(DataInput ins) throws IOException
+    public static control_msgs.ControlValues _decodeRecursiveFactory(DataInput ins) throws IOException
     {
-        dimos_control_msgs.ControlValues o = new dimos_control_msgs.ControlValues();
+        control_msgs.ControlValues o = new control_msgs.ControlValues();
         o._decodeRecursive(ins);
         return o;
     }
@@ -154,9 +154,9 @@ public final class ControlValues implements lcm.lcm.LCMEncodable
  
     }
  
-    public dimos_control_msgs.ControlValues copy()
+    public control_msgs.ControlValues copy()
     {
-        dimos_control_msgs.ControlValues outobj = new dimos_control_msgs.ControlValues();
+        control_msgs.ControlValues outobj = new control_msgs.ControlValues();
         outobj.source = this.source;
  
         outobj.source_ts = this.source_ts;

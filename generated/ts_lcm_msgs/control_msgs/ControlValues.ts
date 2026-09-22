@@ -2,7 +2,7 @@
 
 export class ControlValues {
   static readonly _HASH = 0x98d9f64b18d5a4cfn;
-  static readonly _NAME = "dimos_control_msgs.ControlValues";
+  static readonly _NAME = "control_msgs.ControlValues";
   private static _packedFingerprint: bigint | null = null;
 
   source: string;

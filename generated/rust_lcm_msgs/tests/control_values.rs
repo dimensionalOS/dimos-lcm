@@ -1,4 +1,4 @@
-use lcm_msgs::dimos_control_msgs::ControlValues;
+use lcm_msgs::control_msgs::ControlValues;
 
 #[test]
 fn control_values_matches_python_wire_fixture() {

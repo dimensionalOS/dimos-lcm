@@ -6,7 +6,7 @@ import {
   encodeChannel,
   encodePacket,
   getTypeNames,
-  dimos_control_msgs,
+  control_msgs,
 } from "./mod.ts";
 import { Vector3 } from "./generated/geometry_msgs/mod.ts";
 
@@ -14,7 +14,7 @@ Deno.test("ControlValues - public registry matches Python wire fixture", () => {
   const hex = "31b3ec9631ab499f00000003636300405ee000000000001000000000000003" +
     "100000000000000400000001000000010000000e626173652f6c696e6561725f78003fe0000000000000";
   const payload = Uint8Array.from(hex.match(/../g)!, (byte) => parseInt(byte, 16));
-  const expected = new dimos_control_msgs.ControlValues({
+  const expected = new control_msgs.ControlValues({
     source: "cc",
     source_ts: 123.5,
     epoch: (1n << 60n) + 3n,
@@ -27,7 +27,7 @@ Deno.test("ControlValues - public registry matches Python wire fixture", () => {
 
   assertEquals(decode(payload), expected);
   assertEquals(expected.encode(), payload);
-  assertEquals(getTypeNames().includes("dimos_control_msgs.ControlValues"), true);
+  assertEquals(getTypeNames().includes("control_msgs.ControlValues"), true);
 });
 
 Deno.test("getTypeNames - returns registered types", () => {

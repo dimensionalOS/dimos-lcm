@@ -14,7 +14,7 @@ class ControlValues(object):
     configuration; lifecycle requests and their results use RPC.
     """
 
-    msg_name = "dimos_control_msgs.ControlValues"
+    msg_name = "control_msgs.ControlValues"
 
     __slots__ = [
         "source",

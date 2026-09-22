@@ -39,8 +39,8 @@ end
 local ControlValues = {}
 ControlValues.__index = ControlValues
 
-ControlValues.name = 'dimos_control_msgs.ControlValues'
-ControlValues.packagename = 'dimos_control_msgs'
+ControlValues.name = 'control_msgs.ControlValues'
+ControlValues.packagename = 'control_msgs'
 ControlValues.shortname = 'ControlValues'
 
 function ControlValues:new()

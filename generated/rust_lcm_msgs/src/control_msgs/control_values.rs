@@ -16,7 +16,7 @@ pub struct ControlValues {
 
 impl ControlValues {
     pub const HASH: i64 = 0x98D9F64B18D5A4CFu64 as i64;
-    pub const NAME: &str = "dimos_control_msgs.ControlValues";
+    pub const NAME: &str = "control_msgs.ControlValues";
 
     fn packed_fingerprint() -> u64 {
         static CACHE: OnceLock<u64> = OnceLock::new();

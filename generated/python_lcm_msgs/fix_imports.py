@@ -12,7 +12,7 @@ from pathlib import Path
 
 # Message packages to update imports for
 MSG_PACKAGES = [
-    "dimos_control_msgs",
+    "control_msgs",
     "sensor_msgs",
     "geometry_msgs", 
     "std_msgs",
