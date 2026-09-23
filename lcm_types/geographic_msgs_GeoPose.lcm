@@ -1,0 +1,6 @@
+package geographic_msgs;
+
+struct GeoPose {
+    GeoPoint position;
+    geometry_msgs.Quaternion orientation;
+}

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lcm_msgs"
-version = "0.1.2"
+version = "0.1.4"
 description = "LCM generated Python bindings for ROS based types"
 authors = [
     {name = "Dimensional"}

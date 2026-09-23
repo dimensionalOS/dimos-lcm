@@ -1,0 +1,9 @@
+package geographic_msgs;
+
+struct RouteSegment {
+    int32_t props_length;
+    uuid_msgs.UniqueID id;
+    uuid_msgs.UniqueID start;
+    uuid_msgs.UniqueID end;
+    KeyValue props[props_length];
+}

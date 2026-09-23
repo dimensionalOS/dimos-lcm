@@ -1,0 +1,6 @@
+package geographic_msgs;
+
+struct GeoPoseWithCovarianceStamped {
+    std_msgs.Header header;
+    geographic_msgs.GeoPoseWithCovariance pose;
+}

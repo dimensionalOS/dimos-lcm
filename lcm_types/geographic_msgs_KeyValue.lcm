@@ -1,0 +1,6 @@
+package geographic_msgs;
+
+struct KeyValue {
+    string key;
+    string value;
+}

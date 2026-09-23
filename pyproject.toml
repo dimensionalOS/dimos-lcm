@@ -35,6 +35,8 @@ packages = [
     "dimos_lcm.actionlib_msgs",
     "dimos_lcm.builtin_interfaces",
     "dimos_lcm.foxglove_msgs",
+    "dimos_lcm.geographic_msgs",
+    "dimos_lcm.uuid_msgs",
     "dimos_lcm.shape_msgs",
     "dimos_lcm.stereo_msgs",
     "dimos_lcm.tf2_msgs",
@@ -55,6 +57,8 @@ packages = [
 "dimos_lcm.actionlib_msgs" = "generated/python_lcm_msgs/lcm_msgs/actionlib_msgs"
 "dimos_lcm.builtin_interfaces" = "generated/python_lcm_msgs/lcm_msgs/builtin_interfaces"
 "dimos_lcm.foxglove_msgs" = "generated/python_lcm_msgs/lcm_msgs/foxglove_msgs"
+"dimos_lcm.geographic_msgs" = "generated/python_lcm_msgs/lcm_msgs/geographic_msgs"
+"dimos_lcm.uuid_msgs" = "generated/python_lcm_msgs/lcm_msgs/uuid_msgs"
 "dimos_lcm.shape_msgs" = "generated/python_lcm_msgs/lcm_msgs/shape_msgs"
 "dimos_lcm.stereo_msgs" = "generated/python_lcm_msgs/lcm_msgs/stereo_msgs"
 "dimos_lcm.tf2_msgs" = "generated/python_lcm_msgs/lcm_msgs/tf2_msgs"

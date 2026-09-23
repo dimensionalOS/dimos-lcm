@@ -1,0 +1,6 @@
+package geographic_msgs;
+
+struct GeoPoseWithCovariance {
+    GeoPose pose;
+    double covariance[36];
+}

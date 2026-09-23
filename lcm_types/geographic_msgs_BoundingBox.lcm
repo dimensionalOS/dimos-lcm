@@ -1,0 +1,6 @@
+package geographic_msgs;
+
+struct BoundingBox {
+    GeoPoint min_pt;
+    GeoPoint max_pt;
+}
