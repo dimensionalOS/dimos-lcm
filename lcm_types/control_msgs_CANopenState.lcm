@@ -1,0 +1,21 @@
+package control_msgs;
+
+struct CANopenState {
+    const int8_t NMT_INITIALISING = 0;
+    const int8_t NMT_PRE_OPERATIONAL = 127;
+    const int8_t NMT_OPERATIONAL = 5;
+    const int8_t NMT_STOPPED = 4;
+    const int8_t DSP402_NOT_READY_TO_SWITCH_ON = 0;
+    const int8_t DSP402_SWITCH_ON_DISABLED = 1;
+    const int8_t DSP402_READY_TO_SWITCH_ON = 2;
+    const int8_t DSP402_SWITCHED_ON = 3;
+    const int8_t DSP402_OPERATION_ENABLED = 4;
+    const int8_t DSP402_QUICK_STOP_ACTIVE = 5;
+    const int8_t DSP402_FAULT_REACTION_ACTIVE = 6;
+    const int8_t DSP402_FAULT = 7;
+
+    byte node_id;
+    byte nmt_state;
+    byte dsp_402_state;
+    int32_t last_emcy_code;
+}

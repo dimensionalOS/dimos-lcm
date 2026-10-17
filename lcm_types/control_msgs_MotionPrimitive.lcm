@@ -1,0 +1,17 @@
+package control_msgs;
+
+struct MotionPrimitive {
+    const int8_t UNKNOWN = -1;
+    const int8_t LINEAR_JOINT = 0;
+    const int8_t LINEAR_CARTESIAN = 50;
+    const int8_t CIRCULAR_CARTESIAN = 51;
+
+    int32_t additional_arguments_length;
+    int32_t poses_length;
+    int32_t joint_positions_length;
+    int8_t type;
+    double blend_radius;
+    MotionArgument additional_arguments[additional_arguments_length];
+    geometry_msgs.PoseStamped poses[poses_length];
+    double joint_positions[joint_positions_length];
+}

@@ -8,6 +8,8 @@ sys.path.insert(
     0,
     str(Path(__file__).parents[1] / "generated" / "python_lcm_msgs" / "lcm_msgs"),
 )
+# control_msgs also holds upstream ROS types that import other packages via lcm_msgs.
+sys.path.insert(1, str(Path(__file__).parents[1] / "generated" / "python_lcm_msgs"))
 
 from control_msgs import ControlValues  # noqa: E402
 

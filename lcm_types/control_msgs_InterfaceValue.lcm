@@ -1,0 +1,8 @@
+package control_msgs;
+
+struct InterfaceValue {
+    int32_t interface_names_length;
+    int32_t values_length;
+    string interface_names[interface_names_length];
+    double values[values_length];
+}

@@ -1,0 +1,12 @@
+package control_msgs;
+
+struct SingleDOFState {
+    string name;
+    double reference;
+    double feedback;
+    double feedback_dot;
+    double error;
+    double error_dot;
+    double time_step;
+    double output;
+}

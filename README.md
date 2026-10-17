@@ -36,6 +36,10 @@ It is not very useful standalone and is meant to be used in conjuction with actu
 
 ## Control values
 
+The `control_msgs` package also contains the upstream ROS 2 `control_msgs` messages
+(ros-controls/control_msgs, e.g. `DynamicJointState`, `InterfaceValue`), converted from
+`sources/ros_msgs/control_msgs/`. `ControlValues` below is dimos-specific and not a ROS type.
+
 `control_msgs.ControlValues` carries continuous command or state data
 between a control coordinator and device-owning connections. The stream/topic
 determines the direction; both use the same wire type.

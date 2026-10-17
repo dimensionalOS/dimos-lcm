@@ -1,0 +1,14 @@
+package control_msgs;
+
+struct HardwareDeviceStatus {
+    int32_t hardware_status_length;
+    int32_t canopen_states_length;
+    int32_t ethercat_states_length;
+    int32_t vda5050_states_length;
+    std_msgs.Header header;
+    string device_id;
+    GenericHardwareState hardware_status[hardware_status_length];
+    CANopenState canopen_states[canopen_states_length];
+    EtherCATState ethercat_states[ethercat_states_length];
+    VDA5050State vda5050_states[vda5050_states_length];
+}

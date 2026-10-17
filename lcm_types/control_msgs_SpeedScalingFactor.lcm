@@ -1,0 +1,5 @@
+package control_msgs;
+
+struct SpeedScalingFactor {
+    double factor;
+}

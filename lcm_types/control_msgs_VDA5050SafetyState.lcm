@@ -1,0 +1,6 @@
+package control_msgs;
+
+struct VDA5050SafetyState {
+    string e_stop;
+    boolean field_violation;
+}

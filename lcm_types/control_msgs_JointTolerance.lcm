@@ -1,0 +1,8 @@
+package control_msgs;
+
+struct JointTolerance {
+    string name;
+    double position;
+    double velocity;
+    double acceleration;
+}

@@ -1,0 +1,9 @@
+package control_msgs;
+
+struct DynamicInterfaceGroupValues {
+    int32_t interface_groups_length;
+    int32_t interface_values_length;
+    std_msgs.Header header;
+    string interface_groups[interface_groups_length];
+    InterfaceValue interface_values[interface_values_length];
+}

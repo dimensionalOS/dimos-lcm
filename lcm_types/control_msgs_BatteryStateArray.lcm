@@ -1,0 +1,6 @@
+package control_msgs;
+
+struct BatteryStateArray {
+    int32_t battery_states_length;
+    sensor_msgs.BatteryState battery_states[battery_states_length];
+}

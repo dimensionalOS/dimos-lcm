@@ -1,0 +1,9 @@
+package control_msgs;
+
+struct JointWrenchTrajectory {
+    int32_t joint_names_length;
+    int32_t points_length;
+    std_msgs.Header header;
+    string joint_names[joint_names_length];
+    control_msgs.JointWrenchTrajectoryPoint points[points_length];
+}
