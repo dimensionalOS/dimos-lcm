@@ -1,0 +1,6 @@
+package control_msgs;
+
+struct MotionPrimitiveSequence {
+    int32_t motions_length;
+    MotionPrimitive motions[motions_length];
+}

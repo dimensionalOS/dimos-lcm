@@ -1,0 +1,12 @@
+package control_msgs;
+
+struct VDA5050State {
+    string order_id;
+    string action_status;
+    int32_t last_node_id;
+    boolean driving;
+    double battery_charge;
+    string operating_mode;
+    string error_type;
+    string error_description;
+}

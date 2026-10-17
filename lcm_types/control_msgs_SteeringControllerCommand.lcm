@@ -1,0 +1,7 @@
+package control_msgs;
+
+struct SteeringControllerCommand {
+    std_msgs.Header header;
+    double steering_angle;
+    double linear_velocity;
+}

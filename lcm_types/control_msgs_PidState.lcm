@@ -1,0 +1,13 @@
+package control_msgs;
+
+struct PidState {
+    std_msgs.Header header;
+    builtin_interfaces.Duration timestep;
+    double error;
+    double error_dot;
+    double i_term;
+    double p_gain;
+    double i_gain;
+    double d_gain;
+    double output;
+}

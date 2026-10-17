@@ -1,0 +1,16 @@
+package control_msgs;
+
+struct EtherCATState {
+    const int8_t AL_STATE_INIT = 1;
+    const int8_t AL_STATE_PREOP = 2;
+    const int8_t AL_STATE_BOOTSTRAP = 3;
+    const int8_t AL_STATE_SAFEOP = 4;
+    const int8_t AL_STATE_OP = 8;
+
+    int16_t slave_position;
+    string vendor_id;
+    string product_code;
+    byte al_state;
+    boolean has_error;
+    int16_t al_status_code;
+}

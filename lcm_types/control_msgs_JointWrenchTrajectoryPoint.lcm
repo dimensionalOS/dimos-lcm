@@ -1,0 +1,6 @@
+package control_msgs;
+
+struct JointWrenchTrajectoryPoint {
+    trajectory_msgs.JointTrajectoryPoint point;
+    control_msgs.WrenchFramed wrench;
+}

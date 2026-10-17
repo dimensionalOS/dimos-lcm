@@ -1,0 +1,6 @@
+package control_msgs;
+
+struct SingleDOFStateStamped {
+    std_msgs.Header header;
+    SingleDOFState dof_state;
+}

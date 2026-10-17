@@ -1,0 +1,15 @@
+package control_msgs;
+
+struct JointComponentTolerance {
+    const int16_t X_AXIS = 1;
+    const int16_t Y_AXIS = 2;
+    const int16_t Z_AXIS = 3;
+    const int16_t TRANSLATION = 4;
+    const int16_t ROTATION = 5;
+
+    string joint_name;
+    int16_t component;
+    double position;
+    double velocity;
+    double acceleration;
+}

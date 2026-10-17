@@ -1,0 +1,6 @@
+package control_msgs;
+
+struct MotionArgument {
+    string name;
+    double value;
+}

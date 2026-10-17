@@ -1,0 +1,8 @@
+package control_msgs;
+
+struct HardwareDiagnostics {
+    int32_t hardware_device_diagnostics_length;
+    std_msgs.Header header;
+    string hardware_id;
+    HardwareDeviceDiagnostics hardware_device_diagnostics[hardware_device_diagnostics_length];
+}

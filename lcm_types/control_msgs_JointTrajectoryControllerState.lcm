@@ -1,0 +1,18 @@
+package control_msgs;
+
+struct JointTrajectoryControllerState {
+    int32_t joint_names_length;
+    int32_t multi_dof_joint_names_length;
+    std_msgs.Header header;
+    string joint_names[joint_names_length];
+    trajectory_msgs.JointTrajectoryPoint reference;
+    trajectory_msgs.JointTrajectoryPoint feedback;
+    trajectory_msgs.JointTrajectoryPoint error;
+    trajectory_msgs.JointTrajectoryPoint output;
+    string multi_dof_joint_names[multi_dof_joint_names_length];
+    trajectory_msgs.MultiDOFJointTrajectoryPoint multi_dof_reference;
+    trajectory_msgs.MultiDOFJointTrajectoryPoint multi_dof_feedback;
+    trajectory_msgs.MultiDOFJointTrajectoryPoint multi_dof_error;
+    trajectory_msgs.MultiDOFJointTrajectoryPoint multi_dof_output;
+    double speed_scaling_factor;
+}

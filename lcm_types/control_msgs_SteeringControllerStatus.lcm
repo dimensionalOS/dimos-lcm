@@ -1,0 +1,15 @@
+package control_msgs;
+
+struct SteeringControllerStatus {
+    int32_t traction_wheels_position_length;
+    int32_t traction_wheels_velocity_length;
+    int32_t steer_positions_length;
+    int32_t traction_command_length;
+    int32_t steering_angle_command_length;
+    std_msgs.Header header;
+    double traction_wheels_position[traction_wheels_position_length];
+    double traction_wheels_velocity[traction_wheels_velocity_length];
+    double steer_positions[steer_positions_length];
+    double traction_command[traction_command_length];
+    double steering_angle_command[steering_angle_command_length];
+}

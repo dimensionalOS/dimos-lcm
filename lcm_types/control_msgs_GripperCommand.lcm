@@ -1,0 +1,6 @@
+package control_msgs;
+
+struct GripperCommand {
+    double position;
+    double max_effort;
+}

@@ -1,0 +1,10 @@
+package control_msgs;
+
+struct MecanumDriveControllerState {
+    std_msgs.Header header;
+    double front_left_wheel_velocity;
+    double back_left_wheel_velocity;
+    double back_right_wheel_velocity;
+    double front_right_wheel_velocity;
+    geometry_msgs.Twist reference_velocity;
+}

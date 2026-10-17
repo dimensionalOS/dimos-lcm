@@ -1,0 +1,10 @@
+package control_msgs;
+
+struct MultiDOFCommand {
+    int32_t dof_names_length;
+    int32_t values_length;
+    int32_t values_dot_length;
+    string dof_names[dof_names_length];
+    double values[values_length];
+    double values_dot[values_dot_length];
+}

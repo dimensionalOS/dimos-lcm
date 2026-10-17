@@ -1,0 +1,12 @@
+package control_msgs;
+
+struct JointJog {
+    int32_t joint_names_length;
+    int32_t displacements_length;
+    int32_t velocities_length;
+    std_msgs.Header header;
+    string joint_names[joint_names_length];
+    double displacements[displacements_length];
+    double velocities[velocities_length];
+    double duration;
+}
