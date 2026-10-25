@@ -1,0 +1,9 @@
+package files;
+
+// One file's bytes (a URDF, a mesh, a texture, ...), named by the URI it was requested by.
+struct File {
+    std_msgs.Header header;
+    string uri;
+    int32_t data_length;
+    byte data[data_length];
+}

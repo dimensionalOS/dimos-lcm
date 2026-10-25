@@ -5,6 +5,7 @@ pub mod actionlib_msgs;
 pub mod builtin_interfaces;
 pub mod control_msgs;
 pub mod diagnostic_msgs;
+pub mod files;
 pub mod foxglove_msgs;
 pub mod geometry_msgs;
 pub mod nav_msgs;

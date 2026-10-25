@@ -19,6 +19,7 @@ MSG_PACKAGES = [
     "actionlib_msgs",
     "builtin_interfaces",
     "diagnostic_msgs", 
+    "files",
     "foxglove_msgs",
     "nav_msgs",
     "shape_msgs",

@@ -8,6 +8,7 @@
     "./builtin_interfaces": "./generated/builtin_interfaces/mod.ts",
     "./diagnostic_msgs": "./generated/diagnostic_msgs/mod.ts",
     "./control_msgs": "./generated/control_msgs/mod.ts",
+    "./files": "./generated/files/mod.ts",
     "./foxglove_msgs": "./generated/foxglove_msgs/mod.ts",
     "./geometry_msgs": "./generated/geometry_msgs/mod.ts",
     "./nav_msgs": "./generated/nav_msgs/mod.ts",

@@ -34,6 +34,11 @@ This will:
 This repo is also a Python package and you can install it via `pip install dimos-lcm`
 It is not very useful standalone and is meant to be used in conjuction with actual [dimOS](https://github.com/dimensionalOS/dimos)
 
+## Files
+
+`files.File` carries one file's bytes (a URDF, a mesh, a texture, ...) and the URI it was requested by.
+It is dimos-specific and not a ROS type. LCM drops messages over 16 MB, so larger files need another route.
+
 ## Control values
 
 The `control_msgs` package also contains the upstream ROS 2 `control_msgs` messages
