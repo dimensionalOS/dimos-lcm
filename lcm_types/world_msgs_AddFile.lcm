@@ -1,0 +1,12 @@
+package world_msgs;
+
+// add_file: a file entities can name (a mesh, a texture, a model), inline or fetched by sha256.
+struct AddFile {
+    string name;
+    string media_type;
+    byte sha256[32];
+    int64_t size;
+    // 0 means fetch it by sha256.
+    int64_t content_length;
+    byte content[content_length];
+}

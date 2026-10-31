@@ -1,0 +1,15 @@
+package world_msgs;
+
+// WRENCH (an action only): push the target with a force and torque for a while.
+struct Wrench {
+    // The entity whose axes force and torque are in; 0 is the world.
+    int64_t frame;
+    // newtons
+    double force[3];
+    // newton-meters, about point
+    double torque[3];
+    // Where it acts, in the target's frame; zeros are its origin.
+    double point[3];
+    // Sim seconds; 0 is a single physics step.
+    double duration;
+}

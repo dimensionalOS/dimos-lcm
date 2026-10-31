@@ -1,0 +1,6 @@
+package world_msgs;
+
+// cbor_key_remove
+struct CborKeyRemove {
+    string key;
+}

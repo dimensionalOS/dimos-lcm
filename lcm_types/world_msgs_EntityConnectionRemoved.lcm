@@ -1,0 +1,7 @@
+package world_msgs;
+
+// entity_connection_removed
+struct EntityConnectionRemoved {
+    // 0 removes every connection.
+    int64_t other;
+}

@@ -1,0 +1,6 @@
+package world_msgs;
+
+// removed_tag
+struct RemovedTag {
+    string tag;
+}

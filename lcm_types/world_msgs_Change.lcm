@@ -1,0 +1,22 @@
+package world_msgs;
+
+// One change to one entity, file or group. data holds one payload per entry of update_types, in that
+// order, each the LCM encoding (without fingerprint) of that update type's struct in this package.
+// add_entity's data starts with an AddEntity, add_file's is an AddFile, group_set's a GroupSet.
+struct Change {
+    const int8_t ADD_ENTITY = 0, DELETE_ENTITY = 1, ENTITY_UPDATE = 2, ADD_FILE = 3, DELETE_FILE = 4,
+        GROUP_SET = 5, GROUP_UPDATE = 6;
+
+    // Update types, most to least generic. WRENCH is only an action.
+    const int16_t CUSTOM_UPDATE = 0, CBOR_KEY_SET = 1, CBOR_KEY_REMOVE = 2, EVENT = 3, ADDED_TAG = 4,
+        REMOVED_TAG = 5, ENTITY_CONNECTION_ADDED = 6, ENTITY_CONNECTION_REMOVED = 7, WORLD_POSE_SET = 8,
+        WORLD_VELOCITY_SET = 9, MESH_SET = 10, JOINT_POSITION_SET = 11, JOINT_TARGET_SET = 12, WRENCH = 128;
+
+    int8_t type;
+    // 0-255 reserved; 0 is the world. An add_entity action leaves it 0: the sim assigns ids. For group_set/group_update, the group. For add_file/delete_file, the file id.
+    int64_t entity_id;
+    int32_t update_types_length;
+    byte update_types[update_types_length];
+    int32_t data_length;
+    byte data[data_length];
+}

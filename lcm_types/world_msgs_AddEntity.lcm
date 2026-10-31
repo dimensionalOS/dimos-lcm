@@ -1,0 +1,6 @@
+package world_msgs;
+
+// add_entity: the entity's path ("go2", "go2/FL_calf_joint"), before its update payloads.
+struct AddEntity {
+    string path;
+}

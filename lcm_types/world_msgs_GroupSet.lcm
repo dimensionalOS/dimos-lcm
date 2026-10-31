@@ -1,0 +1,7 @@
+package world_msgs;
+
+// group_set: the group's members, in the order a group_update's payloads follow.
+struct GroupSet {
+    int32_t entities_length;
+    int64_t entities[entities_length];
+}

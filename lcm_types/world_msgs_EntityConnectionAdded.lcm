@@ -1,0 +1,12 @@
+package world_msgs;
+
+// entity_connection_added: a relationship to another entity (which may itself be a joint).
+struct EntityConnectionAdded {
+    // JOINT: the other entity is, or is held through, a joint (cbor empty). CBOR: any other relationship.
+    const int8_t JOINT = 0, CBOR = 1;
+
+    int64_t other;
+    int8_t kind;
+    int32_t cbor_length;
+    byte cbor[cbor_length];
+}

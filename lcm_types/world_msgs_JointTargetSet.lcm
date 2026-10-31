@@ -1,0 +1,13 @@
+package world_msgs;
+
+// joint_target_set: what its actuator drives toward, as a motor command:
+// effort = kp * (position - q) + kd * (velocity - dq) + feedforward.
+// NaN in a field means none given: the actuator keeps its own gains, or that target is unset.
+struct JointTargetSet {
+    double position;
+    double velocity;
+    double kp;
+    double kd;
+    // N*m or N
+    double feedforward;
+}

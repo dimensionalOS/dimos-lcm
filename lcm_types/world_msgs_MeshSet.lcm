@@ -1,0 +1,6 @@
+package world_msgs;
+
+// mesh_set: a file the world described with add_file.
+struct MeshSet {
+    int64_t file;
+}

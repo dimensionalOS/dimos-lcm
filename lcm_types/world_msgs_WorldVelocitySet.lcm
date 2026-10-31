@@ -1,0 +1,9 @@
+package world_msgs;
+
+// world_velocity_set: of the entity's origin, in world axes.
+struct WorldVelocitySet {
+    // m/s
+    double linear[3];
+    // rad/s
+    double angular[3];
+}

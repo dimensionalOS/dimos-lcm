@@ -1,0 +1,6 @@
+package world_msgs;
+
+// world_pose_set: x, y, z, qx, qy, qz, qw in the world frame.
+struct WorldPoseSet {
+    double pose[7];
+}

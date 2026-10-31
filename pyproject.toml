@@ -38,7 +38,8 @@ packages = [
     "dimos_lcm.trajectory_msgs",
     "dimos_lcm.vision_msgs",
     "dimos_lcm.visualization_msgs",
-    "dimos_lcm.control_msgs"
+    "dimos_lcm.control_msgs",
+    "dimos_lcm.world_msgs"
 ]
 
 [tool.setuptools.package-dir]
@@ -58,6 +59,7 @@ packages = [
 "dimos_lcm.trajectory_msgs" = "generated/python_lcm_msgs/lcm_msgs/trajectory_msgs"
 "dimos_lcm.vision_msgs" = "generated/python_lcm_msgs/lcm_msgs/vision_msgs"
 "dimos_lcm.visualization_msgs" = "generated/python_lcm_msgs/lcm_msgs/visualization_msgs"
+"dimos_lcm.world_msgs" = "generated/python_lcm_msgs/lcm_msgs/world_msgs"
 "dimos_lcm.control_msgs" = "generated/python_lcm_msgs/lcm_msgs/control_msgs"
 
 [tool.setuptools.package-data]

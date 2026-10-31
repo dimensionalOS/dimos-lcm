@@ -80,3 +80,13 @@ Validate the Python codec with:
 ```sh
 python -m unittest discover -s tests -v
 ```
+
+## World messages
+
+`world_msgs` (dimos-specific, not ROS) carries a simulated world as a stream of changes.
+`WorldChange` is what changed since the last frame (`frame` is consecutive, so a gap means one was
+missed, and stays missed: there is no catching up); `WorldAction` asks the sim for changes in the
+same language, plus `Wrench`. Each `Change` targets one entity id (0 is the world, 0-255 are
+reserved) and carries one payload per update type in `data`: the LCM encoding, without its
+fingerprint, of that update type's struct (`WorldPoseSet`, `JointPositionSet`, `Event`, ...).
+Anything without a typed update is a CBOR key (`CborKeySet`).

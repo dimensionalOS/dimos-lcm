@@ -1,0 +1,6 @@
+package world_msgs;
+
+// added_tag
+struct AddedTag {
+    string tag;
+}

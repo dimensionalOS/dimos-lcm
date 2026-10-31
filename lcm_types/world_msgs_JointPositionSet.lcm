@@ -1,0 +1,10 @@
+package world_msgs;
+
+// joint_position_set: what the joint measures (as an action, a teleport of the joint).
+struct JointPositionSet {
+    // rad or m
+    double position;
+    double velocity;
+    // N*m or N
+    double effort;
+}

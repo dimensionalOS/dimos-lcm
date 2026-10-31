@@ -1,0 +1,9 @@
+package world_msgs;
+
+// cbor_key_set: one key of the entity's CBOR data. Anything without a typed update (materials,
+// lights, sound, friction, joint limits, ...) is one of these.
+struct CborKeySet {
+    string key;
+    int32_t value_length;
+    byte value[value_length];
+}

@@ -1,0 +1,9 @@
+package world_msgs;
+
+// event: something happened to the entity. What happened is itself an entity ("events/contact",
+// "cabinet/open"), so it has an id; the rest is optional CBOR.
+struct Event {
+    int64_t event;
+    int32_t cbor_length;
+    byte cbor[cbor_length];
+}

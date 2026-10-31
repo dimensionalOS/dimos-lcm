@@ -1,0 +1,11 @@
+package world_msgs;
+
+// What changed in a simulated world since the last WorldChange. frame is consecutive per world,
+// so a gap means one was missed; there is no catching up, a missed change is just missed.
+struct WorldChange {
+    // Sim time, nanoseconds.
+    int64_t ts;
+    int64_t frame;
+    int32_t changes_length;
+    world_msgs.Change changes[changes_length];
+}

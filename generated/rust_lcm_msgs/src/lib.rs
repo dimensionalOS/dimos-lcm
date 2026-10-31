@@ -16,3 +16,4 @@ pub mod tf2_msgs;
 pub mod trajectory_msgs;
 pub mod vision_msgs;
 pub mod visualization_msgs;
+pub mod world_msgs;

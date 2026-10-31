@@ -27,6 +27,7 @@ MSG_PACKAGES = [
     "trajectory_msgs",
     "vision_msgs",
     "visualization_msgs",
+    "world_msgs",
 ]
 
 def fix_file_imports(file_path):

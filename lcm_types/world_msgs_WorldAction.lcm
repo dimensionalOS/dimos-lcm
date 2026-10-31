@@ -1,0 +1,14 @@
+package world_msgs;
+
+// What should happen to a simulated world, in the same language as WorldChange: each Change asks for
+// its updates (a world_pose_set is a teleport, a joint_target_set drives an actuator, an event is an
+// interaction), plus WRENCH. Every action has a target, the world (0) included. The sim carries out
+// what it can; a refusal comes back as an event on the target.
+struct WorldAction {
+    // Sim time, nanoseconds, of the frame it was decided from.
+    int64_t ts;
+    int64_t frame;
+    int32_t actions_length;
+    // Applied in order, all before the next physics step.
+    world_msgs.Change actions[actions_length];
+}
