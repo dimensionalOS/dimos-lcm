@@ -8,7 +8,7 @@ use std::sync::OnceLock;
 pub struct WorldAction {
     pub ts: i64,
     pub frame: i64,
-    pub actions: Vec<crate::world_msgs::Change>,
+    pub actions: Vec<crate::world_msgs::Observation>,
 }
 
 impl WorldAction {
@@ -27,7 +27,7 @@ impl WorldAction {
         }
         parents.push(self_hash);
         let mut tmphash = self_hash as u64;
-        tmphash = tmphash.wrapping_add(crate::world_msgs::Change::hash_recursive(parents));
+        tmphash = tmphash.wrapping_add(crate::world_msgs::Observation::hash_recursive(parents));
         parents.pop();
         // rotate left by 1
         tmphash << 1 | tmphash >> 63
@@ -68,7 +68,7 @@ impl WorldAction {
         let actions = {
             let mut v = Vec::with_capacity(actions_length);
             for _ in 0..actions_length {
-                let _elem_0 = crate::world_msgs::Change::decode_one(buf)?;
+                let _elem_0 = crate::world_msgs::Observation::decode_one(buf)?;
                 v.push(_elem_0);
             }
             v

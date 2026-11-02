@@ -8,12 +8,12 @@ import struct
 import sys
 
 from . import *
-from .Change import Change
+from .Observation import Observation
 
 
 class WorldAction(object):
     """
-    What should happen to a simulated world, in the same language as WorldChange: each Change asks for
+    What should happen to a simulated world, in the same language as WorldObservations: each Observation asks for
     its updates (a world_pose_set is a teleport, a joint_target_set drives an actuator, an event is an
     interaction), plus WRENCH. Every action has a target, the world (0) included. The sim carries out
     what it can; a refusal comes back as an event on the target.
@@ -23,14 +23,14 @@ class WorldAction(object):
 
     __slots__ = ["ts", "frame", "actions_length", "actions"]
 
-    __typenames__ = ["int64_t", "int64_t", "int32_t", "Change"]
+    __typenames__ = ["int64_t", "int64_t", "int32_t", "Observation"]
 
     __dimensions__ = [None, None, None, ["actions_length"]]
 
     ts: "int64_t"
     frame: "int64_t"
     actions_length: "int32_t"
-    actions: Change
+    actions: Observation
 
     def __init__(self, ts=0, frame=0, actions_length=0, actions=[]):
         """
@@ -44,7 +44,7 @@ class WorldAction(object):
         self.actions_length = actions_length
         """
         Applied in order, all before the next physics step.
-        LCM Type: Change[actions_length]
+        LCM Type: Observation[actions_length]
         """
         self.actions = actions
 
@@ -59,7 +59,7 @@ class WorldAction(object):
         for i0 in range(self.actions_length):
             assert (
                 self.actions[i0]._get_packed_fingerprint()
-                == Change._get_packed_fingerprint()
+                == Observation._get_packed_fingerprint()
             )
             self.actions[i0]._encode_one(buf)
 
@@ -101,7 +101,7 @@ class WorldAction(object):
             return 0
         newparents = parents + [cls]
         tmphash = (
-            0x114E2B8015EADB0D + Change._get_hash_recursive(newparents)
+            0x114E2B8015EADB0D + Observation._get_hash_recursive(newparents)
         ) & 0xFFFFFFFFFFFFFFFF
         tmphash = (
             ((tmphash << 1) & 0xFFFFFFFFFFFFFFFF) + (tmphash >> 63)

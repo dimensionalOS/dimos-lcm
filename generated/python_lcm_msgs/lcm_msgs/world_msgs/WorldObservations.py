@@ -8,29 +8,29 @@ import struct
 import sys
 
 from . import *
-from .Change import Change
+from .Observation import Observation
 
 
-class WorldChange(object):
+class WorldObservations(object):
     """
-    What changed in a simulated world since the last WorldChange. frame is consecutive per world,
-    so a gap means one was missed; there is no catching up, a missed change is just missed.
+    What was observed in a simulated world since the last WorldObservations. frame is consecutive per world,
+    so a gap means one was missed; there is no catching up, a missed frame is just missed.
     """
 
-    msg_name = "world_msgs.WorldChange"
+    msg_name = "world_msgs.WorldObservations"
 
-    __slots__ = ["ts", "frame", "changes_length", "changes"]
+    __slots__ = ["ts", "frame", "observations_length", "observations"]
 
-    __typenames__ = ["int64_t", "int64_t", "int32_t", "Change"]
+    __typenames__ = ["int64_t", "int64_t", "int32_t", "Observation"]
 
-    __dimensions__ = [None, None, None, ["changes_length"]]
+    __dimensions__ = [None, None, None, ["observations_length"]]
 
     ts: "int64_t"
     frame: "int64_t"
-    changes_length: "int32_t"
-    changes: Change
+    observations_length: "int32_t"
+    observations: Observation
 
-    def __init__(self, ts=0, frame=0, changes_length=0, changes=[]):
+    def __init__(self, ts=0, frame=0, observations_length=0, observations=[]):
         """
         Sim time, nanoseconds.
         LCM Type: int64_t
@@ -39,24 +39,24 @@ class WorldChange(object):
         # LCM Type: int64_t
         self.frame = frame
         # LCM Type: int32_t
-        self.changes_length = changes_length
-        # LCM Type: Change[changes_length]
-        self.changes = changes
+        self.observations_length = observations_length
+        # LCM Type: Observation[observations_length]
+        self.observations = observations
 
     def lcm_encode(self):
         buf = BytesIO()
-        buf.write(WorldChange._get_packed_fingerprint())
+        buf.write(WorldObservations._get_packed_fingerprint())
         self._encode_one(buf)
         return buf.getvalue()
 
     def _encode_one(self, buf):
-        buf.write(struct.pack(">qqi", self.ts, self.frame, self.changes_length))
-        for i0 in range(self.changes_length):
+        buf.write(struct.pack(">qqi", self.ts, self.frame, self.observations_length))
+        for i0 in range(self.observations_length):
             assert (
-                self.changes[i0]._get_packed_fingerprint()
-                == Change._get_packed_fingerprint()
+                self.observations[i0]._get_packed_fingerprint()
+                == Observation._get_packed_fingerprint()
             )
-            self.changes[i0]._encode_one(buf)
+            self.observations[i0]._encode_one(buf)
 
     @classmethod
     def lcm_decode(cls, data: bytes):
@@ -71,10 +71,14 @@ class WorldChange(object):
     @classmethod
     def _decode_one(cls, buf):
         self = cls()
-        self.ts, self.frame, self.changes_length = struct.unpack(">qqi", buf.read(20))
-        self.changes = []
-        for i0 in range(self.changes_length):
-            self.changes.append(cls._get_field_type("changes")._decode_one(buf))
+        self.ts, self.frame, self.observations_length = struct.unpack(
+            ">qqi", buf.read(20)
+        )
+        self.observations = []
+        for i0 in range(self.observations_length):
+            self.observations.append(
+                cls._get_field_type("observations")._decode_one(buf)
+            )
         return self
 
     @classmethod
@@ -96,7 +100,7 @@ class WorldChange(object):
             return 0
         newparents = parents + [cls]
         tmphash = (
-            0x5B5B9A57DF4E4E1F + Change._get_hash_recursive(newparents)
+            0x7ECB865DFF4E480E + Observation._get_hash_recursive(newparents)
         ) & 0xFFFFFFFFFFFFFFFF
         tmphash = (
             ((tmphash << 1) & 0xFFFFFFFFFFFFFFFF) + (tmphash >> 63)

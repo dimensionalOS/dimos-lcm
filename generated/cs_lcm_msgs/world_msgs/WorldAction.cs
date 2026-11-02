@@ -15,7 +15,7 @@ namespace world_msgs
         public long ts;
         public long frame;
         public int actions_length;
-        public world_msgs.Change[] actions;
+        public world_msgs.Observation[] actions;
  
         public WorldAction()
         {
@@ -36,7 +36,7 @@ namespace world_msgs
  
             classes.Add("world_msgs.WorldAction");
             ulong hash = LCM_FINGERPRINT_BASE
-                 + world_msgs.Change._hashRecursive(classes)
+                 + world_msgs.Observation._hashRecursive(classes)
                 ;
             classes.RemoveAt(classes.Count - 1);
             return (hash<<1) + ((hash>>63)&1);
@@ -89,9 +89,9 @@ namespace world_msgs
  
             this.actions_length = ins.ReadInt32();
  
-            this.actions = new world_msgs.Change[(int) actions_length];
+            this.actions = new world_msgs.Observation[(int) actions_length];
             for (int a = 0; a < this.actions_length; a++) {
-                this.actions[a] = world_msgs.Change._decodeRecursiveFactory(ins);
+                this.actions[a] = world_msgs.Observation._decodeRecursiveFactory(ins);
             }
  
         }
@@ -105,7 +105,7 @@ namespace world_msgs
  
             outobj.actions_length = this.actions_length;
  
-            outobj.actions = new world_msgs.Change[(int) actions_length];
+            outobj.actions = new world_msgs.Observation[(int) actions_length];
             for (int a = 0; a < this.actions_length; a++) {
                 outobj.actions[a] = this.actions[a].Copy();
             }

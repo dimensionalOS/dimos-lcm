@@ -10,13 +10,13 @@
 #include <lcm/lcm_coretypes.h>
 
 #include <vector>
-#include "world_msgs/Change.hpp"
+#include "world_msgs/Observation.hpp"
 
 namespace world_msgs
 {
 
 /**
- * What should happen to a simulated world, in the same language as WorldChange: each Change asks for
+ * What should happen to a simulated world, in the same language as WorldObservations: each Observation asks for
  * its updates (a world_pose_set is a teleport, a joint_target_set drives an actuator, an event is an
  * interaction), plus WRENCH. Every action has a target, the world (0) included. The sim carries out
  * what it can; a refusal comes back as an event on the target.
@@ -35,9 +35,9 @@ class WorldAction
 
         /**
          * Applied in order, all before the next physics step.
-         * LCM Type: world_msgs.Change[actions_length]
+         * LCM Type: world_msgs.Observation[actions_length]
          */
-        std::vector< world_msgs::Change > actions;
+        std::vector< world_msgs::Observation > actions;
 
     public:
         /**
@@ -199,7 +199,7 @@ uint64_t WorldAction::_computeHash(const __lcm_hash_ptr *p)
     const __lcm_hash_ptr cp = { p, WorldAction::getHash };
 
     uint64_t hash = 0x114e2b8015eadb0dLL +
-         world_msgs::Change::_computeHash(&cp);
+         world_msgs::Observation::_computeHash(&cp);
 
     return (hash<<1) + ((hash>>63)&1);
 }

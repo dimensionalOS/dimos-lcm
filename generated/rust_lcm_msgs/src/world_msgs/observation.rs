@@ -5,16 +5,16 @@ use std::io::{self, Read, Write, Cursor};
 use std::sync::OnceLock;
 
 #[derive(Debug, Clone, Default, PartialEq)]
-pub struct Change {
+pub struct Observation {
     pub r#type: i8,
     pub entity_id: i64,
     pub update_types: Vec<u8>,
     pub data: Vec<u8>,
 }
 
-impl Change {
+impl Observation {
     pub const HASH: i64 = 0x60016FCD24749A31u64 as i64;
-    pub const NAME: &str = "world_msgs.Change";
+    pub const NAME: &str = "world_msgs.Observation";
 
     pub const ADD_ENTITY: i8 = 0;
     pub const DELETE_ENTITY: i8 = 1;

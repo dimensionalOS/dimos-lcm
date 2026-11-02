@@ -1,9 +1,9 @@
 package world_msgs;
 
-// One change to one entity, file or group. data holds one payload per entry of update_types, in that
+// One observation of one entity, file or group. data holds one payload per entry of update_types, in that
 // order, each the LCM encoding (without fingerprint) of that update type's struct in this package.
 // add_entity's data starts with an AddEntity, add_file's is an AddFile, group_set's a GroupSet.
-struct Change {
+struct Observation {
     const int8_t ADD_ENTITY = 0, DELETE_ENTITY = 1, ENTITY_UPDATE = 2, ADD_FILE = 3, DELETE_FILE = 4,
         GROUP_SET = 5, GROUP_UPDATE = 6;
 

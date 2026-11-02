@@ -11,11 +11,11 @@ import java.util.*;
 import lcm.lcm.*;
  
 /**
- * One change to one entity, file or group. data holds one payload per entry of update_types, in that
+ * One observation of one entity, file or group. data holds one payload per entry of update_types, in that
  * order, each the LCM encoding (without fingerprint) of that update type's struct in this package.
  * add_entity's data starts with an AddEntity, add_file's is an AddFile, group_set's a GroupSet.
  */
-public final class Change implements lcm.lcm.LCMEncodable
+public final class Observation implements lcm.lcm.LCMEncodable
 {
     public byte type;
 
@@ -39,7 +39,7 @@ public final class Change implements lcm.lcm.LCMEncodable
     public byte data[];
 
  
-    public Change()
+    public Observation()
     {
     }
  
@@ -77,10 +77,10 @@ public final class Change implements lcm.lcm.LCMEncodable
  
     public static long _hashRecursive(ArrayList<Class<?>> classes)
     {
-        if (classes.contains(world_msgs.Change.class))
+        if (classes.contains(world_msgs.Observation.class))
             return 0L;
  
-        classes.add(world_msgs.Change.class);
+        classes.add(world_msgs.Observation.class);
         long hash = LCM_FINGERPRINT_BASE
             ;
         classes.remove(classes.size() - 1);
@@ -111,12 +111,12 @@ public final class Change implements lcm.lcm.LCMEncodable
  
     }
  
-    public Change(byte[] data) throws IOException
+    public Observation(byte[] data) throws IOException
     {
         this(new LCMDataInputStream(data));
     }
  
-    public Change(DataInput ins) throws IOException
+    public Observation(DataInput ins) throws IOException
     {
         if (ins.readLong() != LCM_FINGERPRINT)
             throw new IOException("LCM Decode error: bad fingerprint");
@@ -124,9 +124,9 @@ public final class Change implements lcm.lcm.LCMEncodable
         _decodeRecursive(ins);
     }
  
-    public static world_msgs.Change _decodeRecursiveFactory(DataInput ins) throws IOException
+    public static world_msgs.Observation _decodeRecursiveFactory(DataInput ins) throws IOException
     {
-        world_msgs.Change o = new world_msgs.Change();
+        world_msgs.Observation o = new world_msgs.Observation();
         o._decodeRecursive(ins);
         return o;
     }
@@ -147,9 +147,9 @@ public final class Change implements lcm.lcm.LCMEncodable
         ins.readFully(this.data, 0, (int) data_length); 
     }
  
-    public world_msgs.Change copy()
+    public world_msgs.Observation copy()
     {
-        world_msgs.Change outobj = new world_msgs.Change();
+        world_msgs.Observation outobj = new world_msgs.Observation();
         outobj.type = this.type;
  
         outobj.entity_id = this.entity_id;

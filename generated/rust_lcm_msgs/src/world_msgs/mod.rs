@@ -15,9 +15,6 @@ pub use cbor_key_remove::CborKeyRemove;
 mod cbor_key_set;
 pub use cbor_key_set::CborKeySet;
 
-mod change;
-pub use change::Change;
-
 mod custom_update;
 pub use custom_update::CustomUpdate;
 
@@ -42,14 +39,17 @@ pub use joint_target_set::JointTargetSet;
 mod mesh_set;
 pub use mesh_set::MeshSet;
 
+mod observation;
+pub use observation::Observation;
+
 mod removed_tag;
 pub use removed_tag::RemovedTag;
 
 mod world_action;
 pub use world_action::WorldAction;
 
-mod world_change;
-pub use world_change::WorldChange;
+mod world_observations;
+pub use world_observations::WorldObservations;
 
 mod world_pose_set;
 pub use world_pose_set::WorldPoseSet;

@@ -10,7 +10,7 @@ using LCM.LCM;
  
 namespace world_msgs
 {
-    public sealed class Change : LCM.LCM.LCMEncodable
+    public sealed class Observation : LCM.LCM.LCMEncodable
     {
         public sbyte type;
         public long entity_id;
@@ -19,7 +19,7 @@ namespace world_msgs
         public int data_length;
         public byte[] data;
  
-        public Change()
+        public Observation()
         {
         }
  
@@ -48,17 +48,17 @@ namespace world_msgs
         public const int JOINT_TARGET_SET = 12;
         public const int WRENCH = 128;
 
-        static Change()
+        static Observation()
         {
             LCM_FINGERPRINT = _hashRecursive(new List<String>());
         }
  
         public static ulong _hashRecursive(List<String> classes)
         {
-            if (classes.Contains("world_msgs.Change"))
+            if (classes.Contains("world_msgs.Observation"))
                 return 0L;
  
-            classes.Add("world_msgs.Change");
+            classes.Add("world_msgs.Observation");
             ulong hash = LCM_FINGERPRINT_BASE
                 ;
             classes.RemoveAt(classes.Count - 1);
@@ -91,11 +91,11 @@ namespace world_msgs
  
         }
  
-        public Change(byte[] data) : this(new LCMDataInputStream(data))
+        public Observation(byte[] data) : this(new LCMDataInputStream(data))
         {
         }
  
-        public Change(LCMDataInputStream ins)
+        public Observation(LCMDataInputStream ins)
         {
             if ((ulong) ins.ReadInt64() != LCM_FINGERPRINT)
                 throw new System.IO.IOException("LCM Decode error: bad fingerprint");
@@ -103,9 +103,9 @@ namespace world_msgs
             _decodeRecursive(ins);
         }
  
-        public static world_msgs.Change _decodeRecursiveFactory(LCMDataInputStream ins)
+        public static world_msgs.Observation _decodeRecursiveFactory(LCMDataInputStream ins)
         {
-            world_msgs.Change o = new world_msgs.Change();
+            world_msgs.Observation o = new world_msgs.Observation();
             o._decodeRecursive(ins);
             return o;
         }
@@ -132,9 +132,9 @@ namespace world_msgs
  
         }
  
-        public world_msgs.Change Copy()
+        public world_msgs.Observation Copy()
         {
-            world_msgs.Change outobj = new world_msgs.Change();
+            world_msgs.Observation outobj = new world_msgs.Observation();
             outobj.type = this.type;
  
             outobj.entity_id = this.entity_id;

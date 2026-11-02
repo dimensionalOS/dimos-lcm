@@ -6,7 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 local lcm = require('lcm')
 
-local world_msgs_Change = require('world_msgs.Change')
+local world_msgs_Observation = require('world_msgs.Observation')
 
 local setmetatable = setmetatable
 local ipairs = ipairs
@@ -71,7 +71,7 @@ function WorldAction._get_hash_recursive(parents)
   table.insert(newparents, WorldAction)
 
   local hash = lcm._hash.new('0x114e2b8015eadb0d')
-    + world_msgs_Change._get_hash_recursive(newparents)
+    + world_msgs_Observation._get_hash_recursive(newparents)
   hash:rotate(1)
 
   return hash
@@ -116,7 +116,7 @@ function WorldAction._decode_one(data)
   obj.ts, obj.frame, obj.actions_length = lcm._pack.unpack('>qqi', data:read(20))
   obj.actions = {}
   for i0 = 1, obj.actions_length do
-    obj.actions[i0] = world_msgs_Change._decode_one(data)
+    obj.actions[i0] = world_msgs_Observation._decode_one(data)
   end
 
   return obj

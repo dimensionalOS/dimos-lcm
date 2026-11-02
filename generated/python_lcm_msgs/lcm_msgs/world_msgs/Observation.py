@@ -8,14 +8,14 @@ import struct
 import sys
 
 
-class Change(object):
+class Observation(object):
     """
-    One change to one entity, file or group. data holds one payload per entry of update_types, in that
+    One observation of one entity, file or group. data holds one payload per entry of update_types, in that
     order, each the LCM encoding (without fingerprint) of that update type's struct in this package.
     add_entity's data starts with an AddEntity, add_file's is an AddFile, group_set's a GroupSet.
     """
 
-    msg_name = "world_msgs.Change"
+    msg_name = "world_msgs.Observation"
 
     __slots__ = [
         "type",
@@ -87,7 +87,7 @@ class Change(object):
 
     def lcm_encode(self):
         buf = BytesIO()
-        buf.write(Change._get_packed_fingerprint())
+        buf.write(Observation._get_packed_fingerprint())
         self._encode_one(buf)
         return buf.getvalue()
 

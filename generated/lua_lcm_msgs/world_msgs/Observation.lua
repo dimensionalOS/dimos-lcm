@@ -36,36 +36,36 @@ function _buffer_helper:read(n_bytes)
   return partial
 end
 
-local Change = {}
-Change.__index = Change
+local Observation = {}
+Observation.__index = Observation
 
-  Change.ADD_ENTITY = 0
-  Change.DELETE_ENTITY = 1
-  Change.ENTITY_UPDATE = 2
-  Change.ADD_FILE = 3
-  Change.DELETE_FILE = 4
-  Change.GROUP_SET = 5
-  Change.GROUP_UPDATE = 6
-  Change.CUSTOM_UPDATE = 0
-  Change.CBOR_KEY_SET = 1
-  Change.CBOR_KEY_REMOVE = 2
-  Change.EVENT = 3
-  Change.ADDED_TAG = 4
-  Change.REMOVED_TAG = 5
-  Change.ENTITY_CONNECTION_ADDED = 6
-  Change.ENTITY_CONNECTION_REMOVED = 7
-  Change.WORLD_POSE_SET = 8
-  Change.WORLD_VELOCITY_SET = 9
-  Change.MESH_SET = 10
-  Change.JOINT_POSITION_SET = 11
-  Change.JOINT_TARGET_SET = 12
-  Change.WRENCH = 128
+  Observation.ADD_ENTITY = 0
+  Observation.DELETE_ENTITY = 1
+  Observation.ENTITY_UPDATE = 2
+  Observation.ADD_FILE = 3
+  Observation.DELETE_FILE = 4
+  Observation.GROUP_SET = 5
+  Observation.GROUP_UPDATE = 6
+  Observation.CUSTOM_UPDATE = 0
+  Observation.CBOR_KEY_SET = 1
+  Observation.CBOR_KEY_REMOVE = 2
+  Observation.EVENT = 3
+  Observation.ADDED_TAG = 4
+  Observation.REMOVED_TAG = 5
+  Observation.ENTITY_CONNECTION_ADDED = 6
+  Observation.ENTITY_CONNECTION_REMOVED = 7
+  Observation.WORLD_POSE_SET = 8
+  Observation.WORLD_VELOCITY_SET = 9
+  Observation.MESH_SET = 10
+  Observation.JOINT_POSITION_SET = 11
+  Observation.JOINT_TARGET_SET = 12
+  Observation.WRENCH = 128
 
-Change.name = 'world_msgs.Change'
-Change.packagename = 'world_msgs'
-Change.shortname = 'Change'
+Observation.name = 'world_msgs.Observation'
+Observation.packagename = 'world_msgs'
+Observation.shortname = 'Observation'
 
-function Change:new()
+function Observation:new()
 
   local obj = {}
 
@@ -81,16 +81,16 @@ function Change:new()
   return obj
 end
 
-function Change._get_hash_recursive(parents)
+function Observation._get_hash_recursive(parents)
 
   local newparents = {}
 
   for _, v in ipairs(parents) do
-    if v == Change then return lcm._hash.new('0x0') end
+    if v == Observation then return lcm._hash.new('0x0') end
     table.insert(newparents, v)
   end
 
-  table.insert(newparents, Change)
+  table.insert(newparents, Observation)
 
   local hash = lcm._hash.new('0x60016fcd24749a31')
   hash:rotate(1)
@@ -98,14 +98,14 @@ function Change._get_hash_recursive(parents)
   return hash
 end
 
-Change._packed_fingerprint = lcm._pack.pack('>X', Change._get_hash_recursive({}))
+Observation._packed_fingerprint = lcm._pack.pack('>X', Observation._get_hash_recursive({}))
 
-function Change:encode()
+function Observation:encode()
 
-  return Change._packed_fingerprint .. self:_encode_one()
+  return Observation._packed_fingerprint .. self:_encode_one()
 end
 
-function Change:_encode_one()
+function Observation:_encode_one()
 
   local buf_table = {}
 
@@ -117,22 +117,22 @@ function Change:_encode_one()
   return table.concat(buf_table)
 end
 
-function Change.decode(data)
+function Observation.decode(data)
 
-  if data:sub(1, 8) ~= Change._packed_fingerprint then
+  if data:sub(1, 8) ~= Observation._packed_fingerprint then
     error('bad fingerprint')
   end
 
-  return Change._decode_one(data:sub(9))
+  return Observation._decode_one(data:sub(9))
 end
 
-function Change._decode_one(data)
+function Observation._decode_one(data)
 
   if not data.read then
     data = _buffer_helper:new(data)
   end
 
-  local obj = Change:new()
+  local obj = Observation:new()
 
   obj.type, obj.entity_id, obj.update_types_length = lcm._pack.unpack('>bqi', data:read(13))
   obj.update_types = {lcm._pack.unpack(string.format('>%dB', obj.update_types_length), data:read(obj.update_types_length))}
@@ -142,5 +142,5 @@ function Change._decode_one(data)
   return obj
 end
 
-return Change
+return Observation
 

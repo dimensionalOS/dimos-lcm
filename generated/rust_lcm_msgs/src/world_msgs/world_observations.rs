@@ -5,15 +5,15 @@ use std::io::{self, Read, Write, Cursor};
 use std::sync::OnceLock;
 
 #[derive(Debug, Clone, Default, PartialEq)]
-pub struct WorldChange {
+pub struct WorldObservations {
     pub ts: i64,
     pub frame: i64,
-    pub changes: Vec<crate::world_msgs::Change>,
+    pub observations: Vec<crate::world_msgs::Observation>,
 }
 
-impl WorldChange {
-    pub const HASH: i64 = 0x5B5B9A57DF4E4E1Fu64 as i64;
-    pub const NAME: &str = "world_msgs.WorldChange";
+impl WorldObservations {
+    pub const HASH: i64 = 0x7ECB865DFF4E480Eu64 as i64;
+    pub const NAME: &str = "world_msgs.WorldObservations";
 
     fn packed_fingerprint() -> u64 {
         static CACHE: OnceLock<u64> = OnceLock::new();
@@ -27,7 +27,7 @@ impl WorldChange {
         }
         parents.push(self_hash);
         let mut tmphash = self_hash as u64;
-        tmphash = tmphash.wrapping_add(crate::world_msgs::Change::hash_recursive(parents));
+        tmphash = tmphash.wrapping_add(crate::world_msgs::Observation::hash_recursive(parents));
         parents.pop();
         // rotate left by 1
         tmphash << 1 | tmphash >> 63
@@ -54,8 +54,8 @@ impl WorldChange {
     pub fn encode_one<W: Write>(&self, buf: &mut W) -> io::Result<()> {
         buf.write_i64::<BigEndian>(self.ts)?;
         buf.write_i64::<BigEndian>(self.frame)?;
-        buf.write_i32::<BigEndian>(self.changes.len() as i32)?;
-        for v0 in self.changes.iter() {
+        buf.write_i32::<BigEndian>(self.observations.len() as i32)?;
+        for v0 in self.observations.iter() {
             v0.encode_one(buf)?;
         }
         Ok(())
@@ -64,11 +64,11 @@ impl WorldChange {
     pub fn decode_one<R: Read>(buf: &mut R) -> io::Result<Self> {
         let ts = buf.read_i64::<BigEndian>()?;
         let frame = buf.read_i64::<BigEndian>()?;
-        let changes_length = buf.read_i32::<BigEndian>()? as usize;
-        let changes = {
-            let mut v = Vec::with_capacity(changes_length);
-            for _ in 0..changes_length {
-                let _elem_0 = crate::world_msgs::Change::decode_one(buf)?;
+        let observations_length = buf.read_i32::<BigEndian>()? as usize;
+        let observations = {
+            let mut v = Vec::with_capacity(observations_length);
+            for _ in 0..observations_length {
+                let _elem_0 = crate::world_msgs::Observation::decode_one(buf)?;
                 v.push(_elem_0);
             }
             v
@@ -76,7 +76,7 @@ impl WorldChange {
         Ok(Self {
             ts,
             frame,
-            changes,
+            observations,
         })
     }
 
@@ -85,7 +85,7 @@ impl WorldChange {
         size += 8;
         size += 8;
         size += 4;
-        for v0 in self.changes.iter() {
+        for v0 in self.observations.iter() {
             size += v0.encoded_size();
         }
         size
