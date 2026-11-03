@@ -1,0 +1,13 @@
+package sim_msgs;
+
+// Atomic joint commands for one simulation generation. Not teleport/reset.
+struct Actions {
+    string run_id;
+    string model_revision;
+    int64_t epoch;
+    // Feedback tick this action answers. -1 means unpaced, latest-value control.
+    int64_t tick;
+    double ttl;
+    int32_t actions_length;
+    Action actions[actions_length];
+}
