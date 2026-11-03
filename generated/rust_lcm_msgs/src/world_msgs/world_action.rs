@@ -8,11 +8,11 @@ use std::sync::OnceLock;
 pub struct WorldAction {
     pub ts: i64,
     pub frame: i64,
-    pub actions: Vec<crate::world_msgs::Observation>,
+    pub joint_commands: Vec<crate::world_msgs::JointCommand>,
 }
 
 impl WorldAction {
-    pub const HASH: i64 = 0x114E2B8015EADB0Du64 as i64;
+    pub const HASH: i64 = 0xD0D09ABA7AADB488u64 as i64;
     pub const NAME: &str = "world_msgs.WorldAction";
 
     fn packed_fingerprint() -> u64 {
@@ -27,7 +27,7 @@ impl WorldAction {
         }
         parents.push(self_hash);
         let mut tmphash = self_hash as u64;
-        tmphash = tmphash.wrapping_add(crate::world_msgs::Observation::hash_recursive(parents));
+        tmphash = tmphash.wrapping_add(crate::world_msgs::JointCommand::hash_recursive(parents));
         parents.pop();
         // rotate left by 1
         tmphash << 1 | tmphash >> 63
@@ -54,8 +54,8 @@ impl WorldAction {
     pub fn encode_one<W: Write>(&self, buf: &mut W) -> io::Result<()> {
         buf.write_i64::<BigEndian>(self.ts)?;
         buf.write_i64::<BigEndian>(self.frame)?;
-        buf.write_i32::<BigEndian>(self.actions.len() as i32)?;
-        for v0 in self.actions.iter() {
+        buf.write_i32::<BigEndian>(self.joint_commands.len() as i32)?;
+        for v0 in self.joint_commands.iter() {
             v0.encode_one(buf)?;
         }
         Ok(())
@@ -64,11 +64,11 @@ impl WorldAction {
     pub fn decode_one<R: Read>(buf: &mut R) -> io::Result<Self> {
         let ts = buf.read_i64::<BigEndian>()?;
         let frame = buf.read_i64::<BigEndian>()?;
-        let actions_length = buf.read_i32::<BigEndian>()? as usize;
-        let actions = {
-            let mut v = Vec::with_capacity(actions_length);
-            for _ in 0..actions_length {
-                let _elem_0 = crate::world_msgs::Observation::decode_one(buf)?;
+        let joint_commands_length = buf.read_i32::<BigEndian>()? as usize;
+        let joint_commands = {
+            let mut v = Vec::with_capacity(joint_commands_length);
+            for _ in 0..joint_commands_length {
+                let _elem_0 = crate::world_msgs::JointCommand::decode_one(buf)?;
                 v.push(_elem_0);
             }
             v
@@ -76,7 +76,7 @@ impl WorldAction {
         Ok(Self {
             ts,
             frame,
-            actions,
+            joint_commands,
         })
     }
 
@@ -85,7 +85,7 @@ impl WorldAction {
         size += 8;
         size += 8;
         size += 4;
-        for v0 in self.actions.iter() {
+        for v0 in self.joint_commands.iter() {
             size += v0.encoded_size();
         }
         size

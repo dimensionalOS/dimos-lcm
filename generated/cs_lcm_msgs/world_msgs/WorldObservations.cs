@@ -14,15 +14,17 @@ namespace world_msgs
     {
         public long ts;
         public long frame;
-        public int observations_length;
-        public world_msgs.Observation[] observations;
+        public int cbor_key_values_length;
+        public world_msgs.CborKeyValue[] cbor_key_values;
+        public int positions_length;
+        public world_msgs.Position[] positions;
  
         public WorldObservations()
         {
         }
  
         public static readonly ulong LCM_FINGERPRINT;
-        public static readonly ulong LCM_FINGERPRINT_BASE = 0x7ecb865dff4e480eL;
+        public static readonly ulong LCM_FINGERPRINT_BASE = 0x6d8086b772008358L;
  
         static WorldObservations()
         {
@@ -36,7 +38,8 @@ namespace world_msgs
  
             classes.Add("world_msgs.WorldObservations");
             ulong hash = LCM_FINGERPRINT_BASE
-                 + world_msgs.Observation._hashRecursive(classes)
+                 + world_msgs.CborKeyValue._hashRecursive(classes)
+                 + world_msgs.Position._hashRecursive(classes)
                 ;
             classes.RemoveAt(classes.Count - 1);
             return (hash<<1) + ((hash>>63)&1);
@@ -54,10 +57,16 @@ namespace world_msgs
  
             outs.Write(this.frame); 
  
-            outs.Write(this.observations_length); 
+            outs.Write(this.cbor_key_values_length); 
  
-            for (int a = 0; a < this.observations_length; a++) {
-                this.observations[a]._encodeRecursive(outs); 
+            for (int a = 0; a < this.cbor_key_values_length; a++) {
+                this.cbor_key_values[a]._encodeRecursive(outs); 
+            }
+ 
+            outs.Write(this.positions_length); 
+ 
+            for (int a = 0; a < this.positions_length; a++) {
+                this.positions[a]._encodeRecursive(outs); 
             }
  
         }
@@ -87,11 +96,18 @@ namespace world_msgs
  
             this.frame = ins.ReadInt64();
  
-            this.observations_length = ins.ReadInt32();
+            this.cbor_key_values_length = ins.ReadInt32();
  
-            this.observations = new world_msgs.Observation[(int) observations_length];
-            for (int a = 0; a < this.observations_length; a++) {
-                this.observations[a] = world_msgs.Observation._decodeRecursiveFactory(ins);
+            this.cbor_key_values = new world_msgs.CborKeyValue[(int) cbor_key_values_length];
+            for (int a = 0; a < this.cbor_key_values_length; a++) {
+                this.cbor_key_values[a] = world_msgs.CborKeyValue._decodeRecursiveFactory(ins);
+            }
+ 
+            this.positions_length = ins.ReadInt32();
+ 
+            this.positions = new world_msgs.Position[(int) positions_length];
+            for (int a = 0; a < this.positions_length; a++) {
+                this.positions[a] = world_msgs.Position._decodeRecursiveFactory(ins);
             }
  
         }
@@ -103,11 +119,18 @@ namespace world_msgs
  
             outobj.frame = this.frame;
  
-            outobj.observations_length = this.observations_length;
+            outobj.cbor_key_values_length = this.cbor_key_values_length;
  
-            outobj.observations = new world_msgs.Observation[(int) observations_length];
-            for (int a = 0; a < this.observations_length; a++) {
-                outobj.observations[a] = this.observations[a].Copy();
+            outobj.cbor_key_values = new world_msgs.CborKeyValue[(int) cbor_key_values_length];
+            for (int a = 0; a < this.cbor_key_values_length; a++) {
+                outobj.cbor_key_values[a] = this.cbor_key_values[a].Copy();
+            }
+ 
+            outobj.positions_length = this.positions_length;
+ 
+            outobj.positions = new world_msgs.Position[(int) positions_length];
+            for (int a = 0; a < this.positions_length; a++) {
+                outobj.positions[a] = this.positions[a].Copy();
             }
  
             return outobj;

@@ -6,7 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 local lcm = require('lcm')
 
-local world_msgs_Observation = require('world_msgs.Observation')
+local world_msgs_JointCommand = require('world_msgs.JointCommand')
 
 local setmetatable = setmetatable
 local ipairs = ipairs
@@ -51,8 +51,8 @@ function WorldAction:new()
 
   obj.ts = 0
   obj.frame = 0
-  obj.actions_length = 0
-  obj.actions = {}
+  obj.joint_commands_length = 0
+  obj.joint_commands = {}
 
   setmetatable(obj, self)
 
@@ -70,8 +70,8 @@ function WorldAction._get_hash_recursive(parents)
 
   table.insert(newparents, WorldAction)
 
-  local hash = lcm._hash.new('0x114e2b8015eadb0d')
-    + world_msgs_Observation._get_hash_recursive(newparents)
+  local hash = lcm._hash.new('0xd0d09aba7aadb488')
+    + world_msgs_JointCommand._get_hash_recursive(newparents)
   hash:rotate(1)
 
   return hash
@@ -88,9 +88,9 @@ function WorldAction:_encode_one()
 
   local buf_table = {}
 
-  table.insert(buf_table, lcm._pack.pack('>qqi', self.ts, self.frame, self.actions_length))
-  for i0 = 1, self.actions_length do
-    table.insert(buf_table, self.actions[i0]:_encode_one())
+  table.insert(buf_table, lcm._pack.pack('>qqi', self.ts, self.frame, self.joint_commands_length))
+  for i0 = 1, self.joint_commands_length do
+    table.insert(buf_table, self.joint_commands[i0]:_encode_one())
   end
 
   return table.concat(buf_table)
@@ -113,10 +113,10 @@ function WorldAction._decode_one(data)
 
   local obj = WorldAction:new()
 
-  obj.ts, obj.frame, obj.actions_length = lcm._pack.unpack('>qqi', data:read(20))
-  obj.actions = {}
-  for i0 = 1, obj.actions_length do
-    obj.actions[i0] = world_msgs_Observation._decode_one(data)
+  obj.ts, obj.frame, obj.joint_commands_length = lcm._pack.unpack('>qqi', data:read(20))
+  obj.joint_commands = {}
+  for i0 = 1, obj.joint_commands_length do
+    obj.joint_commands[i0] = world_msgs_JointCommand._decode_one(data)
   end
 
   return obj

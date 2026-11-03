@@ -1,0 +1,10 @@
+package world_msgs;
+
+// One key of an entity's CBOR data: what it is ("path"), what it asks for ("act"), anything else.
+struct CborKeyValue {
+    // 0 is the world.
+    int64_t entity_id;
+    string key;
+    int32_t value_length;
+    byte value[value_length];
+}

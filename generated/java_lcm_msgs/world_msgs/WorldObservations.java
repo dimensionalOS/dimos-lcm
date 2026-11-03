@@ -17,18 +17,25 @@ import lcm.lcm.*;
 public final class WorldObservations implements lcm.lcm.LCMEncodable
 {
     /**
-     * Sim time, nanoseconds.
+     * Sim time plus the wall time the sim started at, nanoseconds.
      */
     public long ts;
 
     public long frame;
 
-    public int observations_length;
+    public int cbor_key_values_length;
 
     /**
-     * LCM Type: world_msgs.Observation[observations_length]
+     * LCM Type: world_msgs.CborKeyValue[cbor_key_values_length]
      */
-    public world_msgs.Observation observations[];
+    public world_msgs.CborKeyValue cbor_key_values[];
+
+    public int positions_length;
+
+    /**
+     * LCM Type: world_msgs.Position[positions_length]
+     */
+    public world_msgs.Position positions[];
 
  
     public WorldObservations()
@@ -36,7 +43,7 @@ public final class WorldObservations implements lcm.lcm.LCMEncodable
     }
  
     public static final long LCM_FINGERPRINT;
-    public static final long LCM_FINGERPRINT_BASE = 0x7ecb865dff4e480eL;
+    public static final long LCM_FINGERPRINT_BASE = 0x6d8086b772008358L;
  
     static {
         LCM_FINGERPRINT = _hashRecursive(new ArrayList<Class<?>>());
@@ -49,7 +56,8 @@ public final class WorldObservations implements lcm.lcm.LCMEncodable
  
         classes.add(world_msgs.WorldObservations.class);
         long hash = LCM_FINGERPRINT_BASE
-             + world_msgs.Observation._hashRecursive(classes)
+             + world_msgs.CborKeyValue._hashRecursive(classes)
+             + world_msgs.Position._hashRecursive(classes)
             ;
         classes.remove(classes.size() - 1);
         return (hash<<1) + ((hash>>63)&1);
@@ -67,10 +75,16 @@ public final class WorldObservations implements lcm.lcm.LCMEncodable
  
         outs.writeLong(this.frame); 
  
-        outs.writeInt(this.observations_length); 
+        outs.writeInt(this.cbor_key_values_length); 
  
-        for (int a = 0; a < this.observations_length; a++) {
-            this.observations[a]._encodeRecursive(outs); 
+        for (int a = 0; a < this.cbor_key_values_length; a++) {
+            this.cbor_key_values[a]._encodeRecursive(outs); 
+        }
+ 
+        outs.writeInt(this.positions_length); 
+ 
+        for (int a = 0; a < this.positions_length; a++) {
+            this.positions[a]._encodeRecursive(outs); 
         }
  
     }
@@ -101,11 +115,18 @@ public final class WorldObservations implements lcm.lcm.LCMEncodable
  
         this.frame = ins.readLong();
  
-        this.observations_length = ins.readInt();
+        this.cbor_key_values_length = ins.readInt();
  
-        this.observations = new world_msgs.Observation[(int) observations_length];
-        for (int a = 0; a < this.observations_length; a++) {
-            this.observations[a] = world_msgs.Observation._decodeRecursiveFactory(ins);
+        this.cbor_key_values = new world_msgs.CborKeyValue[(int) cbor_key_values_length];
+        for (int a = 0; a < this.cbor_key_values_length; a++) {
+            this.cbor_key_values[a] = world_msgs.CborKeyValue._decodeRecursiveFactory(ins);
+        }
+ 
+        this.positions_length = ins.readInt();
+ 
+        this.positions = new world_msgs.Position[(int) positions_length];
+        for (int a = 0; a < this.positions_length; a++) {
+            this.positions[a] = world_msgs.Position._decodeRecursiveFactory(ins);
         }
  
     }
@@ -117,11 +138,18 @@ public final class WorldObservations implements lcm.lcm.LCMEncodable
  
         outobj.frame = this.frame;
  
-        outobj.observations_length = this.observations_length;
+        outobj.cbor_key_values_length = this.cbor_key_values_length;
  
-        outobj.observations = new world_msgs.Observation[(int) observations_length];
-        for (int a = 0; a < this.observations_length; a++) {
-            outobj.observations[a] = this.observations[a].copy();
+        outobj.cbor_key_values = new world_msgs.CborKeyValue[(int) cbor_key_values_length];
+        for (int a = 0; a < this.cbor_key_values_length; a++) {
+            outobj.cbor_key_values[a] = this.cbor_key_values[a].copy();
+        }
+ 
+        outobj.positions_length = this.positions_length;
+ 
+        outobj.positions = new world_msgs.Position[(int) positions_length];
+        for (int a = 0; a < this.positions_length; a++) {
+            outobj.positions[a] = this.positions[a].copy();
         }
  
         return outobj;

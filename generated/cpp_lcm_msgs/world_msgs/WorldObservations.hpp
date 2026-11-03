@@ -10,7 +10,8 @@
 #include <lcm/lcm_coretypes.h>
 
 #include <vector>
-#include "world_msgs/Observation.hpp"
+#include "world_msgs/CborKeyValue.hpp"
+#include "world_msgs/Position.hpp"
 
 namespace world_msgs
 {
@@ -23,18 +24,25 @@ class WorldObservations
 {
     public:
         /**
-         * Sim time, nanoseconds.
+         * Sim time plus the wall time the sim started at, nanoseconds.
          */
         int64_t    ts;
 
         int64_t    frame;
 
-        int32_t    observations_length;
+        int32_t    cbor_key_values_length;
 
         /**
-         * LCM Type: world_msgs.Observation[observations_length]
+         * LCM Type: world_msgs.CborKeyValue[cbor_key_values_length]
          */
-        std::vector< world_msgs::Observation > observations;
+        std::vector< world_msgs::CborKeyValue > cbor_key_values;
+
+        int32_t    positions_length;
+
+        /**
+         * LCM Type: world_msgs.Position[positions_length]
+         */
+        std::vector< world_msgs::Position > positions;
 
     public:
         /**
@@ -138,11 +146,19 @@ int WorldObservations::_encodeNoHash(void *buf, int offset, int maxlen) const
     tlen = __int64_t_encode_array(buf, offset + pos, maxlen - pos, &this->frame, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    tlen = __int32_t_encode_array(buf, offset + pos, maxlen - pos, &this->observations_length, 1);
+    tlen = __int32_t_encode_array(buf, offset + pos, maxlen - pos, &this->cbor_key_values_length, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    for (int a0 = 0; a0 < this->observations_length; a0++) {
-        tlen = this->observations[a0]._encodeNoHash(buf, offset + pos, maxlen - pos);
+    for (int a0 = 0; a0 < this->cbor_key_values_length; a0++) {
+        tlen = this->cbor_key_values[a0]._encodeNoHash(buf, offset + pos, maxlen - pos);
+        if(tlen < 0) return tlen; else pos += tlen;
+    }
+
+    tlen = __int32_t_encode_array(buf, offset + pos, maxlen - pos, &this->positions_length, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
+    for (int a0 = 0; a0 < this->positions_length; a0++) {
+        tlen = this->positions[a0]._encodeNoHash(buf, offset + pos, maxlen - pos);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
@@ -159,16 +175,29 @@ int WorldObservations::_decodeNoHash(const void *buf, int offset, int maxlen)
     tlen = __int64_t_decode_array(buf, offset + pos, maxlen - pos, &this->frame, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->observations_length, 1);
+    tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->cbor_key_values_length, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
     try {
-        this->observations.resize(this->observations_length);
+        this->cbor_key_values.resize(this->cbor_key_values_length);
     } catch (...) {
         return -1;
     }
-    for (int a0 = 0; a0 < this->observations_length; a0++) {
-        tlen = this->observations[a0]._decodeNoHash(buf, offset + pos, maxlen - pos);
+    for (int a0 = 0; a0 < this->cbor_key_values_length; a0++) {
+        tlen = this->cbor_key_values[a0]._decodeNoHash(buf, offset + pos, maxlen - pos);
+        if(tlen < 0) return tlen; else pos += tlen;
+    }
+
+    tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->positions_length, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
+    try {
+        this->positions.resize(this->positions_length);
+    } catch (...) {
+        return -1;
+    }
+    for (int a0 = 0; a0 < this->positions_length; a0++) {
+        tlen = this->positions[a0]._decodeNoHash(buf, offset + pos, maxlen - pos);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
@@ -181,8 +210,12 @@ int WorldObservations::_getEncodedSizeNoHash() const
     enc_size += __int64_t_encoded_array_size(NULL, 1);
     enc_size += __int64_t_encoded_array_size(NULL, 1);
     enc_size += __int32_t_encoded_array_size(NULL, 1);
-    for (int a0 = 0; a0 < this->observations_length; a0++) {
-        enc_size += this->observations[a0]._getEncodedSizeNoHash();
+    for (int a0 = 0; a0 < this->cbor_key_values_length; a0++) {
+        enc_size += this->cbor_key_values[a0]._getEncodedSizeNoHash();
+    }
+    enc_size += __int32_t_encoded_array_size(NULL, 1);
+    for (int a0 = 0; a0 < this->positions_length; a0++) {
+        enc_size += this->positions[a0]._getEncodedSizeNoHash();
     }
     return enc_size;
 }
@@ -195,8 +228,9 @@ uint64_t WorldObservations::_computeHash(const __lcm_hash_ptr *p)
             return 0;
     const __lcm_hash_ptr cp = { p, WorldObservations::getHash };
 
-    uint64_t hash = 0x7ecb865dff4e480eLL +
-         world_msgs::Observation::_computeHash(&cp);
+    uint64_t hash = 0x6d8086b772008358LL +
+         world_msgs::CborKeyValue::_computeHash(&cp) +
+         world_msgs::Position::_computeHash(&cp);
 
     return (hash<<1) + ((hash>>63)&1);
 }

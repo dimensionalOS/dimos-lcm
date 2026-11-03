@@ -7,26 +7,11 @@ lcm-gen 1.5.2
 
 local M = {}
 
-M.CborKeySet = require('world_msgs.CborKeySet')
-M.CborKeyRemove = require('world_msgs.CborKeyRemove')
-M.WorldAction = require('world_msgs.WorldAction')
-M.WorldPoseSet = require('world_msgs.WorldPoseSet')
-M.Observation = require('world_msgs.Observation')
-M.AddedTag = require('world_msgs.AddedTag')
-M.AddFile = require('world_msgs.AddFile')
-M.RemovedTag = require('world_msgs.RemovedTag')
-M.JointPositionSet = require('world_msgs.JointPositionSet')
-M.AddEntity = require('world_msgs.AddEntity')
-M.WorldVelocitySet = require('world_msgs.WorldVelocitySet')
-M.CustomUpdate = require('world_msgs.CustomUpdate')
-M.EntityConnectionRemoved = require('world_msgs.EntityConnectionRemoved')
-M.EntityConnectionAdded = require('world_msgs.EntityConnectionAdded')
-M.JointTargetSet = require('world_msgs.JointTargetSet')
 M.WorldObservations = require('world_msgs.WorldObservations')
-M.Wrench = require('world_msgs.Wrench')
-M.MeshSet = require('world_msgs.MeshSet')
-M.Event = require('world_msgs.Event')
-M.GroupSet = require('world_msgs.GroupSet')
+M.Position = require('world_msgs.Position')
+M.CborKeyValue = require('world_msgs.CborKeyValue')
+M.WorldAction = require('world_msgs.WorldAction')
+M.JointCommand = require('world_msgs.JointCommand')
 
 return M
 

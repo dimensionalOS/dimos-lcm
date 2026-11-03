@@ -14,15 +14,15 @@ namespace world_msgs
     {
         public long ts;
         public long frame;
-        public int actions_length;
-        public world_msgs.Observation[] actions;
+        public int joint_commands_length;
+        public world_msgs.JointCommand[] joint_commands;
  
         public WorldAction()
         {
         }
  
         public static readonly ulong LCM_FINGERPRINT;
-        public static readonly ulong LCM_FINGERPRINT_BASE = 0x114e2b8015eadb0dL;
+        public static readonly ulong LCM_FINGERPRINT_BASE = 0xd0d09aba7aadb488L;
  
         static WorldAction()
         {
@@ -36,7 +36,7 @@ namespace world_msgs
  
             classes.Add("world_msgs.WorldAction");
             ulong hash = LCM_FINGERPRINT_BASE
-                 + world_msgs.Observation._hashRecursive(classes)
+                 + world_msgs.JointCommand._hashRecursive(classes)
                 ;
             classes.RemoveAt(classes.Count - 1);
             return (hash<<1) + ((hash>>63)&1);
@@ -54,10 +54,10 @@ namespace world_msgs
  
             outs.Write(this.frame); 
  
-            outs.Write(this.actions_length); 
+            outs.Write(this.joint_commands_length); 
  
-            for (int a = 0; a < this.actions_length; a++) {
-                this.actions[a]._encodeRecursive(outs); 
+            for (int a = 0; a < this.joint_commands_length; a++) {
+                this.joint_commands[a]._encodeRecursive(outs); 
             }
  
         }
@@ -87,11 +87,11 @@ namespace world_msgs
  
             this.frame = ins.ReadInt64();
  
-            this.actions_length = ins.ReadInt32();
+            this.joint_commands_length = ins.ReadInt32();
  
-            this.actions = new world_msgs.Observation[(int) actions_length];
-            for (int a = 0; a < this.actions_length; a++) {
-                this.actions[a] = world_msgs.Observation._decodeRecursiveFactory(ins);
+            this.joint_commands = new world_msgs.JointCommand[(int) joint_commands_length];
+            for (int a = 0; a < this.joint_commands_length; a++) {
+                this.joint_commands[a] = world_msgs.JointCommand._decodeRecursiveFactory(ins);
             }
  
         }
@@ -103,11 +103,11 @@ namespace world_msgs
  
             outobj.frame = this.frame;
  
-            outobj.actions_length = this.actions_length;
+            outobj.joint_commands_length = this.joint_commands_length;
  
-            outobj.actions = new world_msgs.Observation[(int) actions_length];
-            for (int a = 0; a < this.actions_length; a++) {
-                outobj.actions[a] = this.actions[a].Copy();
+            outobj.joint_commands = new world_msgs.JointCommand[(int) joint_commands_length];
+            for (int a = 0; a < this.joint_commands_length; a++) {
+                outobj.joint_commands[a] = this.joint_commands[a].Copy();
             }
  
             return outobj;

@@ -10,34 +10,28 @@
 #include <lcm/lcm_coretypes.h>
 
 #include <vector>
-#include "world_msgs/Observation.hpp"
+#include "world_msgs/JointCommand.hpp"
 
 namespace world_msgs
 {
 
-/**
- * What should happen to a simulated world, in the same language as WorldObservations: each Observation asks for
- * its updates (a world_pose_set is a teleport, a joint_target_set drives an actuator, an event is an
- * interaction), plus WRENCH. Every action has a target, the world (0) included. The sim carries out
- * what it can; a refusal comes back as an event on the target.
- */
+/// What should happen to a simulated world, all before its next physics step.
 class WorldAction
 {
     public:
         /**
-         * Sim time, nanoseconds, of the frame it was decided from.
+         * The ts and frame of the WorldObservations it was decided from.
          */
         int64_t    ts;
 
         int64_t    frame;
 
-        int32_t    actions_length;
+        int32_t    joint_commands_length;
 
         /**
-         * Applied in order, all before the next physics step.
-         * LCM Type: world_msgs.Observation[actions_length]
+         * LCM Type: world_msgs.JointCommand[joint_commands_length]
          */
-        std::vector< world_msgs::Observation > actions;
+        std::vector< world_msgs::JointCommand > joint_commands;
 
     public:
         /**
@@ -141,11 +135,11 @@ int WorldAction::_encodeNoHash(void *buf, int offset, int maxlen) const
     tlen = __int64_t_encode_array(buf, offset + pos, maxlen - pos, &this->frame, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    tlen = __int32_t_encode_array(buf, offset + pos, maxlen - pos, &this->actions_length, 1);
+    tlen = __int32_t_encode_array(buf, offset + pos, maxlen - pos, &this->joint_commands_length, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    for (int a0 = 0; a0 < this->actions_length; a0++) {
-        tlen = this->actions[a0]._encodeNoHash(buf, offset + pos, maxlen - pos);
+    for (int a0 = 0; a0 < this->joint_commands_length; a0++) {
+        tlen = this->joint_commands[a0]._encodeNoHash(buf, offset + pos, maxlen - pos);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
@@ -162,16 +156,16 @@ int WorldAction::_decodeNoHash(const void *buf, int offset, int maxlen)
     tlen = __int64_t_decode_array(buf, offset + pos, maxlen - pos, &this->frame, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->actions_length, 1);
+    tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->joint_commands_length, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
     try {
-        this->actions.resize(this->actions_length);
+        this->joint_commands.resize(this->joint_commands_length);
     } catch (...) {
         return -1;
     }
-    for (int a0 = 0; a0 < this->actions_length; a0++) {
-        tlen = this->actions[a0]._decodeNoHash(buf, offset + pos, maxlen - pos);
+    for (int a0 = 0; a0 < this->joint_commands_length; a0++) {
+        tlen = this->joint_commands[a0]._decodeNoHash(buf, offset + pos, maxlen - pos);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
@@ -184,8 +178,8 @@ int WorldAction::_getEncodedSizeNoHash() const
     enc_size += __int64_t_encoded_array_size(NULL, 1);
     enc_size += __int64_t_encoded_array_size(NULL, 1);
     enc_size += __int32_t_encoded_array_size(NULL, 1);
-    for (int a0 = 0; a0 < this->actions_length; a0++) {
-        enc_size += this->actions[a0]._getEncodedSizeNoHash();
+    for (int a0 = 0; a0 < this->joint_commands_length; a0++) {
+        enc_size += this->joint_commands[a0]._getEncodedSizeNoHash();
     }
     return enc_size;
 }
@@ -198,8 +192,8 @@ uint64_t WorldAction::_computeHash(const __lcm_hash_ptr *p)
             return 0;
     const __lcm_hash_ptr cp = { p, WorldAction::getHash };
 
-    uint64_t hash = 0x114e2b8015eadb0dLL +
-         world_msgs::Observation::_computeHash(&cp);
+    uint64_t hash = 0xd0d09aba7aadb488LL +
+         world_msgs::JointCommand::_computeHash(&cp);
 
     return (hash<<1) + ((hash>>63)&1);
 }

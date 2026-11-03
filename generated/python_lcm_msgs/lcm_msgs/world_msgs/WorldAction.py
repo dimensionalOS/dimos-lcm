@@ -8,45 +8,37 @@ import struct
 import sys
 
 from . import *
-from .Observation import Observation
+from .JointCommand import JointCommand
 
 
 class WorldAction(object):
-    """
-    What should happen to a simulated world, in the same language as WorldObservations: each Observation asks for
-    its updates (a world_pose_set is a teleport, a joint_target_set drives an actuator, an event is an
-    interaction), plus WRENCH. Every action has a target, the world (0) included. The sim carries out
-    what it can; a refusal comes back as an event on the target.
-    """
+    """What should happen to a simulated world, all before its next physics step."""
 
     msg_name = "world_msgs.WorldAction"
 
-    __slots__ = ["ts", "frame", "actions_length", "actions"]
+    __slots__ = ["ts", "frame", "joint_commands_length", "joint_commands"]
 
-    __typenames__ = ["int64_t", "int64_t", "int32_t", "Observation"]
+    __typenames__ = ["int64_t", "int64_t", "int32_t", "JointCommand"]
 
-    __dimensions__ = [None, None, None, ["actions_length"]]
+    __dimensions__ = [None, None, None, ["joint_commands_length"]]
 
     ts: "int64_t"
     frame: "int64_t"
-    actions_length: "int32_t"
-    actions: Observation
+    joint_commands_length: "int32_t"
+    joint_commands: JointCommand
 
-    def __init__(self, ts=0, frame=0, actions_length=0, actions=[]):
+    def __init__(self, ts=0, frame=0, joint_commands_length=0, joint_commands=[]):
         """
-        Sim time, nanoseconds, of the frame it was decided from.
+        The ts and frame of the WorldObservations it was decided from.
         LCM Type: int64_t
         """
         self.ts = ts
         # LCM Type: int64_t
         self.frame = frame
         # LCM Type: int32_t
-        self.actions_length = actions_length
-        """
-        Applied in order, all before the next physics step.
-        LCM Type: Observation[actions_length]
-        """
-        self.actions = actions
+        self.joint_commands_length = joint_commands_length
+        # LCM Type: JointCommand[joint_commands_length]
+        self.joint_commands = joint_commands
 
     def lcm_encode(self):
         buf = BytesIO()
@@ -55,13 +47,13 @@ class WorldAction(object):
         return buf.getvalue()
 
     def _encode_one(self, buf):
-        buf.write(struct.pack(">qqi", self.ts, self.frame, self.actions_length))
-        for i0 in range(self.actions_length):
+        buf.write(struct.pack(">qqi", self.ts, self.frame, self.joint_commands_length))
+        for i0 in range(self.joint_commands_length):
             assert (
-                self.actions[i0]._get_packed_fingerprint()
-                == Observation._get_packed_fingerprint()
+                self.joint_commands[i0]._get_packed_fingerprint()
+                == JointCommand._get_packed_fingerprint()
             )
-            self.actions[i0]._encode_one(buf)
+            self.joint_commands[i0]._encode_one(buf)
 
     @classmethod
     def lcm_decode(cls, data: bytes):
@@ -76,10 +68,14 @@ class WorldAction(object):
     @classmethod
     def _decode_one(cls, buf):
         self = cls()
-        self.ts, self.frame, self.actions_length = struct.unpack(">qqi", buf.read(20))
-        self.actions = []
-        for i0 in range(self.actions_length):
-            self.actions.append(cls._get_field_type("actions")._decode_one(buf))
+        self.ts, self.frame, self.joint_commands_length = struct.unpack(
+            ">qqi", buf.read(20)
+        )
+        self.joint_commands = []
+        for i0 in range(self.joint_commands_length):
+            self.joint_commands.append(
+                cls._get_field_type("joint_commands")._decode_one(buf)
+            )
         return self
 
     @classmethod
@@ -101,7 +97,7 @@ class WorldAction(object):
             return 0
         newparents = parents + [cls]
         tmphash = (
-            0x114E2B8015EADB0D + Observation._get_hash_recursive(newparents)
+            0xD0D09ABA7AADB488 + JointCommand._get_hash_recursive(newparents)
         ) & 0xFFFFFFFFFFFFFFFF
         tmphash = (
             ((tmphash << 1) & 0xFFFFFFFFFFFFFFFF) + (tmphash >> 63)

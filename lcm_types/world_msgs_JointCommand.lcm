@@ -1,0 +1,14 @@
+package world_msgs;
+
+// Drive a joint through its actuator, or with kp and kd as a motor command:
+// effort = kp * (position - q) + kd * (velocity - dq) + effort. NaN in a field means none given.
+struct JointCommand {
+    int64_t entity_id;
+    // rad or m
+    double position;
+    double velocity;
+    // N*m or N
+    double effort;
+    double kp;
+    double kd;
+}

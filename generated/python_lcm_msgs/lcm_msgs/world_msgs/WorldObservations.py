@@ -8,7 +8,8 @@ import struct
 import sys
 
 from . import *
-from .Observation import Observation
+from .CborKeyValue import CborKeyValue
+from .Position import Position
 
 
 class WorldObservations(object):
@@ -19,29 +20,64 @@ class WorldObservations(object):
 
     msg_name = "world_msgs.WorldObservations"
 
-    __slots__ = ["ts", "frame", "observations_length", "observations"]
+    __slots__ = [
+        "ts",
+        "frame",
+        "cbor_key_values_length",
+        "cbor_key_values",
+        "positions_length",
+        "positions",
+    ]
 
-    __typenames__ = ["int64_t", "int64_t", "int32_t", "Observation"]
+    __typenames__ = [
+        "int64_t",
+        "int64_t",
+        "int32_t",
+        "CborKeyValue",
+        "int32_t",
+        "Position",
+    ]
 
-    __dimensions__ = [None, None, None, ["observations_length"]]
+    __dimensions__ = [
+        None,
+        None,
+        None,
+        ["cbor_key_values_length"],
+        None,
+        ["positions_length"],
+    ]
 
     ts: "int64_t"
     frame: "int64_t"
-    observations_length: "int32_t"
-    observations: Observation
+    cbor_key_values_length: "int32_t"
+    cbor_key_values: CborKeyValue
+    positions_length: "int32_t"
+    positions: Position
 
-    def __init__(self, ts=0, frame=0, observations_length=0, observations=[]):
+    def __init__(
+        self,
+        ts=0,
+        frame=0,
+        cbor_key_values_length=0,
+        cbor_key_values=[],
+        positions_length=0,
+        positions=[],
+    ):
         """
-        Sim time, nanoseconds.
+        Sim time plus the wall time the sim started at, nanoseconds.
         LCM Type: int64_t
         """
         self.ts = ts
         # LCM Type: int64_t
         self.frame = frame
         # LCM Type: int32_t
-        self.observations_length = observations_length
-        # LCM Type: Observation[observations_length]
-        self.observations = observations
+        self.cbor_key_values_length = cbor_key_values_length
+        # LCM Type: CborKeyValue[cbor_key_values_length]
+        self.cbor_key_values = cbor_key_values
+        # LCM Type: int32_t
+        self.positions_length = positions_length
+        # LCM Type: Position[positions_length]
+        self.positions = positions
 
     def lcm_encode(self):
         buf = BytesIO()
@@ -50,13 +86,20 @@ class WorldObservations(object):
         return buf.getvalue()
 
     def _encode_one(self, buf):
-        buf.write(struct.pack(">qqi", self.ts, self.frame, self.observations_length))
-        for i0 in range(self.observations_length):
+        buf.write(struct.pack(">qqi", self.ts, self.frame, self.cbor_key_values_length))
+        for i0 in range(self.cbor_key_values_length):
             assert (
-                self.observations[i0]._get_packed_fingerprint()
-                == Observation._get_packed_fingerprint()
+                self.cbor_key_values[i0]._get_packed_fingerprint()
+                == CborKeyValue._get_packed_fingerprint()
             )
-            self.observations[i0]._encode_one(buf)
+            self.cbor_key_values[i0]._encode_one(buf)
+        buf.write(struct.pack(">i", self.positions_length))
+        for i0 in range(self.positions_length):
+            assert (
+                self.positions[i0]._get_packed_fingerprint()
+                == Position._get_packed_fingerprint()
+            )
+            self.positions[i0]._encode_one(buf)
 
     @classmethod
     def lcm_decode(cls, data: bytes):
@@ -71,14 +114,18 @@ class WorldObservations(object):
     @classmethod
     def _decode_one(cls, buf):
         self = cls()
-        self.ts, self.frame, self.observations_length = struct.unpack(
+        self.ts, self.frame, self.cbor_key_values_length = struct.unpack(
             ">qqi", buf.read(20)
         )
-        self.observations = []
-        for i0 in range(self.observations_length):
-            self.observations.append(
-                cls._get_field_type("observations")._decode_one(buf)
+        self.cbor_key_values = []
+        for i0 in range(self.cbor_key_values_length):
+            self.cbor_key_values.append(
+                cls._get_field_type("cbor_key_values")._decode_one(buf)
             )
+        self.positions_length = struct.unpack(">i", buf.read(4))[0]
+        self.positions = []
+        for i0 in range(self.positions_length):
+            self.positions.append(cls._get_field_type("positions")._decode_one(buf))
         return self
 
     @classmethod
@@ -100,7 +147,9 @@ class WorldObservations(object):
             return 0
         newparents = parents + [cls]
         tmphash = (
-            0x7ECB865DFF4E480E + Observation._get_hash_recursive(newparents)
+            0x6D8086B772008358
+            + CborKeyValue._get_hash_recursive(newparents)
+            + Position._get_hash_recursive(newparents)
         ) & 0xFFFFFFFFFFFFFFFF
         tmphash = (
             ((tmphash << 1) & 0xFFFFFFFFFFFFFFFF) + (tmphash >> 63)

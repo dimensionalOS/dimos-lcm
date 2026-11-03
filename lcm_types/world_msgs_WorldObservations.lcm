@@ -3,9 +3,11 @@ package world_msgs;
 // What was observed in a simulated world since the last WorldObservations. frame is consecutive per world,
 // so a gap means one was missed; there is no catching up, a missed frame is just missed.
 struct WorldObservations {
-    // Sim time, nanoseconds.
+    // Sim time plus the wall time the sim started at, nanoseconds.
     int64_t ts;
     int64_t frame;
-    int32_t observations_length;
-    world_msgs.Observation observations[observations_length];
+    int32_t cbor_key_values_length;
+    world_msgs.CborKeyValue cbor_key_values[cbor_key_values_length];
+    int32_t positions_length;
+    world_msgs.Position positions[positions_length];
 }

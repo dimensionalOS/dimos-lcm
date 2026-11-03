@@ -1,0 +1,8 @@
+package world_msgs;
+
+// Where an entity is. A body: x, y, z, qx, qy, qz, qw in the world frame. A joint: its position (rad or m).
+struct Position {
+    int64_t entity_id;
+    int32_t values_length;
+    double values[values_length];
+}

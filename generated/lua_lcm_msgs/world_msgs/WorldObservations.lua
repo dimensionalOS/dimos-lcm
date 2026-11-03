@@ -6,7 +6,8 @@ DO NOT MODIFY BY HAND!!!!
 
 local lcm = require('lcm')
 
-local world_msgs_Observation = require('world_msgs.Observation')
+local world_msgs_Position = require('world_msgs.Position')
+local world_msgs_CborKeyValue = require('world_msgs.CborKeyValue')
 
 local setmetatable = setmetatable
 local ipairs = ipairs
@@ -51,8 +52,10 @@ function WorldObservations:new()
 
   obj.ts = 0
   obj.frame = 0
-  obj.observations_length = 0
-  obj.observations = {}
+  obj.cbor_key_values_length = 0
+  obj.cbor_key_values = {}
+  obj.positions_length = 0
+  obj.positions = {}
 
   setmetatable(obj, self)
 
@@ -70,8 +73,9 @@ function WorldObservations._get_hash_recursive(parents)
 
   table.insert(newparents, WorldObservations)
 
-  local hash = lcm._hash.new('0x7ecb865dff4e480e')
-    + world_msgs_Observation._get_hash_recursive(newparents)
+  local hash = lcm._hash.new('0x6d8086b772008358')
+    + world_msgs_CborKeyValue._get_hash_recursive(newparents)
+    + world_msgs_Position._get_hash_recursive(newparents)
   hash:rotate(1)
 
   return hash
@@ -88,9 +92,13 @@ function WorldObservations:_encode_one()
 
   local buf_table = {}
 
-  table.insert(buf_table, lcm._pack.pack('>qqi', self.ts, self.frame, self.observations_length))
-  for i0 = 1, self.observations_length do
-    table.insert(buf_table, self.observations[i0]:_encode_one())
+  table.insert(buf_table, lcm._pack.pack('>qqi', self.ts, self.frame, self.cbor_key_values_length))
+  for i0 = 1, self.cbor_key_values_length do
+    table.insert(buf_table, self.cbor_key_values[i0]:_encode_one())
+  end
+  table.insert(buf_table, lcm._pack.pack('>i', self.positions_length))
+  for i0 = 1, self.positions_length do
+    table.insert(buf_table, self.positions[i0]:_encode_one())
   end
 
   return table.concat(buf_table)
@@ -113,10 +121,15 @@ function WorldObservations._decode_one(data)
 
   local obj = WorldObservations:new()
 
-  obj.ts, obj.frame, obj.observations_length = lcm._pack.unpack('>qqi', data:read(20))
-  obj.observations = {}
-  for i0 = 1, obj.observations_length do
-    obj.observations[i0] = world_msgs_Observation._decode_one(data)
+  obj.ts, obj.frame, obj.cbor_key_values_length = lcm._pack.unpack('>qqi', data:read(20))
+  obj.cbor_key_values = {}
+  for i0 = 1, obj.cbor_key_values_length do
+    obj.cbor_key_values[i0] = world_msgs_CborKeyValue._decode_one(data)
+  end
+  obj.positions_length = lcm._pack.unpack('>i', data:read(4))
+  obj.positions = {}
+  for i0 = 1, obj.positions_length do
+    obj.positions[i0] = world_msgs_Position._decode_one(data)
   end
 
   return obj

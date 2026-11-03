@@ -11,27 +11,23 @@ import java.util.*;
 import lcm.lcm.*;
  
 /**
- * What should happen to a simulated world, in the same language as WorldObservations: each Observation asks for
- * its updates (a world_pose_set is a teleport, a joint_target_set drives an actuator, an event is an
- * interaction), plus WRENCH. Every action has a target, the world (0) included. The sim carries out
- * what it can; a refusal comes back as an event on the target.
+ * What should happen to a simulated world, all before its next physics step.
  */
 public final class WorldAction implements lcm.lcm.LCMEncodable
 {
     /**
-     * Sim time, nanoseconds, of the frame it was decided from.
+     * The ts and frame of the WorldObservations it was decided from.
      */
     public long ts;
 
     public long frame;
 
-    public int actions_length;
+    public int joint_commands_length;
 
     /**
-     * Applied in order, all before the next physics step.
-     * LCM Type: world_msgs.Observation[actions_length]
+     * LCM Type: world_msgs.JointCommand[joint_commands_length]
      */
-    public world_msgs.Observation actions[];
+    public world_msgs.JointCommand joint_commands[];
 
  
     public WorldAction()
@@ -39,7 +35,7 @@ public final class WorldAction implements lcm.lcm.LCMEncodable
     }
  
     public static final long LCM_FINGERPRINT;
-    public static final long LCM_FINGERPRINT_BASE = 0x114e2b8015eadb0dL;
+    public static final long LCM_FINGERPRINT_BASE = 0xd0d09aba7aadb488L;
  
     static {
         LCM_FINGERPRINT = _hashRecursive(new ArrayList<Class<?>>());
@@ -52,7 +48,7 @@ public final class WorldAction implements lcm.lcm.LCMEncodable
  
         classes.add(world_msgs.WorldAction.class);
         long hash = LCM_FINGERPRINT_BASE
-             + world_msgs.Observation._hashRecursive(classes)
+             + world_msgs.JointCommand._hashRecursive(classes)
             ;
         classes.remove(classes.size() - 1);
         return (hash<<1) + ((hash>>63)&1);
@@ -70,10 +66,10 @@ public final class WorldAction implements lcm.lcm.LCMEncodable
  
         outs.writeLong(this.frame); 
  
-        outs.writeInt(this.actions_length); 
+        outs.writeInt(this.joint_commands_length); 
  
-        for (int a = 0; a < this.actions_length; a++) {
-            this.actions[a]._encodeRecursive(outs); 
+        for (int a = 0; a < this.joint_commands_length; a++) {
+            this.joint_commands[a]._encodeRecursive(outs); 
         }
  
     }
@@ -104,11 +100,11 @@ public final class WorldAction implements lcm.lcm.LCMEncodable
  
         this.frame = ins.readLong();
  
-        this.actions_length = ins.readInt();
+        this.joint_commands_length = ins.readInt();
  
-        this.actions = new world_msgs.Observation[(int) actions_length];
-        for (int a = 0; a < this.actions_length; a++) {
-            this.actions[a] = world_msgs.Observation._decodeRecursiveFactory(ins);
+        this.joint_commands = new world_msgs.JointCommand[(int) joint_commands_length];
+        for (int a = 0; a < this.joint_commands_length; a++) {
+            this.joint_commands[a] = world_msgs.JointCommand._decodeRecursiveFactory(ins);
         }
  
     }
@@ -120,11 +116,11 @@ public final class WorldAction implements lcm.lcm.LCMEncodable
  
         outobj.frame = this.frame;
  
-        outobj.actions_length = this.actions_length;
+        outobj.joint_commands_length = this.joint_commands_length;
  
-        outobj.actions = new world_msgs.Observation[(int) actions_length];
-        for (int a = 0; a < this.actions_length; a++) {
-            outobj.actions[a] = this.actions[a].copy();
+        outobj.joint_commands = new world_msgs.JointCommand[(int) joint_commands_length];
+        for (int a = 0; a < this.joint_commands_length; a++) {
+            outobj.joint_commands[a] = this.joint_commands[a].copy();
         }
  
         return outobj;

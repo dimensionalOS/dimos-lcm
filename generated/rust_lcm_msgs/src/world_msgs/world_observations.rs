@@ -8,11 +8,12 @@ use std::sync::OnceLock;
 pub struct WorldObservations {
     pub ts: i64,
     pub frame: i64,
-    pub observations: Vec<crate::world_msgs::Observation>,
+    pub cbor_key_values: Vec<crate::world_msgs::CborKeyValue>,
+    pub positions: Vec<crate::world_msgs::Position>,
 }
 
 impl WorldObservations {
-    pub const HASH: i64 = 0x7ECB865DFF4E480Eu64 as i64;
+    pub const HASH: i64 = 0x6D8086B772008358u64 as i64;
     pub const NAME: &str = "world_msgs.WorldObservations";
 
     fn packed_fingerprint() -> u64 {
@@ -27,7 +28,8 @@ impl WorldObservations {
         }
         parents.push(self_hash);
         let mut tmphash = self_hash as u64;
-        tmphash = tmphash.wrapping_add(crate::world_msgs::Observation::hash_recursive(parents));
+        tmphash = tmphash.wrapping_add(crate::world_msgs::CborKeyValue::hash_recursive(parents));
+        tmphash = tmphash.wrapping_add(crate::world_msgs::Position::hash_recursive(parents));
         parents.pop();
         // rotate left by 1
         tmphash << 1 | tmphash >> 63
@@ -54,8 +56,12 @@ impl WorldObservations {
     pub fn encode_one<W: Write>(&self, buf: &mut W) -> io::Result<()> {
         buf.write_i64::<BigEndian>(self.ts)?;
         buf.write_i64::<BigEndian>(self.frame)?;
-        buf.write_i32::<BigEndian>(self.observations.len() as i32)?;
-        for v0 in self.observations.iter() {
+        buf.write_i32::<BigEndian>(self.cbor_key_values.len() as i32)?;
+        for v0 in self.cbor_key_values.iter() {
+            v0.encode_one(buf)?;
+        }
+        buf.write_i32::<BigEndian>(self.positions.len() as i32)?;
+        for v0 in self.positions.iter() {
             v0.encode_one(buf)?;
         }
         Ok(())
@@ -64,11 +70,20 @@ impl WorldObservations {
     pub fn decode_one<R: Read>(buf: &mut R) -> io::Result<Self> {
         let ts = buf.read_i64::<BigEndian>()?;
         let frame = buf.read_i64::<BigEndian>()?;
-        let observations_length = buf.read_i32::<BigEndian>()? as usize;
-        let observations = {
-            let mut v = Vec::with_capacity(observations_length);
-            for _ in 0..observations_length {
-                let _elem_0 = crate::world_msgs::Observation::decode_one(buf)?;
+        let cbor_key_values_length = buf.read_i32::<BigEndian>()? as usize;
+        let cbor_key_values = {
+            let mut v = Vec::with_capacity(cbor_key_values_length);
+            for _ in 0..cbor_key_values_length {
+                let _elem_0 = crate::world_msgs::CborKeyValue::decode_one(buf)?;
+                v.push(_elem_0);
+            }
+            v
+        };
+        let positions_length = buf.read_i32::<BigEndian>()? as usize;
+        let positions = {
+            let mut v = Vec::with_capacity(positions_length);
+            for _ in 0..positions_length {
+                let _elem_0 = crate::world_msgs::Position::decode_one(buf)?;
                 v.push(_elem_0);
             }
             v
@@ -76,7 +91,8 @@ impl WorldObservations {
         Ok(Self {
             ts,
             frame,
-            observations,
+            cbor_key_values,
+            positions,
         })
     }
 
@@ -85,7 +101,11 @@ impl WorldObservations {
         size += 8;
         size += 8;
         size += 4;
-        for v0 in self.observations.iter() {
+        for v0 in self.cbor_key_values.iter() {
+            size += v0.encoded_size();
+        }
+        size += 4;
+        for v0 in self.positions.iter() {
             size += v0.encoded_size();
         }
         size
