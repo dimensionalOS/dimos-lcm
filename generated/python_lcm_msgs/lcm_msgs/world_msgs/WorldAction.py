@@ -9,6 +9,7 @@ import sys
 
 from . import *
 from .JointCommand import JointCommand
+from .CborKeyValueCommand import CborKeyValueCommand
 
 
 class WorldAction(object):
@@ -16,18 +17,49 @@ class WorldAction(object):
 
     msg_name = "world_msgs.WorldAction"
 
-    __slots__ = ["ts", "frame", "joint_commands_length", "joint_commands"]
+    __slots__ = [
+        "ts",
+        "frame",
+        "joint_commands_length",
+        "joint_commands",
+        "cbor_key_value_commands_length",
+        "cbor_key_value_commands",
+    ]
 
-    __typenames__ = ["int64_t", "int64_t", "int32_t", "JointCommand"]
+    __typenames__ = [
+        "int64_t",
+        "int64_t",
+        "int32_t",
+        "JointCommand",
+        "int32_t",
+        "CborKeyValueCommand",
+    ]
 
-    __dimensions__ = [None, None, None, ["joint_commands_length"]]
+    __dimensions__ = [
+        None,
+        None,
+        None,
+        ["joint_commands_length"],
+        None,
+        ["cbor_key_value_commands_length"],
+    ]
 
     ts: "int64_t"
     frame: "int64_t"
     joint_commands_length: "int32_t"
     joint_commands: JointCommand
+    cbor_key_value_commands_length: "int32_t"
+    cbor_key_value_commands: CborKeyValueCommand
 
-    def __init__(self, ts=0, frame=0, joint_commands_length=0, joint_commands=[]):
+    def __init__(
+        self,
+        ts=0,
+        frame=0,
+        joint_commands_length=0,
+        joint_commands=[],
+        cbor_key_value_commands_length=0,
+        cbor_key_value_commands=[],
+    ):
         """
         The ts and frame of the WorldObservations it was decided from.
         LCM Type: int64_t
@@ -39,6 +71,10 @@ class WorldAction(object):
         self.joint_commands_length = joint_commands_length
         # LCM Type: JointCommand[joint_commands_length]
         self.joint_commands = joint_commands
+        # LCM Type: int32_t
+        self.cbor_key_value_commands_length = cbor_key_value_commands_length
+        # LCM Type: CborKeyValueCommand[cbor_key_value_commands_length]
+        self.cbor_key_value_commands = cbor_key_value_commands
 
     def lcm_encode(self):
         buf = BytesIO()
@@ -54,6 +90,13 @@ class WorldAction(object):
                 == JointCommand._get_packed_fingerprint()
             )
             self.joint_commands[i0]._encode_one(buf)
+        buf.write(struct.pack(">i", self.cbor_key_value_commands_length))
+        for i0 in range(self.cbor_key_value_commands_length):
+            assert (
+                self.cbor_key_value_commands[i0]._get_packed_fingerprint()
+                == CborKeyValueCommand._get_packed_fingerprint()
+            )
+            self.cbor_key_value_commands[i0]._encode_one(buf)
 
     @classmethod
     def lcm_decode(cls, data: bytes):
@@ -76,6 +119,12 @@ class WorldAction(object):
             self.joint_commands.append(
                 cls._get_field_type("joint_commands")._decode_one(buf)
             )
+        self.cbor_key_value_commands_length = struct.unpack(">i", buf.read(4))[0]
+        self.cbor_key_value_commands = []
+        for i0 in range(self.cbor_key_value_commands_length):
+            self.cbor_key_value_commands.append(
+                cls._get_field_type("cbor_key_value_commands")._decode_one(buf)
+            )
         return self
 
     @classmethod
@@ -97,7 +146,9 @@ class WorldAction(object):
             return 0
         newparents = parents + [cls]
         tmphash = (
-            0xD0D09ABA7AADB488 + JointCommand._get_hash_recursive(newparents)
+            0xBC2C7A0C0DE1AEC0
+            + JointCommand._get_hash_recursive(newparents)
+            + CborKeyValueCommand._get_hash_recursive(newparents)
         ) & 0xFFFFFFFFFFFFFFFF
         tmphash = (
             ((tmphash << 1) & 0xFFFFFFFFFFFFFFFF) + (tmphash >> 63)

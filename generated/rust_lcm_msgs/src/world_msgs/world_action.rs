@@ -9,10 +9,11 @@ pub struct WorldAction {
     pub ts: i64,
     pub frame: i64,
     pub joint_commands: Vec<crate::world_msgs::JointCommand>,
+    pub cbor_key_value_commands: Vec<crate::world_msgs::CborKeyValueCommand>,
 }
 
 impl WorldAction {
-    pub const HASH: i64 = 0xD0D09ABA7AADB488u64 as i64;
+    pub const HASH: i64 = 0xBC2C7A0C0DE1AEC0u64 as i64;
     pub const NAME: &str = "world_msgs.WorldAction";
 
     fn packed_fingerprint() -> u64 {
@@ -28,6 +29,7 @@ impl WorldAction {
         parents.push(self_hash);
         let mut tmphash = self_hash as u64;
         tmphash = tmphash.wrapping_add(crate::world_msgs::JointCommand::hash_recursive(parents));
+        tmphash = tmphash.wrapping_add(crate::world_msgs::CborKeyValueCommand::hash_recursive(parents));
         parents.pop();
         // rotate left by 1
         tmphash << 1 | tmphash >> 63
@@ -58,6 +60,10 @@ impl WorldAction {
         for v0 in self.joint_commands.iter() {
             v0.encode_one(buf)?;
         }
+        buf.write_i32::<BigEndian>(self.cbor_key_value_commands.len() as i32)?;
+        for v0 in self.cbor_key_value_commands.iter() {
+            v0.encode_one(buf)?;
+        }
         Ok(())
     }
 
@@ -73,10 +79,20 @@ impl WorldAction {
             }
             v
         };
+        let cbor_key_value_commands_length = buf.read_i32::<BigEndian>()? as usize;
+        let cbor_key_value_commands = {
+            let mut v = Vec::with_capacity(cbor_key_value_commands_length);
+            for _ in 0..cbor_key_value_commands_length {
+                let _elem_0 = crate::world_msgs::CborKeyValueCommand::decode_one(buf)?;
+                v.push(_elem_0);
+            }
+            v
+        };
         Ok(Self {
             ts,
             frame,
             joint_commands,
+            cbor_key_value_commands,
         })
     }
 
@@ -86,6 +102,10 @@ impl WorldAction {
         size += 8;
         size += 4;
         for v0 in self.joint_commands.iter() {
+            size += v0.encoded_size();
+        }
+        size += 4;
+        for v0 in self.cbor_key_value_commands.iter() {
             size += v0.encoded_size();
         }
         size

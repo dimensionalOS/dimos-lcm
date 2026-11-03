@@ -7,4 +7,6 @@ struct WorldAction {
     int64_t frame;
     int32_t joint_commands_length;
     world_msgs.JointCommand joint_commands[joint_commands_length];
+    int32_t cbor_key_value_commands_length;
+    world_msgs.CborKeyValueCommand cbor_key_value_commands[cbor_key_value_commands_length];
 }

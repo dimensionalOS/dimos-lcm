@@ -3,6 +3,9 @@
 mod cbor_key_value;
 pub use cbor_key_value::CborKeyValue;
 
+mod cbor_key_value_command;
+pub use cbor_key_value_command::CborKeyValueCommand;
+
 mod joint_command;
 pub use joint_command::JointCommand;
 

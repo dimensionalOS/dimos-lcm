@@ -8,9 +8,9 @@ import struct
 import sys
 
 from . import *
-from .Position import Position
-from .JointState import JointState
 from .CborKeyValue import CborKeyValue
+from .JointState import JointState
+from .Position import Position
 
 
 class WorldObservations(object):

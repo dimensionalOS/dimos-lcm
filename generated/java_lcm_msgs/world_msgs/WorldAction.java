@@ -29,13 +29,20 @@ public final class WorldAction implements lcm.lcm.LCMEncodable
      */
     public world_msgs.JointCommand joint_commands[];
 
+    public int cbor_key_value_commands_length;
+
+    /**
+     * LCM Type: world_msgs.CborKeyValueCommand[cbor_key_value_commands_length]
+     */
+    public world_msgs.CborKeyValueCommand cbor_key_value_commands[];
+
  
     public WorldAction()
     {
     }
  
     public static final long LCM_FINGERPRINT;
-    public static final long LCM_FINGERPRINT_BASE = 0xd0d09aba7aadb488L;
+    public static final long LCM_FINGERPRINT_BASE = 0xbc2c7a0c0de1aec0L;
  
     static {
         LCM_FINGERPRINT = _hashRecursive(new ArrayList<Class<?>>());
@@ -49,6 +56,7 @@ public final class WorldAction implements lcm.lcm.LCMEncodable
         classes.add(world_msgs.WorldAction.class);
         long hash = LCM_FINGERPRINT_BASE
              + world_msgs.JointCommand._hashRecursive(classes)
+             + world_msgs.CborKeyValueCommand._hashRecursive(classes)
             ;
         classes.remove(classes.size() - 1);
         return (hash<<1) + ((hash>>63)&1);
@@ -70,6 +78,12 @@ public final class WorldAction implements lcm.lcm.LCMEncodable
  
         for (int a = 0; a < this.joint_commands_length; a++) {
             this.joint_commands[a]._encodeRecursive(outs); 
+        }
+ 
+        outs.writeInt(this.cbor_key_value_commands_length); 
+ 
+        for (int a = 0; a < this.cbor_key_value_commands_length; a++) {
+            this.cbor_key_value_commands[a]._encodeRecursive(outs); 
         }
  
     }
@@ -107,6 +121,13 @@ public final class WorldAction implements lcm.lcm.LCMEncodable
             this.joint_commands[a] = world_msgs.JointCommand._decodeRecursiveFactory(ins);
         }
  
+        this.cbor_key_value_commands_length = ins.readInt();
+ 
+        this.cbor_key_value_commands = new world_msgs.CborKeyValueCommand[(int) cbor_key_value_commands_length];
+        for (int a = 0; a < this.cbor_key_value_commands_length; a++) {
+            this.cbor_key_value_commands[a] = world_msgs.CborKeyValueCommand._decodeRecursiveFactory(ins);
+        }
+ 
     }
  
     public world_msgs.WorldAction copy()
@@ -121,6 +142,13 @@ public final class WorldAction implements lcm.lcm.LCMEncodable
         outobj.joint_commands = new world_msgs.JointCommand[(int) joint_commands_length];
         for (int a = 0; a < this.joint_commands_length; a++) {
             outobj.joint_commands[a] = this.joint_commands[a].copy();
+        }
+ 
+        outobj.cbor_key_value_commands_length = this.cbor_key_value_commands_length;
+ 
+        outobj.cbor_key_value_commands = new world_msgs.CborKeyValueCommand[(int) cbor_key_value_commands_length];
+        for (int a = 0; a < this.cbor_key_value_commands_length; a++) {
+            outobj.cbor_key_value_commands[a] = this.cbor_key_value_commands[a].copy();
         }
  
         return outobj;

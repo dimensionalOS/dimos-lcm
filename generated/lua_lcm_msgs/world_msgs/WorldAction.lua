@@ -7,6 +7,7 @@ DO NOT MODIFY BY HAND!!!!
 local lcm = require('lcm')
 
 local world_msgs_JointCommand = require('world_msgs.JointCommand')
+local world_msgs_CborKeyValueCommand = require('world_msgs.CborKeyValueCommand')
 
 local setmetatable = setmetatable
 local ipairs = ipairs
@@ -53,6 +54,8 @@ function WorldAction:new()
   obj.frame = 0
   obj.joint_commands_length = 0
   obj.joint_commands = {}
+  obj.cbor_key_value_commands_length = 0
+  obj.cbor_key_value_commands = {}
 
   setmetatable(obj, self)
 
@@ -70,8 +73,9 @@ function WorldAction._get_hash_recursive(parents)
 
   table.insert(newparents, WorldAction)
 
-  local hash = lcm._hash.new('0xd0d09aba7aadb488')
+  local hash = lcm._hash.new('0xbc2c7a0c0de1aec0')
     + world_msgs_JointCommand._get_hash_recursive(newparents)
+    + world_msgs_CborKeyValueCommand._get_hash_recursive(newparents)
   hash:rotate(1)
 
   return hash
@@ -91,6 +95,10 @@ function WorldAction:_encode_one()
   table.insert(buf_table, lcm._pack.pack('>qqi', self.ts, self.frame, self.joint_commands_length))
   for i0 = 1, self.joint_commands_length do
     table.insert(buf_table, self.joint_commands[i0]:_encode_one())
+  end
+  table.insert(buf_table, lcm._pack.pack('>i', self.cbor_key_value_commands_length))
+  for i0 = 1, self.cbor_key_value_commands_length do
+    table.insert(buf_table, self.cbor_key_value_commands[i0]:_encode_one())
   end
 
   return table.concat(buf_table)
@@ -117,6 +125,11 @@ function WorldAction._decode_one(data)
   obj.joint_commands = {}
   for i0 = 1, obj.joint_commands_length do
     obj.joint_commands[i0] = world_msgs_JointCommand._decode_one(data)
+  end
+  obj.cbor_key_value_commands_length = lcm._pack.unpack('>i', data:read(4))
+  obj.cbor_key_value_commands = {}
+  for i0 = 1, obj.cbor_key_value_commands_length do
+    obj.cbor_key_value_commands[i0] = world_msgs_CborKeyValueCommand._decode_one(data)
   end
 
   return obj

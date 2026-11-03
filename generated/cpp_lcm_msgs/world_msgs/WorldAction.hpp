@@ -11,6 +11,7 @@
 
 #include <vector>
 #include "world_msgs/JointCommand.hpp"
+#include "world_msgs/CborKeyValueCommand.hpp"
 
 namespace world_msgs
 {
@@ -32,6 +33,13 @@ class WorldAction
          * LCM Type: world_msgs.JointCommand[joint_commands_length]
          */
         std::vector< world_msgs::JointCommand > joint_commands;
+
+        int32_t    cbor_key_value_commands_length;
+
+        /**
+         * LCM Type: world_msgs.CborKeyValueCommand[cbor_key_value_commands_length]
+         */
+        std::vector< world_msgs::CborKeyValueCommand > cbor_key_value_commands;
 
     public:
         /**
@@ -143,6 +151,14 @@ int WorldAction::_encodeNoHash(void *buf, int offset, int maxlen) const
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
+    tlen = __int32_t_encode_array(buf, offset + pos, maxlen - pos, &this->cbor_key_value_commands_length, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
+    for (int a0 = 0; a0 < this->cbor_key_value_commands_length; a0++) {
+        tlen = this->cbor_key_value_commands[a0]._encodeNoHash(buf, offset + pos, maxlen - pos);
+        if(tlen < 0) return tlen; else pos += tlen;
+    }
+
     return pos;
 }
 
@@ -169,6 +185,19 @@ int WorldAction::_decodeNoHash(const void *buf, int offset, int maxlen)
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
+    tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->cbor_key_value_commands_length, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
+    try {
+        this->cbor_key_value_commands.resize(this->cbor_key_value_commands_length);
+    } catch (...) {
+        return -1;
+    }
+    for (int a0 = 0; a0 < this->cbor_key_value_commands_length; a0++) {
+        tlen = this->cbor_key_value_commands[a0]._decodeNoHash(buf, offset + pos, maxlen - pos);
+        if(tlen < 0) return tlen; else pos += tlen;
+    }
+
     return pos;
 }
 
@@ -181,6 +210,10 @@ int WorldAction::_getEncodedSizeNoHash() const
     for (int a0 = 0; a0 < this->joint_commands_length; a0++) {
         enc_size += this->joint_commands[a0]._getEncodedSizeNoHash();
     }
+    enc_size += __int32_t_encoded_array_size(NULL, 1);
+    for (int a0 = 0; a0 < this->cbor_key_value_commands_length; a0++) {
+        enc_size += this->cbor_key_value_commands[a0]._getEncodedSizeNoHash();
+    }
     return enc_size;
 }
 
@@ -192,8 +225,9 @@ uint64_t WorldAction::_computeHash(const __lcm_hash_ptr *p)
             return 0;
     const __lcm_hash_ptr cp = { p, WorldAction::getHash };
 
-    uint64_t hash = 0xd0d09aba7aadb488LL +
-         world_msgs::JointCommand::_computeHash(&cp);
+    uint64_t hash = 0xbc2c7a0c0de1aec0LL +
+         world_msgs::JointCommand::_computeHash(&cp) +
+         world_msgs::CborKeyValueCommand::_computeHash(&cp);
 
     return (hash<<1) + ((hash>>63)&1);
 }

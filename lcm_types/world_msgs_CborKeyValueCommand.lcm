@@ -1,0 +1,10 @@
+package world_msgs;
+
+// Set one key of an entity's CBOR data; what it does is the sim's (a kinematic base's "base_velocity").
+struct CborKeyValueCommand {
+    // 0 is the world.
+    int64_t entity_id;
+    string key;
+    int32_t value_length;
+    byte value[value_length];
+}
