@@ -7,11 +7,11 @@ use std::sync::OnceLock;
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct Position {
     pub entity_id: i64,
-    pub values: Vec<f64>,
+    pub pose: [f64; 7],
 }
 
 impl Position {
-    pub const HASH: i64 = 0xE262A26E4667CE0Cu64 as i64;
+    pub const HASH: i64 = 0x361A9C0D7EAB0B34u64 as i64;
     pub const NAME: &str = "world_msgs.Position";
 
     fn packed_fingerprint() -> u64 {
@@ -51,8 +51,7 @@ impl Position {
 
     pub fn encode_one<W: Write>(&self, buf: &mut W) -> io::Result<()> {
         buf.write_i64::<BigEndian>(self.entity_id)?;
-        buf.write_i32::<BigEndian>(self.values.len() as i32)?;
-        for v0 in self.values.iter() {
+        for v0 in self.pose.iter() {
             buf.write_f64::<BigEndian>(*v0)?;
         }
         Ok(())
@@ -60,26 +59,23 @@ impl Position {
 
     pub fn decode_one<R: Read>(buf: &mut R) -> io::Result<Self> {
         let entity_id = buf.read_i64::<BigEndian>()?;
-        let values_length = buf.read_i32::<BigEndian>()? as usize;
-        let values = {
-            let mut v = Vec::with_capacity(values_length);
-            for _ in 0..values_length {
-                let _elem_0 = buf.read_f64::<BigEndian>()?;
-                v.push(_elem_0);
+        let pose = {
+            let mut _arr_0 = [0.0f64; 7];
+            for elem in _arr_0.iter_mut() {
+                *elem = buf.read_f64::<BigEndian>()?;
             }
-            v
+            _arr_0
         };
         Ok(Self {
             entity_id,
-            values,
+            pose,
         })
     }
 
     pub fn encoded_size(&self) -> usize {
         let mut size = 0usize;
         size += 8;
-        size += 4;
-        size += self.values.len() * 8;
+        size += self.pose.len() * 8;
         size
     }
 

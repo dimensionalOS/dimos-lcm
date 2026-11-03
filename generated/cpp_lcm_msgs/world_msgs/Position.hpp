@@ -9,23 +9,20 @@
 
 #include <lcm/lcm_coretypes.h>
 
-#include <vector>
 
 namespace world_msgs
 {
 
-/// Where an entity is. A body: x, y, z, qx, qy, qz, qw in the world frame. A joint: its position (rad or m).
+/// Where a body is: x, y, z, qx, qy, qz, qw in the world frame.
 class Position
 {
     public:
         int64_t    entity_id;
 
-        int32_t    values_length;
-
         /**
-         * LCM Type: double[values_length]
+         * LCM Type: double[7]
          */
-        std::vector< double > values;
+        double     pose[7];
 
     public:
         /**
@@ -126,13 +123,8 @@ int Position::_encodeNoHash(void *buf, int offset, int maxlen) const
     tlen = __int64_t_encode_array(buf, offset + pos, maxlen - pos, &this->entity_id, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    tlen = __int32_t_encode_array(buf, offset + pos, maxlen - pos, &this->values_length, 1);
+    tlen = __double_encode_array(buf, offset + pos, maxlen - pos, &this->pose[0], 7);
     if(tlen < 0) return tlen; else pos += tlen;
-
-    if(this->values_length > 0) {
-        tlen = __double_encode_array(buf, offset + pos, maxlen - pos, &this->values[0], this->values_length);
-        if(tlen < 0) return tlen; else pos += tlen;
-    }
 
     return pos;
 }
@@ -144,14 +136,8 @@ int Position::_decodeNoHash(const void *buf, int offset, int maxlen)
     tlen = __int64_t_decode_array(buf, offset + pos, maxlen - pos, &this->entity_id, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->values_length, 1);
+    tlen = __double_decode_array(buf, offset + pos, maxlen - pos, &this->pose[0], 7);
     if(tlen < 0) return tlen; else pos += tlen;
-
-    if(this->values_length) {
-        this->values.resize(this->values_length);
-        tlen = __double_decode_array(buf, offset + pos, maxlen - pos, &this->values[0], this->values_length);
-        if(tlen < 0) return tlen; else pos += tlen;
-    }
 
     return pos;
 }
@@ -160,14 +146,13 @@ int Position::_getEncodedSizeNoHash() const
 {
     int enc_size = 0;
     enc_size += __int64_t_encoded_array_size(NULL, 1);
-    enc_size += __int32_t_encoded_array_size(NULL, 1);
-    enc_size += __double_encoded_array_size(NULL, this->values_length);
+    enc_size += __double_encoded_array_size(NULL, 7);
     return enc_size;
 }
 
 uint64_t Position::_computeHash(const __lcm_hash_ptr *)
 {
-    uint64_t hash = 0xe262a26e4667ce0cLL;
+    uint64_t hash = 0x361a9c0d7eab0b34LL;
     return (hash<<1) + ((hash>>63)&1);
 }
 

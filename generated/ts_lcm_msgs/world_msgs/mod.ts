@@ -2,6 +2,7 @@
 
 export * from "./CborKeyValue.ts";
 export * from "./JointCommand.ts";
+export * from "./JointState.ts";
 export * from "./Position.ts";
 export * from "./WorldAction.ts";
 export * from "./WorldObservations.ts";

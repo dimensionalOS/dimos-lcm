@@ -8,8 +8,9 @@ import struct
 import sys
 
 from . import *
-from .CborKeyValue import CborKeyValue
 from .Position import Position
+from .JointState import JointState
+from .CborKeyValue import CborKeyValue
 
 
 class WorldObservations(object):
@@ -27,6 +28,8 @@ class WorldObservations(object):
         "cbor_key_values",
         "positions_length",
         "positions",
+        "joint_states_length",
+        "joint_states",
     ]
 
     __typenames__ = [
@@ -36,6 +39,8 @@ class WorldObservations(object):
         "CborKeyValue",
         "int32_t",
         "Position",
+        "int32_t",
+        "JointState",
     ]
 
     __dimensions__ = [
@@ -45,6 +50,8 @@ class WorldObservations(object):
         ["cbor_key_values_length"],
         None,
         ["positions_length"],
+        None,
+        ["joint_states_length"],
     ]
 
     ts: "int64_t"
@@ -53,6 +60,8 @@ class WorldObservations(object):
     cbor_key_values: CborKeyValue
     positions_length: "int32_t"
     positions: Position
+    joint_states_length: "int32_t"
+    joint_states: JointState
 
     def __init__(
         self,
@@ -62,6 +71,8 @@ class WorldObservations(object):
         cbor_key_values=[],
         positions_length=0,
         positions=[],
+        joint_states_length=0,
+        joint_states=[],
     ):
         """
         Sim time plus the wall time the sim started at, nanoseconds.
@@ -78,6 +89,10 @@ class WorldObservations(object):
         self.positions_length = positions_length
         # LCM Type: Position[positions_length]
         self.positions = positions
+        # LCM Type: int32_t
+        self.joint_states_length = joint_states_length
+        # LCM Type: JointState[joint_states_length]
+        self.joint_states = joint_states
 
     def lcm_encode(self):
         buf = BytesIO()
@@ -100,6 +115,13 @@ class WorldObservations(object):
                 == Position._get_packed_fingerprint()
             )
             self.positions[i0]._encode_one(buf)
+        buf.write(struct.pack(">i", self.joint_states_length))
+        for i0 in range(self.joint_states_length):
+            assert (
+                self.joint_states[i0]._get_packed_fingerprint()
+                == JointState._get_packed_fingerprint()
+            )
+            self.joint_states[i0]._encode_one(buf)
 
     @classmethod
     def lcm_decode(cls, data: bytes):
@@ -126,6 +148,12 @@ class WorldObservations(object):
         self.positions = []
         for i0 in range(self.positions_length):
             self.positions.append(cls._get_field_type("positions")._decode_one(buf))
+        self.joint_states_length = struct.unpack(">i", buf.read(4))[0]
+        self.joint_states = []
+        for i0 in range(self.joint_states_length):
+            self.joint_states.append(
+                cls._get_field_type("joint_states")._decode_one(buf)
+            )
         return self
 
     @classmethod
@@ -147,9 +175,10 @@ class WorldObservations(object):
             return 0
         newparents = parents + [cls]
         tmphash = (
-            0x6D8086B772008358
+            0xF07BDBA174EAA931
             + CborKeyValue._get_hash_recursive(newparents)
             + Position._get_hash_recursive(newparents)
+            + JointState._get_hash_recursive(newparents)
         ) & 0xFFFFFFFFFFFFFFFF
         tmphash = (
             ((tmphash << 1) & 0xFFFFFFFFFFFFFFFF) + (tmphash >> 63)

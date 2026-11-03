@@ -8,6 +8,7 @@ lcm-gen 1.5.2
 local M = {}
 
 M.WorldObservations = require('world_msgs.WorldObservations')
+M.JointState = require('world_msgs.JointState')
 M.Position = require('world_msgs.Position')
 M.CborKeyValue = require('world_msgs.CborKeyValue')
 M.WorldAction = require('world_msgs.WorldAction')

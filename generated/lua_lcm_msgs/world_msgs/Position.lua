@@ -48,8 +48,10 @@ function Position:new()
   local obj = {}
 
   obj.entity_id = 0
-  obj.values_length = 0
-  obj.values = {}
+  obj.pose = {}
+  for d0 = 1, 7 do
+    obj.pose[d0] = 0.0
+  end
 
   setmetatable(obj, self)
 
@@ -67,7 +69,7 @@ function Position._get_hash_recursive(parents)
 
   table.insert(newparents, Position)
 
-  local hash = lcm._hash.new('0xe262a26e4667ce0c')
+  local hash = lcm._hash.new('0x361a9c0d7eab0b34')
   hash:rotate(1)
 
   return hash
@@ -84,8 +86,8 @@ function Position:_encode_one()
 
   local buf_table = {}
 
-  table.insert(buf_table, lcm._pack.pack('>qi', self.entity_id, self.values_length))
-  table.insert(buf_table, lcm._pack.pack(string.format('>%dd', self.values_length), unpack(self.values)))
+  table.insert(buf_table, lcm._pack.pack('>q', self.entity_id))
+  table.insert(buf_table, lcm._pack.pack('>7d', unpack(self.pose)))
 
   return table.concat(buf_table)
 end
@@ -107,8 +109,8 @@ function Position._decode_one(data)
 
   local obj = Position:new()
 
-  obj.entity_id, obj.values_length = lcm._pack.unpack('>qi', data:read(12))
-  obj.values = {lcm._pack.unpack(string.format('>%dd', obj.values_length), data:read(obj.values_length * 8))}
+  obj.entity_id = lcm._pack.unpack('>q', data:read(8))
+  obj.pose = {lcm._pack.unpack('>7d', data:read(56))}
 
   return obj
 end

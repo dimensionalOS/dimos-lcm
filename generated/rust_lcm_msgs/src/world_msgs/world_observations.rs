@@ -10,10 +10,11 @@ pub struct WorldObservations {
     pub frame: i64,
     pub cbor_key_values: Vec<crate::world_msgs::CborKeyValue>,
     pub positions: Vec<crate::world_msgs::Position>,
+    pub joint_states: Vec<crate::world_msgs::JointState>,
 }
 
 impl WorldObservations {
-    pub const HASH: i64 = 0x6D8086B772008358u64 as i64;
+    pub const HASH: i64 = 0xF07BDBA174EAA931u64 as i64;
     pub const NAME: &str = "world_msgs.WorldObservations";
 
     fn packed_fingerprint() -> u64 {
@@ -30,6 +31,7 @@ impl WorldObservations {
         let mut tmphash = self_hash as u64;
         tmphash = tmphash.wrapping_add(crate::world_msgs::CborKeyValue::hash_recursive(parents));
         tmphash = tmphash.wrapping_add(crate::world_msgs::Position::hash_recursive(parents));
+        tmphash = tmphash.wrapping_add(crate::world_msgs::JointState::hash_recursive(parents));
         parents.pop();
         // rotate left by 1
         tmphash << 1 | tmphash >> 63
@@ -64,6 +66,10 @@ impl WorldObservations {
         for v0 in self.positions.iter() {
             v0.encode_one(buf)?;
         }
+        buf.write_i32::<BigEndian>(self.joint_states.len() as i32)?;
+        for v0 in self.joint_states.iter() {
+            v0.encode_one(buf)?;
+        }
         Ok(())
     }
 
@@ -88,11 +94,21 @@ impl WorldObservations {
             }
             v
         };
+        let joint_states_length = buf.read_i32::<BigEndian>()? as usize;
+        let joint_states = {
+            let mut v = Vec::with_capacity(joint_states_length);
+            for _ in 0..joint_states_length {
+                let _elem_0 = crate::world_msgs::JointState::decode_one(buf)?;
+                v.push(_elem_0);
+            }
+            v
+        };
         Ok(Self {
             ts,
             frame,
             cbor_key_values,
             positions,
+            joint_states,
         })
     }
 
@@ -106,6 +122,10 @@ impl WorldObservations {
         }
         size += 4;
         for v0 in self.positions.iter() {
+            size += v0.encoded_size();
+        }
+        size += 4;
+        for v0 in self.joint_states.iter() {
             size += v0.encoded_size();
         }
         size

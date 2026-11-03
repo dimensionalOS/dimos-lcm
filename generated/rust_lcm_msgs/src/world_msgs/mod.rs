@@ -6,6 +6,9 @@ pub use cbor_key_value::CborKeyValue;
 mod joint_command;
 pub use joint_command::JointCommand;
 
+mod joint_state;
+pub use joint_state::JointState;
+
 mod position;
 pub use position::Position;
 

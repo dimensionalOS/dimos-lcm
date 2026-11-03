@@ -10,4 +10,6 @@ struct WorldObservations {
     world_msgs.CborKeyValue cbor_key_values[cbor_key_values_length];
     int32_t positions_length;
     world_msgs.Position positions[positions_length];
+    int32_t joint_states_length;
+    world_msgs.JointState joint_states[joint_states_length];
 }

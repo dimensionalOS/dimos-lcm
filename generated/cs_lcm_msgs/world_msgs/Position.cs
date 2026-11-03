@@ -13,15 +13,15 @@ namespace world_msgs
     public sealed class Position : LCM.LCM.LCMEncodable
     {
         public long entity_id;
-        public int values_length;
-        public double[] values;
+        public double[] pose;
  
         public Position()
         {
+            pose = new double[7];
         }
  
         public static readonly ulong LCM_FINGERPRINT;
-        public static readonly ulong LCM_FINGERPRINT_BASE = 0xe262a26e4667ce0cL;
+        public static readonly ulong LCM_FINGERPRINT_BASE = 0x361a9c0d7eab0b34L;
  
         static Position()
         {
@@ -50,10 +50,8 @@ namespace world_msgs
         {
             outs.Write(this.entity_id); 
  
-            outs.Write(this.values_length); 
- 
-            for (int a = 0; a < this.values_length; a++) {
-                outs.Write(this.values[a]); 
+            for (int a = 0; a < 7; a++) {
+                outs.Write(this.pose[a]); 
             }
  
         }
@@ -81,11 +79,9 @@ namespace world_msgs
         {
             this.entity_id = ins.ReadInt64();
  
-            this.values_length = ins.ReadInt32();
- 
-            this.values = new double[(int) values_length];
-            for (int a = 0; a < this.values_length; a++) {
-                this.values[a] = ins.ReadDouble();
+            this.pose = new double[(int) 7];
+            for (int a = 0; a < 7; a++) {
+                this.pose[a] = ins.ReadDouble();
             }
  
         }
@@ -95,11 +91,9 @@ namespace world_msgs
             world_msgs.Position outobj = new world_msgs.Position();
             outobj.entity_id = this.entity_id;
  
-            outobj.values_length = this.values_length;
- 
-            outobj.values = new double[(int) values_length];
-            for (int a = 0; a < this.values_length; a++) {
-                outobj.values[a] = this.values[a];
+            outobj.pose = new double[(int) 7];
+            for (int a = 0; a < 7; a++) {
+                outobj.pose[a] = this.pose[a];
             }
  
             return outobj;

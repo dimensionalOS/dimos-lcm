@@ -18,13 +18,15 @@ namespace world_msgs
         public world_msgs.CborKeyValue[] cbor_key_values;
         public int positions_length;
         public world_msgs.Position[] positions;
+        public int joint_states_length;
+        public world_msgs.JointState[] joint_states;
  
         public WorldObservations()
         {
         }
  
         public static readonly ulong LCM_FINGERPRINT;
-        public static readonly ulong LCM_FINGERPRINT_BASE = 0x6d8086b772008358L;
+        public static readonly ulong LCM_FINGERPRINT_BASE = 0xf07bdba174eaa931L;
  
         static WorldObservations()
         {
@@ -40,6 +42,7 @@ namespace world_msgs
             ulong hash = LCM_FINGERPRINT_BASE
                  + world_msgs.CborKeyValue._hashRecursive(classes)
                  + world_msgs.Position._hashRecursive(classes)
+                 + world_msgs.JointState._hashRecursive(classes)
                 ;
             classes.RemoveAt(classes.Count - 1);
             return (hash<<1) + ((hash>>63)&1);
@@ -67,6 +70,12 @@ namespace world_msgs
  
             for (int a = 0; a < this.positions_length; a++) {
                 this.positions[a]._encodeRecursive(outs); 
+            }
+ 
+            outs.Write(this.joint_states_length); 
+ 
+            for (int a = 0; a < this.joint_states_length; a++) {
+                this.joint_states[a]._encodeRecursive(outs); 
             }
  
         }
@@ -110,6 +119,13 @@ namespace world_msgs
                 this.positions[a] = world_msgs.Position._decodeRecursiveFactory(ins);
             }
  
+            this.joint_states_length = ins.ReadInt32();
+ 
+            this.joint_states = new world_msgs.JointState[(int) joint_states_length];
+            for (int a = 0; a < this.joint_states_length; a++) {
+                this.joint_states[a] = world_msgs.JointState._decodeRecursiveFactory(ins);
+            }
+ 
         }
  
         public world_msgs.WorldObservations Copy()
@@ -131,6 +147,13 @@ namespace world_msgs
             outobj.positions = new world_msgs.Position[(int) positions_length];
             for (int a = 0; a < this.positions_length; a++) {
                 outobj.positions[a] = this.positions[a].Copy();
+            }
+ 
+            outobj.joint_states_length = this.joint_states_length;
+ 
+            outobj.joint_states = new world_msgs.JointState[(int) joint_states_length];
+            for (int a = 0; a < this.joint_states_length; a++) {
+                outobj.joint_states[a] = this.joint_states[a].Copy();
             }
  
             return outobj;

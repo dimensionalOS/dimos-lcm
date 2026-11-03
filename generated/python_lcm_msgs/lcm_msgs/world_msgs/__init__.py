@@ -6,6 +6,7 @@ lcm-gen 1.5.2
 
 from .CborKeyValue import CborKeyValue as CborKeyValue
 from .WorldAction import WorldAction as WorldAction
+from .JointState import JointState as JointState
 from .Position import Position as Position
 from .WorldObservations import WorldObservations as WorldObservations
 from .JointCommand import JointCommand as JointCommand

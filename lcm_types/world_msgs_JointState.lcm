@@ -1,0 +1,11 @@
+package world_msgs;
+
+// What a joint measures.
+struct JointState {
+    int64_t entity_id;
+    // rad or m
+    double position;
+    double velocity;
+    // N*m or N
+    double effort;
+}

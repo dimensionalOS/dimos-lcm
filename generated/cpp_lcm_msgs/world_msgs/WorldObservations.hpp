@@ -12,6 +12,7 @@
 #include <vector>
 #include "world_msgs/CborKeyValue.hpp"
 #include "world_msgs/Position.hpp"
+#include "world_msgs/JointState.hpp"
 
 namespace world_msgs
 {
@@ -43,6 +44,13 @@ class WorldObservations
          * LCM Type: world_msgs.Position[positions_length]
          */
         std::vector< world_msgs::Position > positions;
+
+        int32_t    joint_states_length;
+
+        /**
+         * LCM Type: world_msgs.JointState[joint_states_length]
+         */
+        std::vector< world_msgs::JointState > joint_states;
 
     public:
         /**
@@ -162,6 +170,14 @@ int WorldObservations::_encodeNoHash(void *buf, int offset, int maxlen) const
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
+    tlen = __int32_t_encode_array(buf, offset + pos, maxlen - pos, &this->joint_states_length, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
+    for (int a0 = 0; a0 < this->joint_states_length; a0++) {
+        tlen = this->joint_states[a0]._encodeNoHash(buf, offset + pos, maxlen - pos);
+        if(tlen < 0) return tlen; else pos += tlen;
+    }
+
     return pos;
 }
 
@@ -201,6 +217,19 @@ int WorldObservations::_decodeNoHash(const void *buf, int offset, int maxlen)
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
+    tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->joint_states_length, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
+    try {
+        this->joint_states.resize(this->joint_states_length);
+    } catch (...) {
+        return -1;
+    }
+    for (int a0 = 0; a0 < this->joint_states_length; a0++) {
+        tlen = this->joint_states[a0]._decodeNoHash(buf, offset + pos, maxlen - pos);
+        if(tlen < 0) return tlen; else pos += tlen;
+    }
+
     return pos;
 }
 
@@ -217,6 +246,10 @@ int WorldObservations::_getEncodedSizeNoHash() const
     for (int a0 = 0; a0 < this->positions_length; a0++) {
         enc_size += this->positions[a0]._getEncodedSizeNoHash();
     }
+    enc_size += __int32_t_encoded_array_size(NULL, 1);
+    for (int a0 = 0; a0 < this->joint_states_length; a0++) {
+        enc_size += this->joint_states[a0]._getEncodedSizeNoHash();
+    }
     return enc_size;
 }
 
@@ -228,9 +261,10 @@ uint64_t WorldObservations::_computeHash(const __lcm_hash_ptr *p)
             return 0;
     const __lcm_hash_ptr cp = { p, WorldObservations::getHash };
 
-    uint64_t hash = 0x6d8086b772008358LL +
+    uint64_t hash = 0xf07bdba174eaa931LL +
          world_msgs::CborKeyValue::_computeHash(&cp) +
-         world_msgs::Position::_computeHash(&cp);
+         world_msgs::Position::_computeHash(&cp) +
+         world_msgs::JointState::_computeHash(&cp);
 
     return (hash<<1) + ((hash>>63)&1);
 }

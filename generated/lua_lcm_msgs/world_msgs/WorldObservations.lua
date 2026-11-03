@@ -7,6 +7,7 @@ DO NOT MODIFY BY HAND!!!!
 local lcm = require('lcm')
 
 local world_msgs_Position = require('world_msgs.Position')
+local world_msgs_JointState = require('world_msgs.JointState')
 local world_msgs_CborKeyValue = require('world_msgs.CborKeyValue')
 
 local setmetatable = setmetatable
@@ -56,6 +57,8 @@ function WorldObservations:new()
   obj.cbor_key_values = {}
   obj.positions_length = 0
   obj.positions = {}
+  obj.joint_states_length = 0
+  obj.joint_states = {}
 
   setmetatable(obj, self)
 
@@ -73,9 +76,10 @@ function WorldObservations._get_hash_recursive(parents)
 
   table.insert(newparents, WorldObservations)
 
-  local hash = lcm._hash.new('0x6d8086b772008358')
+  local hash = lcm._hash.new('0xf07bdba174eaa931')
     + world_msgs_CborKeyValue._get_hash_recursive(newparents)
     + world_msgs_Position._get_hash_recursive(newparents)
+    + world_msgs_JointState._get_hash_recursive(newparents)
   hash:rotate(1)
 
   return hash
@@ -99,6 +103,10 @@ function WorldObservations:_encode_one()
   table.insert(buf_table, lcm._pack.pack('>i', self.positions_length))
   for i0 = 1, self.positions_length do
     table.insert(buf_table, self.positions[i0]:_encode_one())
+  end
+  table.insert(buf_table, lcm._pack.pack('>i', self.joint_states_length))
+  for i0 = 1, self.joint_states_length do
+    table.insert(buf_table, self.joint_states[i0]:_encode_one())
   end
 
   return table.concat(buf_table)
@@ -130,6 +138,11 @@ function WorldObservations._decode_one(data)
   obj.positions = {}
   for i0 = 1, obj.positions_length do
     obj.positions[i0] = world_msgs_Position._decode_one(data)
+  end
+  obj.joint_states_length = lcm._pack.unpack('>i', data:read(4))
+  obj.joint_states = {}
+  for i0 = 1, obj.joint_states_length do
+    obj.joint_states[i0] = world_msgs_JointState._decode_one(data)
   end
 
   return obj

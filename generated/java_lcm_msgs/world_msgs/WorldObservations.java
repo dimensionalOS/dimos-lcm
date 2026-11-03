@@ -37,13 +37,20 @@ public final class WorldObservations implements lcm.lcm.LCMEncodable
      */
     public world_msgs.Position positions[];
 
+    public int joint_states_length;
+
+    /**
+     * LCM Type: world_msgs.JointState[joint_states_length]
+     */
+    public world_msgs.JointState joint_states[];
+
  
     public WorldObservations()
     {
     }
  
     public static final long LCM_FINGERPRINT;
-    public static final long LCM_FINGERPRINT_BASE = 0x6d8086b772008358L;
+    public static final long LCM_FINGERPRINT_BASE = 0xf07bdba174eaa931L;
  
     static {
         LCM_FINGERPRINT = _hashRecursive(new ArrayList<Class<?>>());
@@ -58,6 +65,7 @@ public final class WorldObservations implements lcm.lcm.LCMEncodable
         long hash = LCM_FINGERPRINT_BASE
              + world_msgs.CborKeyValue._hashRecursive(classes)
              + world_msgs.Position._hashRecursive(classes)
+             + world_msgs.JointState._hashRecursive(classes)
             ;
         classes.remove(classes.size() - 1);
         return (hash<<1) + ((hash>>63)&1);
@@ -85,6 +93,12 @@ public final class WorldObservations implements lcm.lcm.LCMEncodable
  
         for (int a = 0; a < this.positions_length; a++) {
             this.positions[a]._encodeRecursive(outs); 
+        }
+ 
+        outs.writeInt(this.joint_states_length); 
+ 
+        for (int a = 0; a < this.joint_states_length; a++) {
+            this.joint_states[a]._encodeRecursive(outs); 
         }
  
     }
@@ -129,6 +143,13 @@ public final class WorldObservations implements lcm.lcm.LCMEncodable
             this.positions[a] = world_msgs.Position._decodeRecursiveFactory(ins);
         }
  
+        this.joint_states_length = ins.readInt();
+ 
+        this.joint_states = new world_msgs.JointState[(int) joint_states_length];
+        for (int a = 0; a < this.joint_states_length; a++) {
+            this.joint_states[a] = world_msgs.JointState._decodeRecursiveFactory(ins);
+        }
+ 
     }
  
     public world_msgs.WorldObservations copy()
@@ -150,6 +171,13 @@ public final class WorldObservations implements lcm.lcm.LCMEncodable
         outobj.positions = new world_msgs.Position[(int) positions_length];
         for (int a = 0; a < this.positions_length; a++) {
             outobj.positions[a] = this.positions[a].copy();
+        }
+ 
+        outobj.joint_states_length = this.joint_states_length;
+ 
+        outobj.joint_states = new world_msgs.JointState[(int) joint_states_length];
+        for (int a = 0; a < this.joint_states_length; a++) {
+            outobj.joint_states[a] = this.joint_states[a].copy();
         }
  
         return outobj;

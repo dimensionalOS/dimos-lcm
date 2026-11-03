@@ -9,27 +9,24 @@ import sys
 
 
 class Position(object):
-    """Where an entity is. A body: x, y, z, qx, qy, qz, qw in the world frame. A joint: its position (rad or m)."""
+    """Where a body is: x, y, z, qx, qy, qz, qw in the world frame."""
 
     msg_name = "world_msgs.Position"
 
-    __slots__ = ["entity_id", "values_length", "values"]
+    __slots__ = ["entity_id", "pose"]
 
-    __typenames__ = ["int64_t", "int32_t", "double"]
+    __typenames__ = ["int64_t", "double"]
 
-    __dimensions__ = [None, None, ["values_length"]]
+    __dimensions__ = [None, [7]]
 
     entity_id: "int64_t"
-    values_length: "int32_t"
-    values: "double"
+    pose: "double"
 
-    def __init__(self, entity_id=0, values_length=0, values=[]):
+    def __init__(self, entity_id=0, pose=[0.0 for dim0 in range(7)]):
         # LCM Type: int64_t
         self.entity_id = entity_id
-        # LCM Type: int32_t
-        self.values_length = values_length
-        # LCM Type: double[values_length]
-        self.values = values
+        # LCM Type: double[7]
+        self.pose = pose
 
     def lcm_encode(self):
         buf = BytesIO()
@@ -38,10 +35,8 @@ class Position(object):
         return buf.getvalue()
 
     def _encode_one(self, buf):
-        buf.write(struct.pack(">qi", self.entity_id, self.values_length))
-        buf.write(
-            struct.pack(">%dd" % self.values_length, *self.values[: self.values_length])
-        )
+        buf.write(struct.pack(">q", self.entity_id))
+        buf.write(struct.pack(">7d", *self.pose[:7]))
 
     @classmethod
     def lcm_decode(cls, data: bytes):
@@ -56,10 +51,8 @@ class Position(object):
     @classmethod
     def _decode_one(cls, buf):
         self = cls()
-        self.entity_id, self.values_length = struct.unpack(">qi", buf.read(12))
-        self.values = struct.unpack(
-            ">%dd" % self.values_length, buf.read(self.values_length * 8)
-        )
+        self.entity_id = struct.unpack(">q", buf.read(8))[0]
+        self.pose = struct.unpack(">7d", buf.read(56))
         return self
 
     @classmethod
@@ -79,7 +72,7 @@ class Position(object):
     def _get_hash_recursive(cls, parents):
         if cls in parents:
             return 0
-        tmphash = (0xE262A26E4667CE0C) & 0xFFFFFFFFFFFFFFFF
+        tmphash = (0x361A9C0D7EAB0B34) & 0xFFFFFFFFFFFFFFFF
         tmphash = (
             ((tmphash << 1) & 0xFFFFFFFFFFFFFFFF) + (tmphash >> 63)
         ) & 0xFFFFFFFFFFFFFFFF

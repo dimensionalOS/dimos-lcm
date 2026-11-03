@@ -2,9 +2,10 @@
 
 import { CborKeyValue } from "./CborKeyValue.ts";
 import { Position } from "./Position.ts";
+import { JointState } from "./JointState.ts";
 
 export class WorldObservations {
-  static readonly _HASH = 0x6d8086b772008358n;
+  static readonly _HASH = 0xf07bdba174eaa931n;
   static readonly _NAME = "world_msgs.WorldObservations";
   private static _packedFingerprint: bigint | null = null;
 
@@ -14,6 +15,8 @@ export class WorldObservations {
   cbor_key_values: CborKeyValue[];
   positions_length: number;
   positions: Position[];
+  joint_states_length: number;
+  joint_states: JointState[];
 
   constructor(init?: Partial<WorldObservations>) {
     this.ts = init?.ts ?? 0n;
@@ -22,6 +25,8 @@ export class WorldObservations {
     this.cbor_key_values = init?.cbor_key_values ?? [];
     this.positions_length = init?.positions_length ?? 0;
     this.positions = init?.positions ?? [];
+    this.joint_states_length = init?.joint_states_length ?? 0;
+    this.joint_states = init?.joint_states ?? [];
   }
 
   static decode(data: Uint8Array): WorldObservations {
@@ -60,6 +65,13 @@ export class WorldObservations {
       target.positions[i0] = new Position();
       ({ offset } = Position._decodeOne(view, offset, target.positions[i0]));
     }
+    target.joint_states_length = view.getInt32(offset, false);
+    offset += 4;
+    target.joint_states = new Array(target.joint_states_length);
+    for (let i0 = 0; i0 < target.joint_states_length; i0++) {
+      target.joint_states[i0] = new JointState();
+      ({ offset } = JointState._decodeOne(view, offset, target.joint_states[i0]));
+    }
     return { offset };
   }
 
@@ -92,6 +104,11 @@ export class WorldObservations {
     for (let i0 = 0; i0 < this.positions_length; i0++) {
       offset = this.positions[i0]._encodeOne(view, offset);
     }
+    view.setInt32(offset, this.joint_states_length, false);
+    offset += 4;
+    for (let i0 = 0; i0 < this.joint_states_length; i0++) {
+      offset = this.joint_states[i0]._encodeOne(view, offset);
+    }
     return offset;
   }
 
@@ -107,6 +124,10 @@ export class WorldObservations {
     for (let i0 = 0; i0 < this.positions_length; i0++) {
       size += this.positions[i0]._encodedSize();
     }
+    size += 4;
+    for (let i0 = 0; i0 < this.joint_states_length; i0++) {
+      size += this.joint_states[i0]._encodedSize();
+    }
     return size;
   }
 
@@ -117,6 +138,7 @@ export class WorldObservations {
     let tmphash = WorldObservations._HASH;
     tmphash = (tmphash + CborKeyValue._getHashRecursive(newparents)) & 0xffffffffffffffffn;
     tmphash = (tmphash + Position._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + JointState._getHashRecursive(newparents)) & 0xffffffffffffffffn;
     tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
     return tmphash;
   }
