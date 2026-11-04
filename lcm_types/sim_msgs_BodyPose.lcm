@@ -1,0 +1,6 @@
+package sim_msgs;
+
+struct BodyPose {
+    string body_id;
+    geometry_msgs.Pose pose_world;
+}

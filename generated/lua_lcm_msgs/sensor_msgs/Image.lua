@@ -6,7 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 local lcm = require('lcm')
 
-local std_msgs_Header = require('std_msgs.Header')
+local common_msgs_SampleHeader = require('common_msgs.SampleHeader')
 
 local setmetatable = setmetatable
 local ipairs = ipairs
@@ -75,7 +75,7 @@ function Image._get_hash_recursive(parents)
   table.insert(newparents, Image)
 
   local hash = lcm._hash.new('0x79d36c21d3c16094')
-    + std_msgs_Header._get_hash_recursive(newparents)
+    + common_msgs_SampleHeader._get_hash_recursive(newparents)
   hash:rotate(1)
 
   return hash
@@ -122,7 +122,7 @@ function Image._decode_one(data)
   local obj = Image:new()
 
   obj.data_length = lcm._pack.unpack('>i', data:read(4))
-  obj.header = std_msgs_Header._decode_one(data)
+  obj.header = common_msgs_SampleHeader._decode_one(data)
   obj.height, obj.width = lcm._pack.unpack('>ii', data:read(8))
   local __encoding_tmpstrlen = lcm._pack.unpack('>I', data:read(4))
   obj.encoding = lcm._pack.prepare_string(data:read(__encoding_tmpstrlen))

@@ -1,10 +1,10 @@
 package control_msgs;
 
 struct JointCommand {
-    int32_t joint_names_length;
-    int32_t values_length;
-    std_msgs.Header header;
-    string joint_names[joint_names_length];
-    string interface_name;
-    double values[values_length];
+    int32_t targets_length;
+    common_msgs.SampleHeader header;
+    int64_t based_on_time_ns;
+    int64_t apply_at_ns;
+    int64_t valid_until_ns;
+    control_msgs.JointTarget targets[targets_length];
 }

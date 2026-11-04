@@ -1,0 +1,10 @@
+package sim_msgs;
+
+struct BodyMotion {
+    common_msgs.SampleHeader header; // frame_id identifies the queried rigid frame
+    geometry_msgs.Pose pose_world;
+    double linear_velocity_world[3];
+    double angular_velocity_world[3];
+    double linear_acceleration_world[3]; // kinematic acceleration AT the frame origin
+     double gravity_world[3]; // no gravity subtraction or sensor model applied
+}

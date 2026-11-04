@@ -16,7 +16,7 @@ namespace sensor_msgs
         public int position_length;
         public int velocity_length;
         public int effort_length;
-        public std_msgs.Header header;
+        public common_msgs.SampleHeader header;
         public String[] name;
         public double[] position;
         public double[] velocity;
@@ -41,7 +41,7 @@ namespace sensor_msgs
  
             classes.Add("sensor_msgs.JointState");
             ulong hash = LCM_FINGERPRINT_BASE
-                 + std_msgs.Header._hashRecursive(classes)
+                 + common_msgs.SampleHeader._hashRecursive(classes)
                 ;
             classes.RemoveAt(classes.Count - 1);
             return (hash<<1) + ((hash>>63)&1);
@@ -114,7 +114,7 @@ namespace sensor_msgs
  
             this.effort_length = ins.ReadInt32();
  
-            this.header = std_msgs.Header._decodeRecursiveFactory(ins);
+            this.header = common_msgs.SampleHeader._decodeRecursiveFactory(ins);
  
             this.name = new String[(int) name_length];
             for (int a = 0; a < this.name_length; a++) {

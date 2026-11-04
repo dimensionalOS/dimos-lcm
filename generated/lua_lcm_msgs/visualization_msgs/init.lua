@@ -11,12 +11,12 @@ M.InteractiveMarkerControl = require('visualization_msgs.InteractiveMarkerContro
 M.MarkerArray = require('visualization_msgs.MarkerArray')
 M.InteractiveMarkerFeedback = require('visualization_msgs.InteractiveMarkerFeedback')
 M.InteractiveMarkerInit = require('visualization_msgs.InteractiveMarkerInit')
-M.InteractiveMarkerUpdate = require('visualization_msgs.InteractiveMarkerUpdate')
+M.ImageMarker = require('visualization_msgs.ImageMarker')
 M.Marker = require('visualization_msgs.Marker')
 M.InteractiveMarker = require('visualization_msgs.InteractiveMarker')
 M.InteractiveMarkerPose = require('visualization_msgs.InteractiveMarkerPose')
 M.MenuEntry = require('visualization_msgs.MenuEntry')
-M.ImageMarker = require('visualization_msgs.ImageMarker')
+M.InteractiveMarkerUpdate = require('visualization_msgs.InteractiveMarkerUpdate')
 
 return M
 

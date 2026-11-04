@@ -36,8 +36,8 @@ It is not very useful standalone and is meant to be used in conjuction with actu
 
 ## Control values
 
-Simulation scene observations and joint actions are defined in
-[the sim_msgs contract](docs/sim_messages.md), with shared Python/TypeScript wire fixtures.
+Physical truth, independent sensor measurements and typed joint/wrench commands are defined in
+[the simulation message contract](docs/sim_messages.md), with shared Python/TypeScript wire fixtures.
 
 The `control_msgs` package also contains the upstream ROS 2 `control_msgs` messages
 (ros-controls/control_msgs, e.g. `DynamicJointState`, `InterfaceValue`), converted from

@@ -6,7 +6,7 @@ use std::sync::OnceLock;
 
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct TransformStamped {
-    pub header: crate::std_msgs::Header,
+    pub header: crate::common_msgs::SampleHeader,
     pub child_frame_id: std::string::String,
     pub transform: crate::geometry_msgs::Transform,
 }
@@ -27,7 +27,7 @@ impl TransformStamped {
         }
         parents.push(self_hash);
         let mut tmphash = self_hash as u64;
-        tmphash = tmphash.wrapping_add(crate::std_msgs::Header::hash_recursive(parents));
+        tmphash = tmphash.wrapping_add(crate::common_msgs::SampleHeader::hash_recursive(parents));
         tmphash = tmphash.wrapping_add(crate::geometry_msgs::Transform::hash_recursive(parents));
         parents.pop();
         // rotate left by 1
@@ -65,7 +65,7 @@ impl TransformStamped {
     }
 
     pub fn decode_one<R: Read>(buf: &mut R) -> io::Result<Self> {
-        let header = crate::std_msgs::Header::decode_one(buf)?;
+        let header = crate::common_msgs::SampleHeader::decode_one(buf)?;
         let child_frame_id = {
             let len = buf.read_u32::<BigEndian>()? as usize;
             let mut bytes = vec![0u8; len];

@@ -1,0 +1,10 @@
+package common_msgs;
+
+struct SampleHeader {
+    string clock_id;
+    int64_t epoch;
+    int64_t time_ns;
+    string source_id;
+    int64_t sequence;
+    string frame_id;
+}

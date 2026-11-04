@@ -7,7 +7,7 @@ from io import BytesIO
 import struct
 import sys
 
-from lcm_msgs import std_msgs
+from lcm_msgs import common_msgs
 
 
 class JointState(object):
@@ -30,7 +30,7 @@ class JointState(object):
         "int32_t",
         "int32_t",
         "int32_t",
-        "std_msgs.Header",
+        "common_msgs.SampleHeader",
         "string",
         "double",
         "double",
@@ -53,7 +53,7 @@ class JointState(object):
     position_length: "int32_t"
     velocity_length: "int32_t"
     effort_length: "int32_t"
-    header: std_msgs.Header
+    header: common_msgs.SampleHeader
     name: "string"
     position: "double"
     velocity: "double"
@@ -65,7 +65,7 @@ class JointState(object):
         position_length=0,
         velocity_length=0,
         effort_length=0,
-        header=std_msgs.Header(),
+        header=common_msgs.SampleHeader(),
         name=[],
         position=[],
         velocity=[],
@@ -79,7 +79,7 @@ class JointState(object):
         self.velocity_length = velocity_length
         # LCM Type: int32_t
         self.effort_length = effort_length
-        # LCM Type: std_msgs.Header
+        # LCM Type: common_msgs.SampleHeader
         self.header = header
         # LCM Type: string[name_length]
         self.name = name
@@ -108,7 +108,7 @@ class JointState(object):
         )
         assert (
             self.header._get_packed_fingerprint()
-            == std_msgs.Header._get_packed_fingerprint()
+            == common_msgs.SampleHeader._get_packed_fingerprint()
         )
         self.header._encode_one(buf)
         for i0 in range(self.name_length):
@@ -184,7 +184,8 @@ class JointState(object):
             return 0
         newparents = parents + [cls]
         tmphash = (
-            0xB69CC30D0D7668FA + std_msgs.Header._get_hash_recursive(newparents)
+            0xB69CC30D0D7668FA
+            + common_msgs.SampleHeader._get_hash_recursive(newparents)
         ) & 0xFFFFFFFFFFFFFFFF
         tmphash = (
             ((tmphash << 1) & 0xFFFFFFFFFFFFFFFF) + (tmphash >> 63)

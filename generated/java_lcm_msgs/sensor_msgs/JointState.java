@@ -20,7 +20,7 @@ public final class JointState implements lcm.lcm.LCMEncodable
 
     public int effort_length;
 
-    public std_msgs.Header header;
+    public common_msgs.SampleHeader header;
 
     /**
      * LCM Type: string[name_length]
@@ -61,7 +61,7 @@ public final class JointState implements lcm.lcm.LCMEncodable
  
         classes.add(sensor_msgs.JointState.class);
         long hash = LCM_FINGERPRINT_BASE
-             + std_msgs.Header._hashRecursive(classes)
+             + common_msgs.SampleHeader._hashRecursive(classes)
             ;
         classes.remove(classes.size() - 1);
         return (hash<<1) + ((hash>>63)&1);
@@ -135,7 +135,7 @@ public final class JointState implements lcm.lcm.LCMEncodable
  
         this.effort_length = ins.readInt();
  
-        this.header = std_msgs.Header._decodeRecursiveFactory(ins);
+        this.header = common_msgs.SampleHeader._decodeRecursiveFactory(ins);
  
         this.name = new String[(int) name_length];
         for (int a = 0; a < this.name_length; a++) {

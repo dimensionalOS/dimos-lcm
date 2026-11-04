@@ -6,7 +6,8 @@ DO NOT MODIFY BY HAND!!!!
 
 local lcm = require('lcm')
 
-local std_msgs_Header = require('std_msgs.Header')
+local control_msgs_JointTarget = require('control_msgs.JointTarget')
+local common_msgs_SampleHeader = require('common_msgs.SampleHeader')
 
 local setmetatable = setmetatable
 local ipairs = ipairs
@@ -49,12 +50,12 @@ function JointCommand:new()
 
   local obj = {}
 
-  obj.joint_names_length = 0
-  obj.values_length = 0
+  obj.targets_length = 0
   obj.header = nil
-  obj.joint_names = {}
-  obj.interface_name = ''
-  obj.values = {}
+  obj.based_on_time_ns = 0
+  obj.apply_at_ns = 0
+  obj.valid_until_ns = 0
+  obj.targets = {}
 
   setmetatable(obj, self)
 
@@ -72,8 +73,9 @@ function JointCommand._get_hash_recursive(parents)
 
   table.insert(newparents, JointCommand)
 
-  local hash = lcm._hash.new('0xfd99fa6f28c147a8')
-    + std_msgs_Header._get_hash_recursive(newparents)
+  local hash = lcm._hash.new('0x9072bd833aa7b102')
+    + common_msgs_SampleHeader._get_hash_recursive(newparents)
+    + control_msgs_JointTarget._get_hash_recursive(newparents)
   hash:rotate(1)
 
   return hash
@@ -90,17 +92,12 @@ function JointCommand:_encode_one()
 
   local buf_table = {}
 
-  table.insert(buf_table, lcm._pack.pack('>ii', self.joint_names_length, self.values_length))
+  table.insert(buf_table, lcm._pack.pack('>i', self.targets_length))
   table.insert(buf_table, self.header:_encode_one())
-  for i0 = 1, self.joint_names_length do
-    local __joint_names_tmpstr = lcm._pack.prepare_string(self.joint_names[i0])
-    table.insert(buf_table, lcm._pack.pack('>I', #__joint_names_tmpstr + 1))
-    table.insert(buf_table, __joint_names_tmpstr .. '\0')
+  table.insert(buf_table, lcm._pack.pack('>qqq', self.based_on_time_ns, self.apply_at_ns, self.valid_until_ns))
+  for i0 = 1, self.targets_length do
+    table.insert(buf_table, self.targets[i0]:_encode_one())
   end
-  local __interface_name_tmpstr = lcm._pack.prepare_string(self.interface_name)
-  table.insert(buf_table, lcm._pack.pack('>I', #__interface_name_tmpstr + 1))
-  table.insert(buf_table, __interface_name_tmpstr .. '\0')
-  table.insert(buf_table, lcm._pack.pack(string.format('>%dd', self.values_length), unpack(self.values)))
 
   return table.concat(buf_table)
 end
@@ -122,16 +119,13 @@ function JointCommand._decode_one(data)
 
   local obj = JointCommand:new()
 
-  obj.joint_names_length, obj.values_length = lcm._pack.unpack('>ii', data:read(8))
-  obj.header = std_msgs_Header._decode_one(data)
-  obj.joint_names = {}
-  for i0 = 1, obj.joint_names_length do
-    local __joint_names_tmpstrlen = lcm._pack.unpack('>I', data:read(4))
-    obj.joint_names[i0] = lcm._pack.prepare_string(data:read(__joint_names_tmpstrlen))
+  obj.targets_length = lcm._pack.unpack('>i', data:read(4))
+  obj.header = common_msgs_SampleHeader._decode_one(data)
+  obj.based_on_time_ns, obj.apply_at_ns, obj.valid_until_ns = lcm._pack.unpack('>qqq', data:read(24))
+  obj.targets = {}
+  for i0 = 1, obj.targets_length do
+    obj.targets[i0] = control_msgs_JointTarget._decode_one(data)
   end
-  local __interface_name_tmpstrlen = lcm._pack.unpack('>I', data:read(4))
-  obj.interface_name = lcm._pack.prepare_string(data:read(__interface_name_tmpstrlen))
-  obj.values = {lcm._pack.unpack(string.format('>%dd', obj.values_length), data:read(obj.values_length * 8))}
 
   return obj
 end

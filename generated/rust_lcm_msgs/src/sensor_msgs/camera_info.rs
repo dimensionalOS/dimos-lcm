@@ -6,7 +6,7 @@ use std::sync::OnceLock;
 
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct CameraInfo {
-    pub header: crate::std_msgs::Header,
+    pub header: crate::common_msgs::SampleHeader,
     pub height: i32,
     pub width: i32,
     pub distortion_model: std::string::String,
@@ -35,7 +35,7 @@ impl CameraInfo {
         }
         parents.push(self_hash);
         let mut tmphash = self_hash as u64;
-        tmphash = tmphash.wrapping_add(crate::std_msgs::Header::hash_recursive(parents));
+        tmphash = tmphash.wrapping_add(crate::common_msgs::SampleHeader::hash_recursive(parents));
         tmphash = tmphash.wrapping_add(crate::sensor_msgs::RegionOfInterest::hash_recursive(parents));
         parents.pop();
         // rotate left by 1
@@ -91,7 +91,7 @@ impl CameraInfo {
 
     pub fn decode_one<R: Read>(buf: &mut R) -> io::Result<Self> {
         let D_length = buf.read_i32::<BigEndian>()? as usize;
-        let header = crate::std_msgs::Header::decode_one(buf)?;
+        let header = crate::common_msgs::SampleHeader::decode_one(buf)?;
         let height = buf.read_i32::<BigEndian>()?;
         let width = buf.read_i32::<BigEndian>()?;
         let distortion_model = {

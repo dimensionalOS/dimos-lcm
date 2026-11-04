@@ -6,7 +6,7 @@ DO NOT MODIFY BY HAND!!!!
 
 local lcm = require('lcm')
 
-local std_msgs_Header = require('std_msgs.Header')
+local common_msgs_SampleHeader = require('common_msgs.SampleHeader')
 
 local setmetatable = setmetatable
 local ipairs = ipairs
@@ -76,7 +76,7 @@ function JointState._get_hash_recursive(parents)
   table.insert(newparents, JointState)
 
   local hash = lcm._hash.new('0xb69cc30d0d7668fa')
-    + std_msgs_Header._get_hash_recursive(newparents)
+    + common_msgs_SampleHeader._get_hash_recursive(newparents)
   hash:rotate(1)
 
   return hash
@@ -125,7 +125,7 @@ function JointState._decode_one(data)
   local obj = JointState:new()
 
   obj.name_length, obj.position_length, obj.velocity_length, obj.effort_length = lcm._pack.unpack('>iiii', data:read(16))
-  obj.header = std_msgs_Header._decode_one(data)
+  obj.header = common_msgs_SampleHeader._decode_one(data)
   obj.name = {}
   for i0 = 1, obj.name_length do
     local __name_tmpstrlen = lcm._pack.unpack('>I', data:read(4))

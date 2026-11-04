@@ -18,7 +18,7 @@
 # states.
 
 
-Header header
+common_msgs/SampleHeader header
 
 string[] name
 float64[] position

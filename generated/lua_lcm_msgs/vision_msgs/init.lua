@@ -9,20 +9,20 @@ local M = {}
 
 M.Detection2DArray = require('vision_msgs.Detection2DArray')
 M.ObjectHypothesisWithPose = require('vision_msgs.ObjectHypothesisWithPose')
-M.BoundingBox2DArray = require('vision_msgs.BoundingBox2DArray')
-M.BoundingBox3DArray = require('vision_msgs.BoundingBox3DArray')
-M.BoundingBox3D = require('vision_msgs.BoundingBox3D')
 M.VisionInfo = require('vision_msgs.VisionInfo')
-M.Detection2D = require('vision_msgs.Detection2D')
+M.BoundingBox3DArray = require('vision_msgs.BoundingBox3DArray')
 M.Detection3D = require('vision_msgs.Detection3D')
+M.Detection2D = require('vision_msgs.Detection2D')
+M.BoundingBox2D = require('vision_msgs.BoundingBox2D')
+M.BoundingBox2DArray = require('vision_msgs.BoundingBox2DArray')
 M.ObjectHypothesis = require('vision_msgs.ObjectHypothesis')
-M.LabelInfo = require('vision_msgs.LabelInfo')
+M.Classification = require('vision_msgs.Classification')
 M.Pose2D = require('vision_msgs.Pose2D')
 M.VisionClass = require('vision_msgs.VisionClass')
-M.Detection3DArray = require('vision_msgs.Detection3DArray')
+M.BoundingBox3D = require('vision_msgs.BoundingBox3D')
 M.Point2D = require('vision_msgs.Point2D')
-M.Classification = require('vision_msgs.Classification')
-M.BoundingBox2D = require('vision_msgs.BoundingBox2D')
+M.LabelInfo = require('vision_msgs.LabelInfo')
+M.Detection3DArray = require('vision_msgs.Detection3DArray')
 
 return M
 

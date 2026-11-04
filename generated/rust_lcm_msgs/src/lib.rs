@@ -3,6 +3,7 @@
 
 pub mod actionlib_msgs;
 pub mod builtin_interfaces;
+pub mod common_msgs;
 pub mod control_msgs;
 pub mod diagnostic_msgs;
 pub mod foxglove_msgs;

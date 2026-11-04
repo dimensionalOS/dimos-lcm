@@ -10,7 +10,7 @@
 #include <lcm/lcm_coretypes.h>
 
 #include <vector>
-#include "std_msgs/Header.hpp"
+#include "common_msgs/SampleHeader.hpp"
 #include "sensor_msgs/PointField.hpp"
 
 namespace sensor_msgs
@@ -23,7 +23,7 @@ class PointCloud2
 
         int32_t    data_length;
 
-        std_msgs::Header header;
+        common_msgs::SampleHeader header;
 
         int32_t    height;
 
@@ -261,7 +261,7 @@ uint64_t PointCloud2::_computeHash(const __lcm_hash_ptr *p)
     const __lcm_hash_ptr cp = { p, PointCloud2::getHash };
 
     uint64_t hash = 0xeabe7183c4d74215LL +
-         std_msgs::Header::_computeHash(&cp) +
+         common_msgs::SampleHeader::_computeHash(&cp) +
          sensor_msgs::PointField::_computeHash(&cp);
 
     return (hash<<1) + ((hash>>63)&1);

@@ -39,6 +39,7 @@ packages = [
     "dimos_lcm.vision_msgs",
     "dimos_lcm.visualization_msgs",
     "dimos_lcm.control_msgs",
+    "dimos_lcm.common_msgs",
     "dimos_lcm.sim_msgs"
 ]
 
@@ -60,6 +61,7 @@ packages = [
 "dimos_lcm.vision_msgs" = "generated/python_lcm_msgs/lcm_msgs/vision_msgs"
 "dimos_lcm.visualization_msgs" = "generated/python_lcm_msgs/lcm_msgs/visualization_msgs"
 "dimos_lcm.control_msgs" = "generated/python_lcm_msgs/lcm_msgs/control_msgs"
+"dimos_lcm.common_msgs" = "generated/python_lcm_msgs/lcm_msgs/common_msgs"
 "dimos_lcm.sim_msgs" = "generated/python_lcm_msgs/lcm_msgs/sim_msgs"
 
 [tool.setuptools.package-data]

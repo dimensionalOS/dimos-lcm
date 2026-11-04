@@ -1,49 +1,62 @@
-# Simulation scene and action messages
+# Physical truth, measurements and commands
 
-`sim_msgs` is independent of the experimental `world_msgs` change stream.
-These generated messages define encoding, not change suppression or a simulator.
+All quantities use SI units and right-handed axes. World Z is up. A pose is
+world-from-body, XYZ metres and an XYZW unit quaternion. A body ID names a rigid
+frame in the resolved model. A joint ID names a scalar degree of freedom; these
+are different identifiers. A model revision identifies the static scene.
 
-`Observations` identifies one run, model revision, reset epoch and simulation tick.
-`sim_time` is simulation seconds; `ts` is Unix publication seconds. Epochs increase
-on reset/placement; ticks restart at zero. A new simulator process gets a new run
-ID and requires rebinding its description. Compare `(epoch, tick)` only within
-that bound run/model. Wall timestamps are not ordering or synchronization proofs.
+## Acquisition identity
 
-An entity ID identifies a body/frame in the resolved model, not a whole articulated
-robot or an actuator. `POSE` is an absolute world-from-body pose, with XYZ metres
-and unit XYZW quaternion in a right-handed, Z-up world. `frame_id` is `world` in
-V1. The payload is the existing generated `geometry_msgs.Pose` encoding including
-its fingerprint. Articulated robots publish each link's pose. Readers do not need
-joint coordinates or simulator checkpoints to place geometry.
+`common_msgs.SampleHeader` contains `clock_id`, `epoch`, `time_ns`, `source_id`,
+`sequence`, and `frame_id`. `time_ns` is acquisition time in the named clock,
+never publication or receipt time. Simulation uses a unique clock ID per run,
+starts at zero, and increments epoch on reset/placement. Hardware may use the
+`unix` clock; an empty clock denotes unknown time. A zero time in a named clock
+is valid. Sequence is monotonic within a source/epoch; retransmission preserves it.
 
-`complete=true` requires exactly one pose for every declared body, including
-stationary bodies. A reader can start with any such sample and recover from a
-dropped sample with the next one. Validate the whole batch before replacing state;
-reject duplicate/missing/unknown body poses, nonfinite values and invalid rotations.
-`complete=false` reserves subset semantics: absence means no observation, never
-removal. The initial DimOS reader rejects subsets rather than treating them as a
-complete world. Entity creation/removal requires a new model description/revision.
+Compare timestamps only within the same clock and epoch. Receivers reject older
+epochs; a new clock requires an explicit new binding. Interpolation and histories
+must never cross reset boundaries. Generated codecs preserve integers as int64
+(Python int / TypeScript bigint); the application enforces ordering and meaning.
 
-`CBOR` is an optional extension with a producer-owned versioned `schema` identifier.
-It cannot replace required poses. Unknown optional observation kinds can be skipped
-using their payload length. Future standardized kinds get new identifiers; do not
-change the meaning of an existing kind. Changing the outer LCM schema still changes
-its fingerprint; nested payloads make new kinds possible without changing that schema.
+## Contracts
 
-`Actions` is separate from observation and scene editing. Its initial `JOINT_COMMAND`
-payload is generated `JointCommand`: named arrays of desired position, velocity,
-kp, kd and feedforward effort. The backend applies
-`tau = kp*(position-q) + kd*(velocity-dq) + effort` each physics tick, subject to model
-limits. Zero gains give direct effort. These fields are not measured JointState.
-Unknown action kinds reject the entire batch. Validate all entries before changing
-any actuator. TTL is simulation seconds; `tick=-1` requests unpaced control, otherwise
-the action answers a particular feedback tick. These stamps do not implement safety,
-authorization or expiry by themselves; the owner enforces them.
+| Message | Contents | Meaning |
+|---|---|---|
+| `sim_msgs.BodyPoses` | header, model_revision, BodyPose[] | One complete absolute pose for each declared rigid frame, including stationary frames, at one acquisition. Any sample is independently usable. No deltas, joint coordinates, sensor readings or solver checkpoint. |
+| `sim_msgs.BodyMotion` | header with frame_id, pose_world, world linear/angular velocity, world linear acceleration, gravity_world | Kinematic truth **at that frame's origin**. Linear acceleration includes free fall; it is not accelerometer specific force. |
+| `sensor_msgs.JointState` | header, name[], position[], velocity[], effort[] | On joint_truth: selected physical coordinates. On joint_state: an encoder's measurements; unavailable effort is empty. The topic/source distinguishes truth from measurement. |
+| `sensor_msgs.Imu` | header, orientation, angular velocity, linear acceleration, covariances | Sensor-frame gyro and specific force `R_world_sensorᵀ (a_world - gravity_world)`; orientation availability follows the covariance flag. Produced by an IMU model, never the physics module. |
+| `sensor_msgs.Image`, `CameraInfo`, `PointCloud2` | acquisition header and existing payload fields | Sensor acquisition. Rolling cloud header is scan-start time; per-point offsets describe the ray times. |
+| `geometry_msgs.TransformStamped` | acquisition header, child ID, transform | Transform at acquisition time; TF must share the clock/epoch of sensor data. |
+| `control_msgs.JointCommand` | header, based_on_time_ns, apply_at_ns, valid_until_ns, JointTarget[] | Explicit desired position, velocity, kp, kd, feedforward per named joint. Atomic validation; no measured state masquerading as commands. |
+| `control_msgs.BodyWrench` | header, body_id, apply_at_ns, valid_until_ns, world force/torque/application point | Physical force and torque at a specified world point, held for the indicated simulation interval. |
+| `sim_msgs.SimulationClock` | header, dt_ns, status, detail | Owner timing/status. Does not establish reliable delivery of other streams. |
 
-Robot joint/IMU feedback uses the existing `control_msgs.ControlValues` contract,
-bound to the same run and model outside the message. Camera/lidar outputs remain
-ordinary sensor messages. The scene observations are not images or point clouds.
+Joint control applies `tau = kp*(q_des-q) + kd*(dq_des-dq) + feedforward`
+on every physics tick, subject to model limits. Zero gains mean direct effort.
+Commands are accepted only for their clock/epoch and valid interval. A configured
+synchronous controller must answer its exact acquisition boundary. Expiry holds
+current position; a controller deadline fault pauses physics until explicit reset.
 
-Cross-language checks: `python -m unittest discover -s tests -v` and
-`deno test --allow-read tests/test_sim_messages.ts`. Both consume the same golden
-wire fixtures, including an epoch larger than JavaScript's safe integer range.
+`BodyPoses` readers validate revision, completeness, duplicate IDs, finite numbers
+and unit rotations before applying a sample. Missing transport samples do not
+require replay: the next complete sample replaces the scene. Sensor histories
+still detect gaps because rolling acquisition cannot invent missed motion.
+
+There is no `Frame`, `WorldState`, `Observations`/`Actions` byte envelope or
+`ControlValues` conversion in this contract. Old unrelated messages in the repo
+are not removed. These schemas deliberately change the affected sensor/TF wire
+fingerprints: all publishers, consumers and Desktop must use the companion revision.
+
+## Verification
+
+```sh
+nix develop --command bash generate.sh
+python -m unittest discover -s tests -v
+deno test --allow-read tests/test_sim_messages.ts
+```
+
+Python/TypeScript share wire fixtures, including integers beyond JavaScript's safe
+number range. Generation also validates the Rust crate. The DimOS tests separately
+verify physical meaning, acquisition timing, control expiry and reset behavior.

@@ -1,0 +1,10 @@
+package control_msgs;
+
+struct JointTarget {
+    string joint_id;
+    double position;
+    double velocity;
+    double kp;
+    double kd;
+    double feedforward;
+}

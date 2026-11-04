@@ -7,8 +7,8 @@ lcm-gen 1.5.2
 
 local M = {}
 
-M.Time = require('builtin_interfaces.Time')
 M.Duration = require('builtin_interfaces.Duration')
+M.Time = require('builtin_interfaces.Time')
 
 return M
 

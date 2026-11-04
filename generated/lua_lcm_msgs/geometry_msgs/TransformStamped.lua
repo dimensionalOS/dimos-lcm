@@ -6,8 +6,8 @@ DO NOT MODIFY BY HAND!!!!
 
 local lcm = require('lcm')
 
+local common_msgs_SampleHeader = require('common_msgs.SampleHeader')
 local geometry_msgs_Transform = require('geometry_msgs.Transform')
-local std_msgs_Header = require('std_msgs.Header')
 
 local setmetatable = setmetatable
 local ipairs = ipairs
@@ -71,7 +71,7 @@ function TransformStamped._get_hash_recursive(parents)
   table.insert(newparents, TransformStamped)
 
   local hash = lcm._hash.new('0xf694f4a6d8779002')
-    + std_msgs_Header._get_hash_recursive(newparents)
+    + common_msgs_SampleHeader._get_hash_recursive(newparents)
     + geometry_msgs_Transform._get_hash_recursive(newparents)
   hash:rotate(1)
 
@@ -115,7 +115,7 @@ function TransformStamped._decode_one(data)
 
   local obj = TransformStamped:new()
 
-  obj.header = std_msgs_Header._decode_one(data)
+  obj.header = common_msgs_SampleHeader._decode_one(data)
   local __child_frame_id_tmpstrlen = lcm._pack.unpack('>I', data:read(4))
   obj.child_frame_id = lcm._pack.prepare_string(data:read(__child_frame_id_tmpstrlen))
   obj.transform = geometry_msgs_Transform._decode_one(data)

@@ -7,7 +7,7 @@ DO NOT MODIFY BY HAND!!!!
 local lcm = require('lcm')
 
 local sensor_msgs_RegionOfInterest = require('sensor_msgs.RegionOfInterest')
-local std_msgs_Header = require('std_msgs.Header')
+local common_msgs_SampleHeader = require('common_msgs.SampleHeader')
 
 local setmetatable = setmetatable
 local ipairs = ipairs
@@ -89,7 +89,7 @@ function CameraInfo._get_hash_recursive(parents)
   table.insert(newparents, CameraInfo)
 
   local hash = lcm._hash.new('0xb4ea6258bc6d0702')
-    + std_msgs_Header._get_hash_recursive(newparents)
+    + common_msgs_SampleHeader._get_hash_recursive(newparents)
     + sensor_msgs_RegionOfInterest._get_hash_recursive(newparents)
   hash:rotate(1)
 
@@ -141,7 +141,7 @@ function CameraInfo._decode_one(data)
   local obj = CameraInfo:new()
 
   obj.D_length = lcm._pack.unpack('>i', data:read(4))
-  obj.header = std_msgs_Header._decode_one(data)
+  obj.header = common_msgs_SampleHeader._decode_one(data)
   obj.height, obj.width = lcm._pack.unpack('>ii', data:read(8))
   local __distortion_model_tmpstrlen = lcm._pack.unpack('>I', data:read(4))
   obj.distortion_model = lcm._pack.prepare_string(data:read(__distortion_model_tmpstrlen))

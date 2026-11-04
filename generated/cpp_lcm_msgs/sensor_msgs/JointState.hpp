@@ -11,7 +11,7 @@
 
 #include <vector>
 #include <string>
-#include "std_msgs/Header.hpp"
+#include "common_msgs/SampleHeader.hpp"
 
 namespace sensor_msgs
 {
@@ -27,7 +27,7 @@ class JointState
 
         int32_t    effort_length;
 
-        std_msgs::Header header;
+        common_msgs::SampleHeader header;
 
         /**
          * LCM Type: string[name_length]
@@ -266,7 +266,7 @@ uint64_t JointState::_computeHash(const __lcm_hash_ptr *p)
     const __lcm_hash_ptr cp = { p, JointState::getHash };
 
     uint64_t hash = 0xb69cc30d0d7668faLL +
-         std_msgs::Header::_computeHash(&cp);
+         common_msgs::SampleHeader::_computeHash(&cp);
 
     return (hash<<1) + ((hash>>63)&1);
 }

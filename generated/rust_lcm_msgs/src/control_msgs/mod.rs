@@ -6,6 +6,9 @@ pub use admittance_controller_state::AdmittanceControllerState;
 mod battery_state_array;
 pub use battery_state_array::BatteryStateArray;
 
+mod body_wrench;
+pub use body_wrench::BodyWrench;
+
 mod ca_nopen_state;
 pub use ca_nopen_state::CANopenState;
 
@@ -59,6 +62,9 @@ pub use joint_controller_state::JointControllerState;
 
 mod joint_jog;
 pub use joint_jog::JointJog;
+
+mod joint_target;
+pub use joint_target::JointTarget;
 
 mod joint_tolerance;
 pub use joint_tolerance::JointTolerance;

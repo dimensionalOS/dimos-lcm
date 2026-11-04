@@ -4,5 +4,5 @@ DO NOT MODIFY BY HAND!!!!
 lcm-gen 1.5.2
 """
 
-from .Time import Time as Time
 from .Duration import Duration as Duration
+from .Time import Time as Time

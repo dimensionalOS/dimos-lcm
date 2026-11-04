@@ -9,7 +9,7 @@
 
 #include <lcm/lcm_coretypes.h>
 
-#include "std_msgs/Header.hpp"
+#include "common_msgs/SampleHeader.hpp"
 #include "geometry_msgs/Quaternion.hpp"
 #include "geometry_msgs/Vector3.hpp"
 #include "geometry_msgs/Vector3.hpp"
@@ -20,7 +20,7 @@ namespace sensor_msgs
 class Imu
 {
     public:
-        std_msgs::Header header;
+        common_msgs::SampleHeader header;
 
         geometry_msgs::Quaternion orientation;
 
@@ -213,7 +213,7 @@ uint64_t Imu::_computeHash(const __lcm_hash_ptr *p)
     const __lcm_hash_ptr cp = { p, Imu::getHash };
 
     uint64_t hash = 0x55c1e238541325f6LL +
-         std_msgs::Header::_computeHash(&cp) +
+         common_msgs::SampleHeader::_computeHash(&cp) +
          geometry_msgs::Quaternion::_computeHash(&cp) +
          geometry_msgs::Vector3::_computeHash(&cp) +
          geometry_msgs::Vector3::_computeHash(&cp);

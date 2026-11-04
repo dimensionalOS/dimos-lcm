@@ -5,6 +5,6 @@
 # <a href="http://wiki.ros.org/tf">tf</a> package. 
 # See its documentation for more information.
 
-Header header
+common_msgs/SampleHeader header
 string child_frame_id # the frame id of the child frame
 Transform transform

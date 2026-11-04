@@ -6,7 +6,7 @@ use std::sync::OnceLock;
 
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct JointState {
-    pub header: crate::std_msgs::Header,
+    pub header: crate::common_msgs::SampleHeader,
     pub name: Vec<std::string::String>,
     pub position: Vec<f64>,
     pub velocity: Vec<f64>,
@@ -29,7 +29,7 @@ impl JointState {
         }
         parents.push(self_hash);
         let mut tmphash = self_hash as u64;
-        tmphash = tmphash.wrapping_add(crate::std_msgs::Header::hash_recursive(parents));
+        tmphash = tmphash.wrapping_add(crate::common_msgs::SampleHeader::hash_recursive(parents));
         parents.pop();
         // rotate left by 1
         tmphash << 1 | tmphash >> 63
@@ -84,7 +84,7 @@ impl JointState {
         let position_length = buf.read_i32::<BigEndian>()? as usize;
         let velocity_length = buf.read_i32::<BigEndian>()? as usize;
         let effort_length = buf.read_i32::<BigEndian>()? as usize;
-        let header = crate::std_msgs::Header::decode_one(buf)?;
+        let header = crate::common_msgs::SampleHeader::decode_one(buf)?;
         let name = {
             let mut v = Vec::with_capacity(name_length);
             for _ in 0..name_length {

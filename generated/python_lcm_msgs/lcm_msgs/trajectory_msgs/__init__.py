@@ -7,6 +7,6 @@ lcm-gen 1.5.2
 from .MultiDOFJointTrajectoryPoint import (
     MultiDOFJointTrajectoryPoint as MultiDOFJointTrajectoryPoint,
 )
+from .JointTrajectory import JointTrajectory as JointTrajectory
 from .MultiDOFJointTrajectory import MultiDOFJointTrajectory as MultiDOFJointTrajectory
 from .JointTrajectoryPoint import JointTrajectoryPoint as JointTrajectoryPoint
-from .JointTrajectory import JointTrajectory as JointTrajectory

@@ -2,6 +2,7 @@
 
 export * from "./AdmittanceControllerState.ts";
 export * from "./BatteryStateArray.ts";
+export * from "./BodyWrench.ts";
 export * from "./CANopenState.ts";
 export * from "./ControlValues.ts";
 export * from "./DynamicInterfaceGroupValues.ts";
@@ -20,6 +21,7 @@ export * from "./JointCommand.ts";
 export * from "./JointComponentTolerance.ts";
 export * from "./JointControllerState.ts";
 export * from "./JointJog.ts";
+export * from "./JointTarget.ts";
 export * from "./JointTolerance.ts";
 export * from "./JointTrajectoryControllerState.ts";
 export * from "./JointWrenchTrajectory.ts";

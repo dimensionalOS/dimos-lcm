@@ -14,7 +14,7 @@ public final class CameraInfo implements lcm.lcm.LCMEncodable
 {
     public int D_length;
 
-    public std_msgs.Header header;
+    public common_msgs.SampleHeader header;
 
     public int height;
 
@@ -70,7 +70,7 @@ public final class CameraInfo implements lcm.lcm.LCMEncodable
  
         classes.add(sensor_msgs.CameraInfo.class);
         long hash = LCM_FINGERPRINT_BASE
-             + std_msgs.Header._hashRecursive(classes)
+             + common_msgs.SampleHeader._hashRecursive(classes)
              + sensor_msgs.RegionOfInterest._hashRecursive(classes)
             ;
         classes.remove(classes.size() - 1);
@@ -145,7 +145,7 @@ public final class CameraInfo implements lcm.lcm.LCMEncodable
         char[] __strbuf = null;
         this.D_length = ins.readInt();
  
-        this.header = std_msgs.Header._decodeRecursiveFactory(ins);
+        this.header = common_msgs.SampleHeader._decodeRecursiveFactory(ins);
  
         this.height = ins.readInt();
  

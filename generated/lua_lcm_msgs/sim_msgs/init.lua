@@ -7,11 +7,10 @@ lcm-gen 1.5.2
 
 local M = {}
 
-M.Action = require('sim_msgs.Action')
-M.Actions = require('sim_msgs.Actions')
-M.JointCommand = require('sim_msgs.JointCommand')
-M.Observation = require('sim_msgs.Observation')
-M.Observations = require('sim_msgs.Observations')
+M.BodyPoses = require('sim_msgs.BodyPoses')
+M.SimulationClock = require('sim_msgs.SimulationClock')
+M.BodyPose = require('sim_msgs.BodyPose')
+M.BodyMotion = require('sim_msgs.BodyMotion')
 
 return M
 
