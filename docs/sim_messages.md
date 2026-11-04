@@ -1,4 +1,4 @@
-# Option E: complete physical state and typed commands
+# Option F: complete physical state and one action input
 
 `sim_msgs.WorldState` is one complete acquisition. Its `SampleHeader` and
 `model_revision` apply to every nested record. It contains:
@@ -46,19 +46,50 @@ not commands, entity discovery, controller readiness or clock signals. Each
 backend's `read_extensions()` supplies its current values; the MuJoCo backend
 has no optional properties to report and returns an empty list.
 
-## Commands and measurements
+## One action input
 
-`control_msgs.JointCommand` carries acquisition identity, `based_on_time_ns`,
-`apply_at_ns`, `valid_until_ns`, and `JointTarget[]`. Each target names a joint
-and specifies desired position/velocity, kp, kd and feedforward effort:
+`actions: In[control_msgs.ActionCommand]` accepts:
+
+```text
+header: common_msgs.SampleHeader
+based_on_time_ns: int64
+apply_at_ns: int64
+valid_until_ns: int64
+joint_targets_length: int32
+joint_targets: control_msgs.JointTarget[]
+cbor_commands_length: int32
+cbor_commands: control_msgs.CborCommand[]
+```
+
+At least one entry is required. The whole batch uses one source, sequence, clock,
+epoch and time window. `based_on_time_ns` identifies the measurement used to choose
+it. `apply_at_ns` is the earliest application time; `valid_until_ns` is exclusive.
+A backend validates all entries before changing state. Unknown CBOR operations
+reject the whole action; they cannot be silently ignored like optional observations.
+An accepted source/sequence is not executed again in the same epoch.
+
+Each `JointTarget` names a joint and specifies desired position/velocity, kp, kd
+and feedforward effort:
 
 ```text
 tau = kp * (q_des - q) + kd * (dq_des - dq) + feedforward
 ```
 
-`control_msgs.BodyWrench` carries acquisition identity, body ID, validity times,
-and world-axis force/torque/application point. These remain separate typed
-commands. There is no generic action batch in Option E.
+Targets persist until expiry, when SimModule holds those joints. A registered
+controller must answer its exact current measurement boundary with its full joint
+set. CBOR-only actions cannot satisfy that motor-control boundary.
+
+`CborCommand` has `entity_id: string`, `key: string`, `schema: string`,
+`value_length: int32`, `value: byte[]`. It carries exactly one CBOR item, addressed
+to a known body/joint or `world`; `(entity_id,key)` is unique within the action.
+The schema defines operation semantics and effect lifetime. Execution is once at
+acceptance, not every physics step; expiry does **not** undo CBOR effects. No wrench
+command is defined. The included MuJoCo backend implements joint targets and rejects
+all CBOR commands; a backend can implement specific operations through `apply_action`
+without changing SimModule. There is no generic execution or operation registry.
+
+The upstream ROS `control_msgs.JointCommand` definition is restored unchanged; sim2
+uses `ActionCommand` instead of repurposing that unrelated message.
 
 Independent sensor modules read WorldState and produce `sensor_msgs.Imu`,
 `JointState`, `Image`/`CameraInfo`, and `PointCloud2`. `SimulationClock` is a
@@ -75,6 +106,6 @@ deno test --allow-read tests/test_sim_messages.ts
 ```
 
 Python/TypeScript use shared wire fixtures for full state, large clock values,
-optional extensions, and joint command validity. Generation also checks Rust.
+optional extensions, joint targets, CBOR commands and action validity. Generation also checks Rust.
 DimOS tests cover physical meaning, complete snapshot replacement, reset,
 control timing and independently acquired sensor outputs.

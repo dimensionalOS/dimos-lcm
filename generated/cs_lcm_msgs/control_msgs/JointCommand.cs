@@ -12,19 +12,19 @@ namespace control_msgs
 {
     public sealed class JointCommand : LCM.LCM.LCMEncodable
     {
-        public int targets_length;
-        public common_msgs.SampleHeader header;
-        public long based_on_time_ns;
-        public long apply_at_ns;
-        public long valid_until_ns;
-        public control_msgs.JointTarget[] targets;
+        public int joint_names_length;
+        public int values_length;
+        public std_msgs.Header header;
+        public String[] joint_names;
+        public String interface_name;
+        public double[] values;
  
         public JointCommand()
         {
         }
  
         public static readonly ulong LCM_FINGERPRINT;
-        public static readonly ulong LCM_FINGERPRINT_BASE = 0x9072bd833aa7b102L;
+        public static readonly ulong LCM_FINGERPRINT_BASE = 0xfd99fa6f28c147a8L;
  
         static JointCommand()
         {
@@ -38,8 +38,7 @@ namespace control_msgs
  
             classes.Add("control_msgs.JointCommand");
             ulong hash = LCM_FINGERPRINT_BASE
-                 + common_msgs.SampleHeader._hashRecursive(classes)
-                 + control_msgs.JointTarget._hashRecursive(classes)
+                 + std_msgs.Header._hashRecursive(classes)
                 ;
             classes.RemoveAt(classes.Count - 1);
             return (hash<<1) + ((hash>>63)&1);
@@ -53,18 +52,21 @@ namespace control_msgs
  
         public void _encodeRecursive(LCMDataOutputStream outs)
         {
-            outs.Write(this.targets_length); 
+            byte[] __strbuf = null;
+            outs.Write(this.joint_names_length); 
+ 
+            outs.Write(this.values_length); 
  
             this.header._encodeRecursive(outs); 
  
-            outs.Write(this.based_on_time_ns); 
+            for (int a = 0; a < this.joint_names_length; a++) {
+                __strbuf = System.Text.Encoding.GetEncoding("US-ASCII").GetBytes(this.joint_names[a]); outs.Write(__strbuf.Length+1); outs.Write(__strbuf, 0, __strbuf.Length); outs.Write((byte) 0); 
+            }
  
-            outs.Write(this.apply_at_ns); 
+            __strbuf = System.Text.Encoding.GetEncoding("US-ASCII").GetBytes(this.interface_name); outs.Write(__strbuf.Length+1); outs.Write(__strbuf, 0, __strbuf.Length); outs.Write((byte) 0); 
  
-            outs.Write(this.valid_until_ns); 
- 
-            for (int a = 0; a < this.targets_length; a++) {
-                this.targets[a]._encodeRecursive(outs); 
+            for (int a = 0; a < this.values_length; a++) {
+                outs.Write(this.values[a]); 
             }
  
         }
@@ -90,19 +92,23 @@ namespace control_msgs
  
         public void _decodeRecursive(LCMDataInputStream ins)
         {
-            this.targets_length = ins.ReadInt32();
+            byte[] __strbuf = null;
+            this.joint_names_length = ins.ReadInt32();
  
-            this.header = common_msgs.SampleHeader._decodeRecursiveFactory(ins);
+            this.values_length = ins.ReadInt32();
  
-            this.based_on_time_ns = ins.ReadInt64();
+            this.header = std_msgs.Header._decodeRecursiveFactory(ins);
  
-            this.apply_at_ns = ins.ReadInt64();
+            this.joint_names = new String[(int) joint_names_length];
+            for (int a = 0; a < this.joint_names_length; a++) {
+                __strbuf = new byte[ins.ReadInt32()-1]; ins.ReadFully(__strbuf); ins.ReadByte(); this.joint_names[a] = System.Text.Encoding.GetEncoding("US-ASCII").GetString(__strbuf);
+            }
  
-            this.valid_until_ns = ins.ReadInt64();
+            __strbuf = new byte[ins.ReadInt32()-1]; ins.ReadFully(__strbuf); ins.ReadByte(); this.interface_name = System.Text.Encoding.GetEncoding("US-ASCII").GetString(__strbuf);
  
-            this.targets = new control_msgs.JointTarget[(int) targets_length];
-            for (int a = 0; a < this.targets_length; a++) {
-                this.targets[a] = control_msgs.JointTarget._decodeRecursiveFactory(ins);
+            this.values = new double[(int) values_length];
+            for (int a = 0; a < this.values_length; a++) {
+                this.values[a] = ins.ReadDouble();
             }
  
         }
@@ -110,19 +116,22 @@ namespace control_msgs
         public control_msgs.JointCommand Copy()
         {
             control_msgs.JointCommand outobj = new control_msgs.JointCommand();
-            outobj.targets_length = this.targets_length;
+            outobj.joint_names_length = this.joint_names_length;
+ 
+            outobj.values_length = this.values_length;
  
             outobj.header = this.header.Copy();
  
-            outobj.based_on_time_ns = this.based_on_time_ns;
+            outobj.joint_names = new String[(int) joint_names_length];
+            for (int a = 0; a < this.joint_names_length; a++) {
+                outobj.joint_names[a] = this.joint_names[a];
+            }
  
-            outobj.apply_at_ns = this.apply_at_ns;
+            outobj.interface_name = this.interface_name;
  
-            outobj.valid_until_ns = this.valid_until_ns;
- 
-            outobj.targets = new control_msgs.JointTarget[(int) targets_length];
-            for (int a = 0; a < this.targets_length; a++) {
-                outobj.targets[a] = this.targets[a].Copy();
+            outobj.values = new double[(int) values_length];
+            for (int a = 0; a < this.values_length; a++) {
+                outobj.values[a] = this.values[a];
             }
  
             return outobj;

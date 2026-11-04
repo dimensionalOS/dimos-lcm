@@ -26,12 +26,18 @@ Deno.test("unrecognized extension bytes survive alongside typed fields", () => {
   assertEquals(restored.extensions[0].value, m.extensions[0].value);
   assertEquals(restored.body_poses[0].body_id, "g1/hand");
 });
-Deno.test("direct joint commands preserve PD, feedforward and validity", () => {
-  const payload = bytes(fixtures.joint_command);
-  const m = published.decode(payload) as published.control_msgs.JointCommand;
-  assertEquals(m.targets[0].joint_id, "g1/elbow");
-  assertEquals(m.targets[0].kp, 40);
-  assertEquals(m.targets[0].feedforward, 2);
+Deno.test("unified actions preserve joint targets, CBOR and validity", () => {
+  const payload = bytes(fixtures.action_command);
+  const m = published.decode(payload) as published.control_msgs.ActionCommand;
+  assertEquals(m.header.time_ns, (1n << 60n) + 7n);
+  assertEquals(m.cbor_commands[0].entity_id, "world");
+  assertEquals(m.cbor_commands[0].key, "increment");
+  assertEquals(m.cbor_commands[0].schema, "example.increment.v1");
+  assertEquals(Array.from(m.cbor_commands[0].value), [1]);
+  assertEquals((standalone.decode(payload) as standalone.control_msgs.ActionCommand).encode(), payload);
+  assertEquals(m.joint_targets[0].joint_id, "g1/elbow");
+  assertEquals(m.joint_targets[0].kp, 40);
+  assertEquals(m.joint_targets[0].feedforward, 2);
   assertEquals(m.valid_until_ns - m.apply_at_ns, 20000000n);
   assertEquals(m.encode(), payload);
 });

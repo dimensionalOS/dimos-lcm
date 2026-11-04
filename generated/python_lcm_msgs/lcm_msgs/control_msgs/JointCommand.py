@@ -7,62 +7,60 @@ from io import BytesIO
 import struct
 import sys
 
-from lcm_msgs import common_msgs
-from . import *
-from .JointTarget import JointTarget
+from lcm_msgs import std_msgs
 
 
 class JointCommand(object):
     msg_name = "control_msgs.JointCommand"
 
     __slots__ = [
-        "targets_length",
+        "joint_names_length",
+        "values_length",
         "header",
-        "based_on_time_ns",
-        "apply_at_ns",
-        "valid_until_ns",
-        "targets",
+        "joint_names",
+        "interface_name",
+        "values",
     ]
 
     __typenames__ = [
         "int32_t",
-        "common_msgs.SampleHeader",
-        "int64_t",
-        "int64_t",
-        "int64_t",
-        "JointTarget",
+        "int32_t",
+        "std_msgs.Header",
+        "string",
+        "string",
+        "double",
     ]
 
-    __dimensions__ = [None, None, None, None, None, ["targets_length"]]
+    __dimensions__ = [None, None, None, ["joint_names_length"], None, ["values_length"]]
 
-    targets_length: "int32_t"
-    header: common_msgs.SampleHeader
-    based_on_time_ns: "int64_t"
-    apply_at_ns: "int64_t"
-    valid_until_ns: "int64_t"
-    targets: JointTarget
+    joint_names_length: "int32_t"
+    values_length: "int32_t"
+    header: std_msgs.Header
+    joint_names: "string"
+    interface_name: "string"
+    values: "double"
 
     def __init__(
         self,
-        targets_length=0,
-        header=common_msgs.SampleHeader(),
-        based_on_time_ns=0,
-        apply_at_ns=0,
-        valid_until_ns=0,
-        targets=[],
+        joint_names_length=0,
+        values_length=0,
+        header=std_msgs.Header(),
+        joint_names=[],
+        interface_name="",
+        values=[],
     ):
         # LCM Type: int32_t
-        self.targets_length = targets_length
-        # LCM Type: common_msgs.SampleHeader
+        self.joint_names_length = joint_names_length
+        # LCM Type: int32_t
+        self.values_length = values_length
+        # LCM Type: std_msgs.Header
         self.header = header
-        # LCM Type: int64_t
-        self.based_on_time_ns = based_on_time_ns
-        # LCM Type: int64_t
-        self.apply_at_ns = apply_at_ns
-        # LCM Type: int64_t
-        self.valid_until_ns = valid_until_ns
-        # LCM Type: JointTarget[targets_length]
-        self.targets = targets
+        # LCM Type: string[joint_names_length]
+        self.joint_names = joint_names
+        # LCM Type: string
+        self.interface_name = interface_name
+        # LCM Type: double[values_length]
+        self.values = values
 
     def lcm_encode(self):
         buf = BytesIO()
@@ -71,23 +69,24 @@ class JointCommand(object):
         return buf.getvalue()
 
     def _encode_one(self, buf):
-        buf.write(struct.pack(">i", self.targets_length))
+        buf.write(struct.pack(">ii", self.joint_names_length, self.values_length))
         assert (
             self.header._get_packed_fingerprint()
-            == common_msgs.SampleHeader._get_packed_fingerprint()
+            == std_msgs.Header._get_packed_fingerprint()
         )
         self.header._encode_one(buf)
+        for i0 in range(self.joint_names_length):
+            __joint_names_encoded = self.joint_names[i0].encode("utf-8")
+            buf.write(struct.pack(">I", len(__joint_names_encoded) + 1))
+            buf.write(__joint_names_encoded)
+            buf.write(b"\0")
+        __interface_name_encoded = self.interface_name.encode("utf-8")
+        buf.write(struct.pack(">I", len(__interface_name_encoded) + 1))
+        buf.write(__interface_name_encoded)
+        buf.write(b"\0")
         buf.write(
-            struct.pack(
-                ">qqq", self.based_on_time_ns, self.apply_at_ns, self.valid_until_ns
-            )
+            struct.pack(">%dd" % self.values_length, *self.values[: self.values_length])
         )
-        for i0 in range(self.targets_length):
-            assert (
-                self.targets[i0]._get_packed_fingerprint()
-                == JointTarget._get_packed_fingerprint()
-            )
-            self.targets[i0]._encode_one(buf)
 
     @classmethod
     def lcm_decode(cls, data: bytes):
@@ -102,14 +101,21 @@ class JointCommand(object):
     @classmethod
     def _decode_one(cls, buf):
         self = cls()
-        self.targets_length = struct.unpack(">i", buf.read(4))[0]
+        self.joint_names_length, self.values_length = struct.unpack(">ii", buf.read(8))
         self.header = cls._get_field_type("header")._decode_one(buf)
-        self.based_on_time_ns, self.apply_at_ns, self.valid_until_ns = struct.unpack(
-            ">qqq", buf.read(24)
+        self.joint_names = []
+        for i0 in range(self.joint_names_length):
+            __joint_names_len = struct.unpack(">I", buf.read(4))[0]
+            self.joint_names.append(
+                buf.read(__joint_names_len)[:-1].decode("utf-8", "replace")
+            )
+        __interface_name_len = struct.unpack(">I", buf.read(4))[0]
+        self.interface_name = buf.read(__interface_name_len)[:-1].decode(
+            "utf-8", "replace"
         )
-        self.targets = []
-        for i0 in range(self.targets_length):
-            self.targets.append(cls._get_field_type("targets")._decode_one(buf))
+        self.values = struct.unpack(
+            ">%dd" % self.values_length, buf.read(self.values_length * 8)
+        )
         return self
 
     @classmethod
@@ -131,9 +137,7 @@ class JointCommand(object):
             return 0
         newparents = parents + [cls]
         tmphash = (
-            0x9072BD833AA7B102
-            + common_msgs.SampleHeader._get_hash_recursive(newparents)
-            + JointTarget._get_hash_recursive(newparents)
+            0xFD99FA6F28C147A8 + std_msgs.Header._get_hash_recursive(newparents)
         ) & 0xFFFFFFFFFFFFFFFF
         tmphash = (
             ((tmphash << 1) & 0xFFFFFFFFFFFFFFFF) + (tmphash >> 63)

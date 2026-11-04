@@ -12,20 +12,23 @@ import lcm.lcm.*;
  
 public final class JointCommand implements lcm.lcm.LCMEncodable
 {
-    public int targets_length;
+    public int joint_names_length;
 
-    public common_msgs.SampleHeader header;
+    public int values_length;
 
-    public long based_on_time_ns;
-
-    public long apply_at_ns;
-
-    public long valid_until_ns;
+    public std_msgs.Header header;
 
     /**
-     * LCM Type: control_msgs.JointTarget[targets_length]
+     * LCM Type: string[joint_names_length]
      */
-    public control_msgs.JointTarget targets[];
+    public String joint_names[];
+
+    public String interface_name;
+
+    /**
+     * LCM Type: double[values_length]
+     */
+    public double values[];
 
  
     public JointCommand()
@@ -33,7 +36,7 @@ public final class JointCommand implements lcm.lcm.LCMEncodable
     }
  
     public static final long LCM_FINGERPRINT;
-    public static final long LCM_FINGERPRINT_BASE = 0x9072bd833aa7b102L;
+    public static final long LCM_FINGERPRINT_BASE = 0xfd99fa6f28c147a8L;
  
     static {
         LCM_FINGERPRINT = _hashRecursive(new ArrayList<Class<?>>());
@@ -46,8 +49,7 @@ public final class JointCommand implements lcm.lcm.LCMEncodable
  
         classes.add(control_msgs.JointCommand.class);
         long hash = LCM_FINGERPRINT_BASE
-             + common_msgs.SampleHeader._hashRecursive(classes)
-             + control_msgs.JointTarget._hashRecursive(classes)
+             + std_msgs.Header._hashRecursive(classes)
             ;
         classes.remove(classes.size() - 1);
         return (hash<<1) + ((hash>>63)&1);
@@ -61,18 +63,21 @@ public final class JointCommand implements lcm.lcm.LCMEncodable
  
     public void _encodeRecursive(DataOutput outs) throws IOException
     {
-        outs.writeInt(this.targets_length); 
+        char[] __strbuf = null;
+        outs.writeInt(this.joint_names_length); 
+ 
+        outs.writeInt(this.values_length); 
  
         this.header._encodeRecursive(outs); 
  
-        outs.writeLong(this.based_on_time_ns); 
+        for (int a = 0; a < this.joint_names_length; a++) {
+            __strbuf = new char[this.joint_names[a].length()]; this.joint_names[a].getChars(0, this.joint_names[a].length(), __strbuf, 0); outs.writeInt(__strbuf.length+1); for (int _i = 0; _i < __strbuf.length; _i++) outs.write(__strbuf[_i]); outs.writeByte(0); 
+        }
  
-        outs.writeLong(this.apply_at_ns); 
+        __strbuf = new char[this.interface_name.length()]; this.interface_name.getChars(0, this.interface_name.length(), __strbuf, 0); outs.writeInt(__strbuf.length+1); for (int _i = 0; _i < __strbuf.length; _i++) outs.write(__strbuf[_i]); outs.writeByte(0); 
  
-        outs.writeLong(this.valid_until_ns); 
- 
-        for (int a = 0; a < this.targets_length; a++) {
-            this.targets[a]._encodeRecursive(outs); 
+        for (int a = 0; a < this.values_length; a++) {
+            outs.writeDouble(this.values[a]); 
         }
  
     }
@@ -99,19 +104,23 @@ public final class JointCommand implements lcm.lcm.LCMEncodable
  
     public void _decodeRecursive(DataInput ins) throws IOException
     {
-        this.targets_length = ins.readInt();
+        char[] __strbuf = null;
+        this.joint_names_length = ins.readInt();
  
-        this.header = common_msgs.SampleHeader._decodeRecursiveFactory(ins);
+        this.values_length = ins.readInt();
  
-        this.based_on_time_ns = ins.readLong();
+        this.header = std_msgs.Header._decodeRecursiveFactory(ins);
  
-        this.apply_at_ns = ins.readLong();
+        this.joint_names = new String[(int) joint_names_length];
+        for (int a = 0; a < this.joint_names_length; a++) {
+            __strbuf = new char[ins.readInt()-1]; for (int _i = 0; _i < __strbuf.length; _i++) __strbuf[_i] = (char) (ins.readByte()&0xff); ins.readByte(); this.joint_names[a] = new String(__strbuf);
+        }
  
-        this.valid_until_ns = ins.readLong();
+        __strbuf = new char[ins.readInt()-1]; for (int _i = 0; _i < __strbuf.length; _i++) __strbuf[_i] = (char) (ins.readByte()&0xff); ins.readByte(); this.interface_name = new String(__strbuf);
  
-        this.targets = new control_msgs.JointTarget[(int) targets_length];
-        for (int a = 0; a < this.targets_length; a++) {
-            this.targets[a] = control_msgs.JointTarget._decodeRecursiveFactory(ins);
+        this.values = new double[(int) values_length];
+        for (int a = 0; a < this.values_length; a++) {
+            this.values[a] = ins.readDouble();
         }
  
     }
@@ -119,21 +128,20 @@ public final class JointCommand implements lcm.lcm.LCMEncodable
     public control_msgs.JointCommand copy()
     {
         control_msgs.JointCommand outobj = new control_msgs.JointCommand();
-        outobj.targets_length = this.targets_length;
+        outobj.joint_names_length = this.joint_names_length;
+ 
+        outobj.values_length = this.values_length;
  
         outobj.header = this.header.copy();
  
-        outobj.based_on_time_ns = this.based_on_time_ns;
+        outobj.joint_names = new String[(int) joint_names_length];
+        if (this.joint_names_length > 0)
+            System.arraycopy(this.joint_names, 0, outobj.joint_names, 0, (int) this.joint_names_length); 
+        outobj.interface_name = this.interface_name;
  
-        outobj.apply_at_ns = this.apply_at_ns;
- 
-        outobj.valid_until_ns = this.valid_until_ns;
- 
-        outobj.targets = new control_msgs.JointTarget[(int) targets_length];
-        for (int a = 0; a < this.targets_length; a++) {
-            outobj.targets[a] = this.targets[a].copy();
-        }
- 
+        outobj.values = new double[(int) values_length];
+        if (this.values_length > 0)
+            System.arraycopy(this.values, 0, outobj.values, 0, (int) this.values_length); 
         return outobj;
     }
  

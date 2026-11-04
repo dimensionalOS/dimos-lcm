@@ -10,8 +10,8 @@
 #include <lcm/lcm_coretypes.h>
 
 #include <vector>
-#include "common_msgs/SampleHeader.hpp"
-#include "control_msgs/JointTarget.hpp"
+#include <string>
+#include "std_msgs/Header.hpp"
 
 namespace control_msgs
 {
@@ -19,20 +19,23 @@ namespace control_msgs
 class JointCommand
 {
     public:
-        int32_t    targets_length;
+        int32_t    joint_names_length;
 
-        common_msgs::SampleHeader header;
+        int32_t    values_length;
 
-        int64_t    based_on_time_ns;
-
-        int64_t    apply_at_ns;
-
-        int64_t    valid_until_ns;
+        std_msgs::Header header;
 
         /**
-         * LCM Type: control_msgs.JointTarget[targets_length]
+         * LCM Type: string[joint_names_length]
          */
-        std::vector< control_msgs::JointTarget > targets;
+        std::vector< std::string > joint_names;
+
+        std::string interface_name;
+
+        /**
+         * LCM Type: double[values_length]
+         */
+        std::vector< double > values;
 
     public:
         /**
@@ -130,23 +133,29 @@ int JointCommand::_encodeNoHash(void *buf, int offset, int maxlen) const
 {
     int pos = 0, tlen;
 
-    tlen = __int32_t_encode_array(buf, offset + pos, maxlen - pos, &this->targets_length, 1);
+    tlen = __int32_t_encode_array(buf, offset + pos, maxlen - pos, &this->joint_names_length, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
+    tlen = __int32_t_encode_array(buf, offset + pos, maxlen - pos, &this->values_length, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
     tlen = this->header._encodeNoHash(buf, offset + pos, maxlen - pos);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    tlen = __int64_t_encode_array(buf, offset + pos, maxlen - pos, &this->based_on_time_ns, 1);
+    for (int a0 = 0; a0 < this->joint_names_length; a0++) {
+        char* __cstr = const_cast<char*>(this->joint_names[a0].c_str());
+        tlen = __string_encode_array(
+            buf, offset + pos, maxlen - pos, &__cstr, 1);
+        if(tlen < 0) return tlen; else pos += tlen;
+    }
+
+    char* interface_name_cstr = const_cast<char*>(this->interface_name.c_str());
+    tlen = __string_encode_array(
+        buf, offset + pos, maxlen - pos, &interface_name_cstr, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    tlen = __int64_t_encode_array(buf, offset + pos, maxlen - pos, &this->apply_at_ns, 1);
-    if(tlen < 0) return tlen; else pos += tlen;
-
-    tlen = __int64_t_encode_array(buf, offset + pos, maxlen - pos, &this->valid_until_ns, 1);
-    if(tlen < 0) return tlen; else pos += tlen;
-
-    for (int a0 = 0; a0 < this->targets_length; a0++) {
-        tlen = this->targets[a0]._encodeNoHash(buf, offset + pos, maxlen - pos);
+    if(this->values_length > 0) {
+        tlen = __double_encode_array(buf, offset + pos, maxlen - pos, &this->values[0], this->values_length);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
@@ -157,28 +166,42 @@ int JointCommand::_decodeNoHash(const void *buf, int offset, int maxlen)
 {
     int pos = 0, tlen;
 
-    tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->targets_length, 1);
+    tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->joint_names_length, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
+    tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->values_length, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
     tlen = this->header._decodeNoHash(buf, offset + pos, maxlen - pos);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    tlen = __int64_t_decode_array(buf, offset + pos, maxlen - pos, &this->based_on_time_ns, 1);
-    if(tlen < 0) return tlen; else pos += tlen;
-
-    tlen = __int64_t_decode_array(buf, offset + pos, maxlen - pos, &this->apply_at_ns, 1);
-    if(tlen < 0) return tlen; else pos += tlen;
-
-    tlen = __int64_t_decode_array(buf, offset + pos, maxlen - pos, &this->valid_until_ns, 1);
-    if(tlen < 0) return tlen; else pos += tlen;
-
     try {
-        this->targets.resize(this->targets_length);
+        this->joint_names.resize(this->joint_names_length);
     } catch (...) {
         return -1;
     }
-    for (int a0 = 0; a0 < this->targets_length; a0++) {
-        tlen = this->targets[a0]._decodeNoHash(buf, offset + pos, maxlen - pos);
+    for (int a0 = 0; a0 < this->joint_names_length; a0++) {
+        int32_t __elem_len;
+        tlen = __int32_t_decode_array(
+            buf, offset + pos, maxlen - pos, &__elem_len, 1);
+        if(tlen < 0) return tlen; else pos += tlen;
+        if(__elem_len > maxlen - pos) return -1;
+        this->joint_names[a0].assign(static_cast<const char*>(buf) + offset + pos, __elem_len -  1);
+        pos += __elem_len;
+    }
+
+    int32_t __interface_name_len__;
+    tlen = __int32_t_decode_array(
+        buf, offset + pos, maxlen - pos, &__interface_name_len__, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+    if(__interface_name_len__ > maxlen - pos) return -1;
+    this->interface_name.assign(
+        static_cast<const char*>(buf) + offset + pos, __interface_name_len__ - 1);
+    pos += __interface_name_len__;
+
+    if(this->values_length) {
+        this->values.resize(this->values_length);
+        tlen = __double_decode_array(buf, offset + pos, maxlen - pos, &this->values[0], this->values_length);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
@@ -189,13 +212,13 @@ int JointCommand::_getEncodedSizeNoHash() const
 {
     int enc_size = 0;
     enc_size += __int32_t_encoded_array_size(NULL, 1);
+    enc_size += __int32_t_encoded_array_size(NULL, 1);
     enc_size += this->header._getEncodedSizeNoHash();
-    enc_size += __int64_t_encoded_array_size(NULL, 1);
-    enc_size += __int64_t_encoded_array_size(NULL, 1);
-    enc_size += __int64_t_encoded_array_size(NULL, 1);
-    for (int a0 = 0; a0 < this->targets_length; a0++) {
-        enc_size += this->targets[a0]._getEncodedSizeNoHash();
+    for (int a0 = 0; a0 < this->joint_names_length; a0++) {
+        enc_size += this->joint_names[a0].size() + 4 + 1;
     }
+    enc_size += this->interface_name.size() + 4 + 1;
+    enc_size += __double_encoded_array_size(NULL, this->values_length);
     return enc_size;
 }
 
@@ -207,9 +230,8 @@ uint64_t JointCommand::_computeHash(const __lcm_hash_ptr *p)
             return 0;
     const __lcm_hash_ptr cp = { p, JointCommand::getHash };
 
-    uint64_t hash = 0x9072bd833aa7b102LL +
-         common_msgs::SampleHeader::_computeHash(&cp) +
-         control_msgs::JointTarget::_computeHash(&cp);
+    uint64_t hash = 0xfd99fa6f28c147a8LL +
+         std_msgs::Header::_computeHash(&cp);
 
     return (hash<<1) + ((hash>>63)&1);
 }

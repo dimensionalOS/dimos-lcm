@@ -5,19 +5,18 @@ use std::io::{self, Read, Write, Cursor};
 use std::sync::OnceLock;
 
 #[derive(Debug, Clone, Default, PartialEq)]
-pub struct BodyWrench {
+pub struct ActionCommand {
     pub header: crate::common_msgs::SampleHeader,
-    pub body_id: std::string::String,
+    pub based_on_time_ns: i64,
     pub apply_at_ns: i64,
     pub valid_until_ns: i64,
-    pub force_world: [f64; 3],
-    pub torque_world: [f64; 3],
-    pub point_world: [f64; 3],
+    pub joint_targets: Vec<crate::control_msgs::JointTarget>,
+    pub cbor_commands: Vec<crate::control_msgs::CborCommand>,
 }
 
-impl BodyWrench {
-    pub const HASH: i64 = 0x390B681B0776ACE0u64 as i64;
-    pub const NAME: &str = "control_msgs.BodyWrench";
+impl ActionCommand {
+    pub const HASH: i64 = 0xE5E6A25C62CA4457u64 as i64;
+    pub const NAME: &str = "control_msgs.ActionCommand";
 
     fn packed_fingerprint() -> u64 {
         static CACHE: OnceLock<u64> = OnceLock::new();
@@ -32,6 +31,8 @@ impl BodyWrench {
         parents.push(self_hash);
         let mut tmphash = self_hash as u64;
         tmphash = tmphash.wrapping_add(crate::common_msgs::SampleHeader::hash_recursive(parents));
+        tmphash = tmphash.wrapping_add(crate::control_msgs::JointTarget::hash_recursive(parents));
+        tmphash = tmphash.wrapping_add(crate::control_msgs::CborCommand::hash_recursive(parents));
         parents.pop();
         // rotate left by 1
         tmphash << 1 | tmphash >> 63
@@ -57,78 +58,67 @@ impl BodyWrench {
 
     pub fn encode_one<W: Write>(&self, buf: &mut W) -> io::Result<()> {
         self.header.encode_one(buf)?;
-        {
-            let bytes = self.body_id.as_bytes();
-            buf.write_u32::<BigEndian>((bytes.len() + 1) as u32)?;
-            buf.write_all(bytes)?;
-            buf.write_u8(0)?;
-        }
+        buf.write_i64::<BigEndian>(self.based_on_time_ns)?;
         buf.write_i64::<BigEndian>(self.apply_at_ns)?;
         buf.write_i64::<BigEndian>(self.valid_until_ns)?;
-        for v0 in self.force_world.iter() {
-            buf.write_f64::<BigEndian>(*v0)?;
+        buf.write_i32::<BigEndian>(self.joint_targets.len() as i32)?;
+        for v0 in self.joint_targets.iter() {
+            v0.encode_one(buf)?;
         }
-        for v0 in self.torque_world.iter() {
-            buf.write_f64::<BigEndian>(*v0)?;
-        }
-        for v0 in self.point_world.iter() {
-            buf.write_f64::<BigEndian>(*v0)?;
+        buf.write_i32::<BigEndian>(self.cbor_commands.len() as i32)?;
+        for v0 in self.cbor_commands.iter() {
+            v0.encode_one(buf)?;
         }
         Ok(())
     }
 
     pub fn decode_one<R: Read>(buf: &mut R) -> io::Result<Self> {
         let header = crate::common_msgs::SampleHeader::decode_one(buf)?;
-        let body_id = {
-            let len = buf.read_u32::<BigEndian>()? as usize;
-            let mut bytes = vec![0u8; len];
-            buf.read_exact(&mut bytes)?;
-            std::string::String::from_utf8(bytes[..len - 1].to_vec())
-                .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?
-        };
+        let based_on_time_ns = buf.read_i64::<BigEndian>()?;
         let apply_at_ns = buf.read_i64::<BigEndian>()?;
         let valid_until_ns = buf.read_i64::<BigEndian>()?;
-        let force_world = {
-            let mut _arr_0 = [0.0f64; 3];
-            for elem in _arr_0.iter_mut() {
-                *elem = buf.read_f64::<BigEndian>()?;
+        let joint_targets_length = buf.read_i32::<BigEndian>()? as usize;
+        let joint_targets = {
+            let mut v = Vec::with_capacity(joint_targets_length);
+            for _ in 0..joint_targets_length {
+                let _elem_0 = crate::control_msgs::JointTarget::decode_one(buf)?;
+                v.push(_elem_0);
             }
-            _arr_0
+            v
         };
-        let torque_world = {
-            let mut _arr_0 = [0.0f64; 3];
-            for elem in _arr_0.iter_mut() {
-                *elem = buf.read_f64::<BigEndian>()?;
+        let cbor_commands_length = buf.read_i32::<BigEndian>()? as usize;
+        let cbor_commands = {
+            let mut v = Vec::with_capacity(cbor_commands_length);
+            for _ in 0..cbor_commands_length {
+                let _elem_0 = crate::control_msgs::CborCommand::decode_one(buf)?;
+                v.push(_elem_0);
             }
-            _arr_0
-        };
-        let point_world = {
-            let mut _arr_0 = [0.0f64; 3];
-            for elem in _arr_0.iter_mut() {
-                *elem = buf.read_f64::<BigEndian>()?;
-            }
-            _arr_0
+            v
         };
         Ok(Self {
             header,
-            body_id,
+            based_on_time_ns,
             apply_at_ns,
             valid_until_ns,
-            force_world,
-            torque_world,
-            point_world,
+            joint_targets,
+            cbor_commands,
         })
     }
 
     pub fn encoded_size(&self) -> usize {
         let mut size = 0usize;
         size += self.header.encoded_size();
-        size += 4 + self.body_id.len() + 1;
         size += 8;
         size += 8;
-        size += self.force_world.len() * 8;
-        size += self.torque_world.len() * 8;
-        size += self.point_world.len() * 8;
+        size += 8;
+        size += 4;
+        for v0 in self.joint_targets.iter() {
+            size += v0.encoded_size();
+        }
+        size += 4;
+        for v0 in self.cbor_commands.iter() {
+            size += v0.encoded_size();
+        }
         size
     }
 
