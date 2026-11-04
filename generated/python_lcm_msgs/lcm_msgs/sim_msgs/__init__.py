@@ -4,7 +4,9 @@ DO NOT MODIFY BY HAND!!!!
 lcm-gen 1.5.2
 """
 
-from .BodyPoses import BodyPoses as BodyPoses
 from .SimulationClock import SimulationClock as SimulationClock
+from .CborExtension import CborExtension as CborExtension
 from .BodyPose import BodyPose as BodyPose
 from .BodyMotion import BodyMotion as BodyMotion
+from .JointTruth import JointTruth as JointTruth
+from .WorldState import WorldState as WorldState

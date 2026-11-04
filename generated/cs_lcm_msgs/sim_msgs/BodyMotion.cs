@@ -12,7 +12,7 @@ namespace sim_msgs
 {
     public sealed class BodyMotion : LCM.LCM.LCMEncodable
     {
-        public common_msgs.SampleHeader header;
+        public String frame_id;
         public geometry_msgs.Pose pose_world;
         public double[] linear_velocity_world;
         public double[] angular_velocity_world;
@@ -28,7 +28,7 @@ namespace sim_msgs
         }
  
         public static readonly ulong LCM_FINGERPRINT;
-        public static readonly ulong LCM_FINGERPRINT_BASE = 0x84dc3cee7768aa82L;
+        public static readonly ulong LCM_FINGERPRINT_BASE = 0x9094e4b204b86128L;
  
         static BodyMotion()
         {
@@ -42,7 +42,6 @@ namespace sim_msgs
  
             classes.Add("sim_msgs.BodyMotion");
             ulong hash = LCM_FINGERPRINT_BASE
-                 + common_msgs.SampleHeader._hashRecursive(classes)
                  + geometry_msgs.Pose._hashRecursive(classes)
                 ;
             classes.RemoveAt(classes.Count - 1);
@@ -57,7 +56,8 @@ namespace sim_msgs
  
         public void _encodeRecursive(LCMDataOutputStream outs)
         {
-            this.header._encodeRecursive(outs); 
+            byte[] __strbuf = null;
+            __strbuf = System.Text.Encoding.GetEncoding("US-ASCII").GetBytes(this.frame_id); outs.Write(__strbuf.Length+1); outs.Write(__strbuf, 0, __strbuf.Length); outs.Write((byte) 0); 
  
             this.pose_world._encodeRecursive(outs); 
  
@@ -100,7 +100,8 @@ namespace sim_msgs
  
         public void _decodeRecursive(LCMDataInputStream ins)
         {
-            this.header = common_msgs.SampleHeader._decodeRecursiveFactory(ins);
+            byte[] __strbuf = null;
+            __strbuf = new byte[ins.ReadInt32()-1]; ins.ReadFully(__strbuf); ins.ReadByte(); this.frame_id = System.Text.Encoding.GetEncoding("US-ASCII").GetString(__strbuf);
  
             this.pose_world = geometry_msgs.Pose._decodeRecursiveFactory(ins);
  
@@ -129,7 +130,7 @@ namespace sim_msgs
         public sim_msgs.BodyMotion Copy()
         {
             sim_msgs.BodyMotion outobj = new sim_msgs.BodyMotion();
-            outobj.header = this.header.Copy();
+            outobj.frame_id = this.frame_id;
  
             outobj.pose_world = this.pose_world.Copy();
  

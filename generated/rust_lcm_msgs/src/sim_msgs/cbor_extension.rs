@@ -5,15 +5,16 @@ use std::io::{self, Read, Write, Cursor};
 use std::sync::OnceLock;
 
 #[derive(Debug, Clone, Default, PartialEq)]
-pub struct BodyPoses {
-    pub header: crate::common_msgs::SampleHeader,
-    pub model_revision: std::string::String,
-    pub bodies: Vec<crate::sim_msgs::BodyPose>,
+pub struct CborExtension {
+    pub entity_id: std::string::String,
+    pub key: std::string::String,
+    pub schema: std::string::String,
+    pub value: Vec<u8>,
 }
 
-impl BodyPoses {
-    pub const HASH: i64 = 0xAC643FA69A260C12u64 as i64;
-    pub const NAME: &str = "sim_msgs.BodyPoses";
+impl CborExtension {
+    pub const HASH: i64 = 0x2B8C40FCF830AB0Du64 as i64;
+    pub const NAME: &str = "sim_msgs.CborExtension";
 
     fn packed_fingerprint() -> u64 {
         static CACHE: OnceLock<u64> = OnceLock::new();
@@ -26,9 +27,7 @@ impl BodyPoses {
             return 0;
         }
         parents.push(self_hash);
-        let mut tmphash = self_hash as u64;
-        tmphash = tmphash.wrapping_add(crate::common_msgs::SampleHeader::hash_recursive(parents));
-        tmphash = tmphash.wrapping_add(crate::sim_msgs::BodyPose::hash_recursive(parents));
+        let tmphash = self_hash as u64;
         parents.pop();
         // rotate left by 1
         tmphash << 1 | tmphash >> 63
@@ -53,53 +52,72 @@ impl BodyPoses {
     }
 
     pub fn encode_one<W: Write>(&self, buf: &mut W) -> io::Result<()> {
-        self.header.encode_one(buf)?;
         {
-            let bytes = self.model_revision.as_bytes();
+            let bytes = self.entity_id.as_bytes();
             buf.write_u32::<BigEndian>((bytes.len() + 1) as u32)?;
             buf.write_all(bytes)?;
             buf.write_u8(0)?;
         }
-        buf.write_i32::<BigEndian>(self.bodies.len() as i32)?;
-        for v0 in self.bodies.iter() {
-            v0.encode_one(buf)?;
+        {
+            let bytes = self.key.as_bytes();
+            buf.write_u32::<BigEndian>((bytes.len() + 1) as u32)?;
+            buf.write_all(bytes)?;
+            buf.write_u8(0)?;
         }
+        {
+            let bytes = self.schema.as_bytes();
+            buf.write_u32::<BigEndian>((bytes.len() + 1) as u32)?;
+            buf.write_all(bytes)?;
+            buf.write_u8(0)?;
+        }
+        buf.write_i32::<BigEndian>(self.value.len() as i32)?;
+        buf.write_all(&self.value)?;
         Ok(())
     }
 
     pub fn decode_one<R: Read>(buf: &mut R) -> io::Result<Self> {
-        let header = crate::common_msgs::SampleHeader::decode_one(buf)?;
-        let model_revision = {
+        let entity_id = {
             let len = buf.read_u32::<BigEndian>()? as usize;
             let mut bytes = vec![0u8; len];
             buf.read_exact(&mut bytes)?;
             std::string::String::from_utf8(bytes[..len - 1].to_vec())
                 .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?
         };
-        let count = buf.read_i32::<BigEndian>()? as usize;
-        let bodies = {
-            let mut v = Vec::with_capacity(count);
-            for _ in 0..count {
-                let _elem_0 = crate::sim_msgs::BodyPose::decode_one(buf)?;
-                v.push(_elem_0);
-            }
+        let key = {
+            let len = buf.read_u32::<BigEndian>()? as usize;
+            let mut bytes = vec![0u8; len];
+            buf.read_exact(&mut bytes)?;
+            std::string::String::from_utf8(bytes[..len - 1].to_vec())
+                .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?
+        };
+        let schema = {
+            let len = buf.read_u32::<BigEndian>()? as usize;
+            let mut bytes = vec![0u8; len];
+            buf.read_exact(&mut bytes)?;
+            std::string::String::from_utf8(bytes[..len - 1].to_vec())
+                .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?
+        };
+        let value_length = buf.read_i32::<BigEndian>()? as usize;
+        let value = {
+            let mut v = vec![0u8; value_length];
+            buf.read_exact(&mut v)?;
             v
         };
         Ok(Self {
-            header,
-            model_revision,
-            bodies,
+            entity_id,
+            key,
+            schema,
+            value,
         })
     }
 
     pub fn encoded_size(&self) -> usize {
         let mut size = 0usize;
-        size += self.header.encoded_size();
-        size += 4 + self.model_revision.len() + 1;
+        size += 4 + self.entity_id.len() + 1;
+        size += 4 + self.key.len() + 1;
+        size += 4 + self.schema.len() + 1;
         size += 4;
-        for v0 in self.bodies.iter() {
-            size += v0.encoded_size();
-        }
+        size += self.value.len();
         size
     }
 

@@ -2,5 +2,7 @@
 
 export * from "./BodyMotion.ts";
 export * from "./BodyPose.ts";
-export * from "./BodyPoses.ts";
+export * from "./CborExtension.ts";
+export * from "./JointTruth.ts";
 export * from "./SimulationClock.ts";
+export * from "./WorldState.ts";

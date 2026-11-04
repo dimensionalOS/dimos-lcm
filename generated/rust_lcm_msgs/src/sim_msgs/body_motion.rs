@@ -6,7 +6,7 @@ use std::sync::OnceLock;
 
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct BodyMotion {
-    pub header: crate::common_msgs::SampleHeader,
+    pub frame_id: std::string::String,
     pub pose_world: crate::geometry_msgs::Pose,
     pub linear_velocity_world: [f64; 3],
     pub angular_velocity_world: [f64; 3],
@@ -15,7 +15,7 @@ pub struct BodyMotion {
 }
 
 impl BodyMotion {
-    pub const HASH: i64 = 0x84DC3CEE7768AA82u64 as i64;
+    pub const HASH: i64 = 0x9094E4B204B86128u64 as i64;
     pub const NAME: &str = "sim_msgs.BodyMotion";
 
     fn packed_fingerprint() -> u64 {
@@ -30,7 +30,6 @@ impl BodyMotion {
         }
         parents.push(self_hash);
         let mut tmphash = self_hash as u64;
-        tmphash = tmphash.wrapping_add(crate::common_msgs::SampleHeader::hash_recursive(parents));
         tmphash = tmphash.wrapping_add(crate::geometry_msgs::Pose::hash_recursive(parents));
         parents.pop();
         // rotate left by 1
@@ -56,7 +55,12 @@ impl BodyMotion {
     }
 
     pub fn encode_one<W: Write>(&self, buf: &mut W) -> io::Result<()> {
-        self.header.encode_one(buf)?;
+        {
+            let bytes = self.frame_id.as_bytes();
+            buf.write_u32::<BigEndian>((bytes.len() + 1) as u32)?;
+            buf.write_all(bytes)?;
+            buf.write_u8(0)?;
+        }
         self.pose_world.encode_one(buf)?;
         for v0 in self.linear_velocity_world.iter() {
             buf.write_f64::<BigEndian>(*v0)?;
@@ -74,7 +78,13 @@ impl BodyMotion {
     }
 
     pub fn decode_one<R: Read>(buf: &mut R) -> io::Result<Self> {
-        let header = crate::common_msgs::SampleHeader::decode_one(buf)?;
+        let frame_id = {
+            let len = buf.read_u32::<BigEndian>()? as usize;
+            let mut bytes = vec![0u8; len];
+            buf.read_exact(&mut bytes)?;
+            std::string::String::from_utf8(bytes[..len - 1].to_vec())
+                .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?
+        };
         let pose_world = crate::geometry_msgs::Pose::decode_one(buf)?;
         let linear_velocity_world = {
             let mut _arr_0 = [0.0f64; 3];
@@ -105,7 +115,7 @@ impl BodyMotion {
             _arr_0
         };
         Ok(Self {
-            header,
+            frame_id,
             pose_world,
             linear_velocity_world,
             angular_velocity_world,
@@ -116,7 +126,7 @@ impl BodyMotion {
 
     pub fn encoded_size(&self) -> usize {
         let mut size = 0usize;
-        size += self.header.encoded_size();
+        size += 4 + self.frame_id.len() + 1;
         size += self.pose_world.encoded_size();
         size += self.linear_velocity_world.len() * 8;
         size += self.angular_velocity_world.len() * 8;

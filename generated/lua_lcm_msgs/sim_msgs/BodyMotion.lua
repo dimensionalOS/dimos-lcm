@@ -7,7 +7,6 @@ DO NOT MODIFY BY HAND!!!!
 local lcm = require('lcm')
 
 local geometry_msgs_Pose = require('geometry_msgs.Pose')
-local common_msgs_SampleHeader = require('common_msgs.SampleHeader')
 
 local setmetatable = setmetatable
 local ipairs = ipairs
@@ -50,7 +49,7 @@ function BodyMotion:new()
 
   local obj = {}
 
-  obj.header = nil
+  obj.frame_id = ''
   obj.pose_world = nil
   obj.linear_velocity_world = {}
   for d0 = 1, 3 do
@@ -85,8 +84,7 @@ function BodyMotion._get_hash_recursive(parents)
 
   table.insert(newparents, BodyMotion)
 
-  local hash = lcm._hash.new('0x84dc3cee7768aa82')
-    + common_msgs_SampleHeader._get_hash_recursive(newparents)
+  local hash = lcm._hash.new('0x9094e4b204b86128')
     + geometry_msgs_Pose._get_hash_recursive(newparents)
   hash:rotate(1)
 
@@ -104,7 +102,9 @@ function BodyMotion:_encode_one()
 
   local buf_table = {}
 
-  table.insert(buf_table, self.header:_encode_one())
+  local __frame_id_tmpstr = lcm._pack.prepare_string(self.frame_id)
+  table.insert(buf_table, lcm._pack.pack('>I', #__frame_id_tmpstr + 1))
+  table.insert(buf_table, __frame_id_tmpstr .. '\0')
   table.insert(buf_table, self.pose_world:_encode_one())
   table.insert(buf_table, lcm._pack.pack('>3d', unpack(self.linear_velocity_world)))
   table.insert(buf_table, lcm._pack.pack('>3d', unpack(self.angular_velocity_world)))
@@ -131,7 +131,8 @@ function BodyMotion._decode_one(data)
 
   local obj = BodyMotion:new()
 
-  obj.header = common_msgs_SampleHeader._decode_one(data)
+  local __frame_id_tmpstrlen = lcm._pack.unpack('>I', data:read(4))
+  obj.frame_id = lcm._pack.prepare_string(data:read(__frame_id_tmpstrlen))
   obj.pose_world = geometry_msgs_Pose._decode_one(data)
   obj.linear_velocity_world = {lcm._pack.unpack('>3d', data:read(24))}
   obj.angular_velocity_world = {lcm._pack.unpack('>3d', data:read(24))}

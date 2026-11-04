@@ -1,8 +1,0 @@
-package sim_msgs;
-
-struct BodyPoses {
-    common_msgs.SampleHeader header;
-    string model_revision;
-    int32_t count;
-    sim_msgs.BodyPose bodies[count]; // complete absolute scene sample, not a delta
-}

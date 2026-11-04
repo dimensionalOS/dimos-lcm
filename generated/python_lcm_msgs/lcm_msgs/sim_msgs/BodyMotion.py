@@ -8,14 +8,18 @@ import struct
 import sys
 
 from lcm_msgs import geometry_msgs
-from lcm_msgs import common_msgs
 
 
 class BodyMotion(object):
+    """
+    Physical motion at the origin of frame_id, in world axes and SI units.
+    Acquired at the enclosing WorldState.header.time_ns.
+    """
+
     msg_name = "sim_msgs.BodyMotion"
 
     __slots__ = [
-        "header",
+        "frame_id",
         "pose_world",
         "linear_velocity_world",
         "angular_velocity_world",
@@ -24,7 +28,7 @@ class BodyMotion(object):
     ]
 
     __typenames__ = [
-        "common_msgs.SampleHeader",
+        "string",
         "geometry_msgs.Pose",
         "double",
         "double",
@@ -34,7 +38,7 @@ class BodyMotion(object):
 
     __dimensions__ = [None, None, [3], [3], [3], [3]]
 
-    header: common_msgs.SampleHeader
+    frame_id: "string"
     pose_world: geometry_msgs.Pose
     linear_velocity_world: "double"
     angular_velocity_world: "double"
@@ -43,19 +47,16 @@ class BodyMotion(object):
 
     def __init__(
         self,
-        header=common_msgs.SampleHeader(),
+        frame_id="",
         pose_world=geometry_msgs.Pose(),
         linear_velocity_world=[0.0 for dim0 in range(3)],
         angular_velocity_world=[0.0 for dim0 in range(3)],
         linear_acceleration_world=[0.0 for dim0 in range(3)],
         gravity_world=[0.0 for dim0 in range(3)],
     ):
-        # LCM Type: common_msgs.SampleHeader
-        self.header = header
-        """
-        frame_id identifies the queried rigid frame
-        LCM Type: geometry_msgs.Pose
-        """
+        # LCM Type: string
+        self.frame_id = frame_id
+        # LCM Type: geometry_msgs.Pose
         self.pose_world = pose_world
         # LCM Type: double[3]
         self.linear_velocity_world = linear_velocity_world
@@ -63,10 +64,7 @@ class BodyMotion(object):
         self.angular_velocity_world = angular_velocity_world
         # LCM Type: double[3]
         self.linear_acceleration_world = linear_acceleration_world
-        """
-        kinematic acceleration AT the frame origin
-        LCM Type: double[3]
-        """
+        # LCM Type: double[3]
         self.gravity_world = gravity_world
 
     def lcm_encode(self):
@@ -76,11 +74,10 @@ class BodyMotion(object):
         return buf.getvalue()
 
     def _encode_one(self, buf):
-        assert (
-            self.header._get_packed_fingerprint()
-            == common_msgs.SampleHeader._get_packed_fingerprint()
-        )
-        self.header._encode_one(buf)
+        __frame_id_encoded = self.frame_id.encode("utf-8")
+        buf.write(struct.pack(">I", len(__frame_id_encoded) + 1))
+        buf.write(__frame_id_encoded)
+        buf.write(b"\0")
         assert (
             self.pose_world._get_packed_fingerprint()
             == geometry_msgs.Pose._get_packed_fingerprint()
@@ -104,7 +101,8 @@ class BodyMotion(object):
     @classmethod
     def _decode_one(cls, buf):
         self = cls()
-        self.header = cls._get_field_type("header")._decode_one(buf)
+        __frame_id_len = struct.unpack(">I", buf.read(4))[0]
+        self.frame_id = buf.read(__frame_id_len)[:-1].decode("utf-8", "replace")
         self.pose_world = cls._get_field_type("pose_world")._decode_one(buf)
         self.linear_velocity_world = struct.unpack(">3d", buf.read(24))
         self.angular_velocity_world = struct.unpack(">3d", buf.read(24))
@@ -131,9 +129,7 @@ class BodyMotion(object):
             return 0
         newparents = parents + [cls]
         tmphash = (
-            0x84DC3CEE7768AA82
-            + common_msgs.SampleHeader._get_hash_recursive(newparents)
-            + geometry_msgs.Pose._get_hash_recursive(newparents)
+            0x9094E4B204B86128 + geometry_msgs.Pose._get_hash_recursive(newparents)
         ) & 0xFFFFFFFFFFFFFFFF
         tmphash = (
             ((tmphash << 1) & 0xFFFFFFFFFFFFFFFF) + (tmphash >> 63)

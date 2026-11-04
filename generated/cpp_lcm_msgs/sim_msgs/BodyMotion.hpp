@@ -9,20 +9,21 @@
 
 #include <lcm/lcm_coretypes.h>
 
-#include "common_msgs/SampleHeader.hpp"
+#include <string>
 #include "geometry_msgs/Pose.hpp"
 
 namespace sim_msgs
 {
 
+/**
+ * Physical motion at the origin of frame_id, in world axes and SI units.
+ * Acquired at the enclosing WorldState.header.time_ns.
+ */
 class BodyMotion
 {
     public:
-        common_msgs::SampleHeader header;
+        std::string frame_id;
 
-        /**
-         * frame_id identifies the queried rigid frame
-         */
         geometry_msgs::Pose pose_world;
 
         /**
@@ -41,7 +42,6 @@ class BodyMotion
         double     linear_acceleration_world[3];
 
         /**
-         * kinematic acceleration AT the frame origin
          * LCM Type: double[3]
          */
         double     gravity_world[3];
@@ -142,7 +142,9 @@ int BodyMotion::_encodeNoHash(void *buf, int offset, int maxlen) const
 {
     int pos = 0, tlen;
 
-    tlen = this->header._encodeNoHash(buf, offset + pos, maxlen - pos);
+    char* frame_id_cstr = const_cast<char*>(this->frame_id.c_str());
+    tlen = __string_encode_array(
+        buf, offset + pos, maxlen - pos, &frame_id_cstr, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
     tlen = this->pose_world._encodeNoHash(buf, offset + pos, maxlen - pos);
@@ -167,8 +169,14 @@ int BodyMotion::_decodeNoHash(const void *buf, int offset, int maxlen)
 {
     int pos = 0, tlen;
 
-    tlen = this->header._decodeNoHash(buf, offset + pos, maxlen - pos);
+    int32_t __frame_id_len__;
+    tlen = __int32_t_decode_array(
+        buf, offset + pos, maxlen - pos, &__frame_id_len__, 1);
     if(tlen < 0) return tlen; else pos += tlen;
+    if(__frame_id_len__ > maxlen - pos) return -1;
+    this->frame_id.assign(
+        static_cast<const char*>(buf) + offset + pos, __frame_id_len__ - 1);
+    pos += __frame_id_len__;
 
     tlen = this->pose_world._decodeNoHash(buf, offset + pos, maxlen - pos);
     if(tlen < 0) return tlen; else pos += tlen;
@@ -191,7 +199,7 @@ int BodyMotion::_decodeNoHash(const void *buf, int offset, int maxlen)
 int BodyMotion::_getEncodedSizeNoHash() const
 {
     int enc_size = 0;
-    enc_size += this->header._getEncodedSizeNoHash();
+    enc_size += this->frame_id.size() + 4 + 1;
     enc_size += this->pose_world._getEncodedSizeNoHash();
     enc_size += __double_encoded_array_size(NULL, 3);
     enc_size += __double_encoded_array_size(NULL, 3);
@@ -208,8 +216,7 @@ uint64_t BodyMotion::_computeHash(const __lcm_hash_ptr *p)
             return 0;
     const __lcm_hash_ptr cp = { p, BodyMotion::getHash };
 
-    uint64_t hash = 0x84dc3cee7768aa82LL +
-         common_msgs::SampleHeader::_computeHash(&cp) +
+    uint64_t hash = 0x9094e4b204b86128LL +
          geometry_msgs::Pose::_computeHash(&cp);
 
     return (hash<<1) + ((hash>>63)&1);

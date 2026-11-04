@@ -6,8 +6,14 @@ pub use body_motion::BodyMotion;
 mod body_pose;
 pub use body_pose::BodyPose;
 
-mod body_poses;
-pub use body_poses::BodyPoses;
+mod cbor_extension;
+pub use cbor_extension::CborExtension;
+
+mod joint_truth;
+pub use joint_truth::JointTruth;
 
 mod simulation_clock;
 pub use simulation_clock::SimulationClock;
+
+mod world_state;
+pub use world_state::WorldState;

@@ -10,13 +10,14 @@ import java.io.*;
 import java.util.*;
 import lcm.lcm.*;
  
+/**
+ * Physical motion at the origin of frame_id, in world axes and SI units.
+ * Acquired at the enclosing WorldState.header.time_ns.
+ */
 public final class BodyMotion implements lcm.lcm.LCMEncodable
 {
-    public common_msgs.SampleHeader header;
+    public String frame_id;
 
-    /**
-     * frame_id identifies the queried rigid frame
-     */
     public geometry_msgs.Pose pose_world;
 
     /**
@@ -35,7 +36,6 @@ public final class BodyMotion implements lcm.lcm.LCMEncodable
     public double linear_acceleration_world[];
 
     /**
-     * kinematic acceleration AT the frame origin
      * LCM Type: double[3]
      */
     public double gravity_world[];
@@ -50,7 +50,7 @@ public final class BodyMotion implements lcm.lcm.LCMEncodable
     }
  
     public static final long LCM_FINGERPRINT;
-    public static final long LCM_FINGERPRINT_BASE = 0x84dc3cee7768aa82L;
+    public static final long LCM_FINGERPRINT_BASE = 0x9094e4b204b86128L;
  
     static {
         LCM_FINGERPRINT = _hashRecursive(new ArrayList<Class<?>>());
@@ -63,7 +63,6 @@ public final class BodyMotion implements lcm.lcm.LCMEncodable
  
         classes.add(sim_msgs.BodyMotion.class);
         long hash = LCM_FINGERPRINT_BASE
-             + common_msgs.SampleHeader._hashRecursive(classes)
              + geometry_msgs.Pose._hashRecursive(classes)
             ;
         classes.remove(classes.size() - 1);
@@ -78,7 +77,8 @@ public final class BodyMotion implements lcm.lcm.LCMEncodable
  
     public void _encodeRecursive(DataOutput outs) throws IOException
     {
-        this.header._encodeRecursive(outs); 
+        char[] __strbuf = null;
+        __strbuf = new char[this.frame_id.length()]; this.frame_id.getChars(0, this.frame_id.length(), __strbuf, 0); outs.writeInt(__strbuf.length+1); for (int _i = 0; _i < __strbuf.length; _i++) outs.write(__strbuf[_i]); outs.writeByte(0); 
  
         this.pose_world._encodeRecursive(outs); 
  
@@ -122,7 +122,8 @@ public final class BodyMotion implements lcm.lcm.LCMEncodable
  
     public void _decodeRecursive(DataInput ins) throws IOException
     {
-        this.header = common_msgs.SampleHeader._decodeRecursiveFactory(ins);
+        char[] __strbuf = null;
+        __strbuf = new char[ins.readInt()-1]; for (int _i = 0; _i < __strbuf.length; _i++) __strbuf[_i] = (char) (ins.readByte()&0xff); ins.readByte(); this.frame_id = new String(__strbuf);
  
         this.pose_world = geometry_msgs.Pose._decodeRecursiveFactory(ins);
  
@@ -151,7 +152,7 @@ public final class BodyMotion implements lcm.lcm.LCMEncodable
     public sim_msgs.BodyMotion copy()
     {
         sim_msgs.BodyMotion outobj = new sim_msgs.BodyMotion();
-        outobj.header = this.header.copy();
+        outobj.frame_id = this.frame_id;
  
         outobj.pose_world = this.pose_world.copy();
  
