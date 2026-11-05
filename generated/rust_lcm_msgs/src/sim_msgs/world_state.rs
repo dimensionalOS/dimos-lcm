@@ -9,7 +9,7 @@ pub struct WorldState {
     pub header: crate::common_msgs::SampleHeader,
     pub model_revision: std::string::String,
     pub bodies: Vec<crate::sim_msgs::BodyState>,
-    pub joint_truth: crate::sim_msgs::JointTruth,
+    pub joint_truth: crate::sensor_msgs::JointState,
     pub cbor_observations: Vec<crate::sim_msgs::CborObservation>,
 }
 
@@ -31,7 +31,7 @@ impl WorldState {
         let mut tmphash = self_hash as u64;
         tmphash = tmphash.wrapping_add(crate::common_msgs::SampleHeader::hash_recursive(parents));
         tmphash = tmphash.wrapping_add(crate::sim_msgs::BodyState::hash_recursive(parents));
-        tmphash = tmphash.wrapping_add(crate::sim_msgs::JointTruth::hash_recursive(parents));
+        tmphash = tmphash.wrapping_add(crate::sensor_msgs::JointState::hash_recursive(parents));
         tmphash = tmphash.wrapping_add(crate::sim_msgs::CborObservation::hash_recursive(parents));
         parents.pop();
         // rotate left by 1
@@ -94,7 +94,7 @@ impl WorldState {
             }
             v
         };
-        let joint_truth = crate::sim_msgs::JointTruth::decode_one(buf)?;
+        let joint_truth = crate::sensor_msgs::JointState::decode_one(buf)?;
         let cbor_observations_length = buf.read_i32::<BigEndian>()? as usize;
         let cbor_observations = {
             let mut v = Vec::with_capacity(cbor_observations_length);

@@ -4,7 +4,7 @@
 `model_revision` apply to every nested record. It contains:
 
 - `BodyState[] bodies`: every described body/frame with `pose: Pose`, `twist: Twist` and `acceleration: Accel`.
-- `JointTruth joint_truth`: named scalar positions, velocities and available efforts.
+- `JointState joint_truth`: named scalar positions, velocities and available efforts.
 - `CborObservation[] cbor_observations`: all current optional entity properties in the export.
 
 Each snapshot replaces the previous snapshot. A missing extension does not retain
@@ -30,7 +30,10 @@ wire fingerprints relative to F; there is no mixed-codec compatibility.
 never publication or receipt time. Simulation has a unique clock ID per run,
 starts at zero, and increments epoch on reset/placement. Sequence is monotonic
 within a source/epoch; retransmission preserves it. Nested physical records share
-this one header. Ordinary sensor messages carry their own acquisition header.
+this acquisition. The nested `joint_truth.header` equals `WorldState.header`;
+ordinary sensor outputs carry their own acquisition header and source identity.
+JointState data fields are reused; its SampleHeader is a draft wire-format change
+from the std_msgs.Header on main, introduced earlier in this stack.
 
 Compare times only within a clock and epoch. Old-epoch data cannot satisfy a
 post-reset control boundary. Generated codecs preserve int64 values, including

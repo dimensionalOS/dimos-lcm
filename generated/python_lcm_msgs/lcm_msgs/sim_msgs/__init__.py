@@ -6,6 +6,5 @@ lcm-gen 1.5.2
 
 from .CborObservation import CborObservation as CborObservation
 from .SimulationClock import SimulationClock as SimulationClock
-from .JointTruth import JointTruth as JointTruth
 from .WorldState import WorldState as WorldState
 from .BodyState import BodyState as BodyState

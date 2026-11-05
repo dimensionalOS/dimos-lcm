@@ -2,6 +2,5 @@
 
 export * from "./BodyState.ts";
 export * from "./CborObservation.ts";
-export * from "./JointTruth.ts";
 export * from "./SimulationClock.ts";
 export * from "./WorldState.ts";

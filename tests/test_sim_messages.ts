@@ -16,6 +16,7 @@ Deno.test("complete world state preserves acquisition and typed physical values"
   assertEquals([alpha.x, alpha.y, alpha.z], [4, 5, 6]);
   assertEquals([b.twist.linear.x, b.twist.linear.y, b.twist.linear.z], [.1, .2, .3]);
   assertEquals([b.twist.angular.x, b.twist.angular.y, b.twist.angular.z], [1, 2, 3]);
+  assertEquals(m.joint_truth.header, m.header);
   assertEquals(Array.from(m.joint_truth.position), [.25]);
   assertEquals(Array.from(m.joint_truth.effort), []);
   assertEquals(m.cbor_observations[0].key, "thermal");

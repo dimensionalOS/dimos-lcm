@@ -6,9 +6,6 @@ pub use body_state::BodyState;
 mod cbor_observation;
 pub use cbor_observation::CborObservation;
 
-mod joint_truth;
-pub use joint_truth::JointTruth;
-
 mod simulation_clock;
 pub use simulation_clock::SimulationClock;
 

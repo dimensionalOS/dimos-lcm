@@ -7,9 +7,8 @@ lcm-gen 1.5.2
 
 local M = {}
 
-M.SimulationClock = require('sim_msgs.SimulationClock')
 M.CborObservation = require('sim_msgs.CborObservation')
-M.JointTruth = require('sim_msgs.JointTruth')
+M.SimulationClock = require('sim_msgs.SimulationClock')
 M.WorldState = require('sim_msgs.WorldState')
 M.BodyState = require('sim_msgs.BodyState')
 

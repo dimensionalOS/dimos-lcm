@@ -9,7 +9,7 @@ import sys
 
 from lcm_msgs import common_msgs
 from . import *
-from .JointTruth import JointTruth
+from lcm_msgs import sensor_msgs
 from .BodyState import BodyState
 from .CborObservation import CborObservation
 
@@ -39,7 +39,7 @@ class WorldState(object):
         "string",
         "int32_t",
         "BodyState",
-        "JointTruth",
+        "sensor_msgs.JointState",
         "int32_t",
         "CborObservation",
     ]
@@ -58,7 +58,7 @@ class WorldState(object):
     model_revision: "string"
     bodies_length: "int32_t"
     bodies: BodyState
-    joint_truth: JointTruth
+    joint_truth: sensor_msgs.JointState
     cbor_observations_length: "int32_t"
     cbor_observations: CborObservation
 
@@ -68,7 +68,7 @@ class WorldState(object):
         model_revision="",
         bodies_length=0,
         bodies=[],
-        joint_truth=JointTruth(),
+        joint_truth=sensor_msgs.JointState(),
         cbor_observations_length=0,
         cbor_observations=[],
     ):
@@ -80,7 +80,10 @@ class WorldState(object):
         self.bodies_length = bodies_length
         # LCM Type: BodyState[bodies_length]
         self.bodies = bodies
-        # LCM Type: JointTruth
+        """
+        Same acquisition header as this WorldState; effort is actuator-applied.
+        LCM Type: sensor_msgs.JointState
+        """
         self.joint_truth = joint_truth
         # LCM Type: int32_t
         self.cbor_observations_length = cbor_observations_length
@@ -112,7 +115,7 @@ class WorldState(object):
             self.bodies[i0]._encode_one(buf)
         assert (
             self.joint_truth._get_packed_fingerprint()
-            == JointTruth._get_packed_fingerprint()
+            == sensor_msgs.JointState._get_packed_fingerprint()
         )
         self.joint_truth._encode_one(buf)
         buf.write(struct.pack(">i", self.cbor_observations_length))
@@ -176,7 +179,7 @@ class WorldState(object):
             0x1E56F36A590E109D
             + common_msgs.SampleHeader._get_hash_recursive(newparents)
             + BodyState._get_hash_recursive(newparents)
-            + JointTruth._get_hash_recursive(newparents)
+            + sensor_msgs.JointState._get_hash_recursive(newparents)
             + CborObservation._get_hash_recursive(newparents)
         ) & 0xFFFFFFFFFFFFFFFF
         tmphash = (

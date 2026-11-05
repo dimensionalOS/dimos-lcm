@@ -29,7 +29,10 @@ public final class WorldState implements lcm.lcm.LCMEncodable
      */
     public sim_msgs.BodyState bodies[];
 
-    public sim_msgs.JointTruth joint_truth;
+    /**
+     * Same acquisition header as this WorldState; effort is actuator-applied.
+     */
+    public sensor_msgs.JointState joint_truth;
 
     public int cbor_observations_length;
 
@@ -59,7 +62,7 @@ public final class WorldState implements lcm.lcm.LCMEncodable
         long hash = LCM_FINGERPRINT_BASE
              + common_msgs.SampleHeader._hashRecursive(classes)
              + sim_msgs.BodyState._hashRecursive(classes)
-             + sim_msgs.JointTruth._hashRecursive(classes)
+             + sensor_msgs.JointState._hashRecursive(classes)
              + sim_msgs.CborObservation._hashRecursive(classes)
             ;
         classes.remove(classes.size() - 1);
@@ -129,7 +132,7 @@ public final class WorldState implements lcm.lcm.LCMEncodable
             this.bodies[a] = sim_msgs.BodyState._decodeRecursiveFactory(ins);
         }
  
-        this.joint_truth = sim_msgs.JointTruth._decodeRecursiveFactory(ins);
+        this.joint_truth = sensor_msgs.JointState._decodeRecursiveFactory(ins);
  
         this.cbor_observations_length = ins.readInt();
  

@@ -2,7 +2,7 @@
 
 import { SampleHeader } from "../common_msgs/SampleHeader.ts";
 import { BodyState } from "./BodyState.ts";
-import { JointTruth } from "./JointTruth.ts";
+import { JointState } from "../sensor_msgs/JointState.ts";
 import { CborObservation } from "./CborObservation.ts";
 
 export class WorldState {
@@ -14,7 +14,7 @@ export class WorldState {
   model_revision: string;
   bodies_length: number;
   bodies: BodyState[];
-  joint_truth: JointTruth;
+  joint_truth: JointState;
   cbor_observations_length: number;
   cbor_observations: CborObservation[];
 
@@ -23,7 +23,7 @@ export class WorldState {
     this.model_revision = init?.model_revision ?? "";
     this.bodies_length = init?.bodies_length ?? 0;
     this.bodies = init?.bodies ?? [];
-    this.joint_truth = init?.joint_truth ?? new JointTruth();
+    this.joint_truth = init?.joint_truth ?? new JointState();
     this.cbor_observations_length = init?.cbor_observations_length ?? 0;
     this.cbor_observations = init?.cbor_observations ?? [];
   }
@@ -61,8 +61,8 @@ export class WorldState {
       target.bodies[i0] = new BodyState();
       ({ offset } = BodyState._decodeOne(view, offset, target.bodies[i0]));
     }
-    target.joint_truth = new JointTruth();
-    ({ offset } = JointTruth._decodeOne(view, offset, target.joint_truth));
+    target.joint_truth = new JointState();
+    ({ offset } = JointState._decodeOne(view, offset, target.joint_truth));
     target.cbor_observations_length = view.getInt32(offset, false);
     offset += 4;
     target.cbor_observations = new Array(target.cbor_observations_length);
@@ -135,7 +135,7 @@ export class WorldState {
     let tmphash = WorldState._HASH;
     tmphash = (tmphash + SampleHeader._getHashRecursive(newparents)) & 0xffffffffffffffffn;
     tmphash = (tmphash + BodyState._getHashRecursive(newparents)) & 0xffffffffffffffffn;
-    tmphash = (tmphash + JointTruth._getHashRecursive(newparents)) & 0xffffffffffffffffn;
+    tmphash = (tmphash + JointState._getHashRecursive(newparents)) & 0xffffffffffffffffn;
     tmphash = (tmphash + CborObservation._getHashRecursive(newparents)) & 0xffffffffffffffffn;
     tmphash = (((tmphash << 1n) & 0xffffffffffffffffn) + (tmphash >> 63n)) & 0xffffffffffffffffn;
     return tmphash;

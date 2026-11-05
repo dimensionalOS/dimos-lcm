@@ -9,7 +9,8 @@ struct WorldState {
     string model_revision;
     int32_t bodies_length;
     BodyState bodies[bodies_length];
-    JointTruth joint_truth;
+    // Same acquisition header as this WorldState; effort is actuator-applied.
+    sensor_msgs.JointState joint_truth;
     int32_t cbor_observations_length;
     CborObservation cbor_observations[cbor_observations_length];
 }

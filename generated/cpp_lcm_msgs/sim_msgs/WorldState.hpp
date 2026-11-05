@@ -13,7 +13,7 @@
 #include <vector>
 #include "common_msgs/SampleHeader.hpp"
 #include "sim_msgs/BodyState.hpp"
-#include "sim_msgs/JointTruth.hpp"
+#include "sensor_msgs/JointState.hpp"
 #include "sim_msgs/CborObservation.hpp"
 
 namespace sim_msgs
@@ -39,7 +39,10 @@ class WorldState
          */
         std::vector< sim_msgs::BodyState > bodies;
 
-        sim_msgs::JointTruth joint_truth;
+        /**
+         * Same acquisition header as this WorldState; effort is actuator-applied.
+         */
+        sensor_msgs::JointState joint_truth;
 
         int32_t    cbor_observations_length;
 
@@ -250,7 +253,7 @@ uint64_t WorldState::_computeHash(const __lcm_hash_ptr *p)
     uint64_t hash = 0x1e56f36a590e109dLL +
          common_msgs::SampleHeader::_computeHash(&cp) +
          sim_msgs::BodyState::_computeHash(&cp) +
-         sim_msgs::JointTruth::_computeHash(&cp) +
+         sensor_msgs::JointState::_computeHash(&cp) +
          sim_msgs::CborObservation::_computeHash(&cp);
 
     return (hash<<1) + ((hash>>63)&1);

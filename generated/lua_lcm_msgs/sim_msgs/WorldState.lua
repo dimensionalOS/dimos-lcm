@@ -8,7 +8,7 @@ local lcm = require('lcm')
 
 local sim_msgs_BodyState = require('sim_msgs.BodyState')
 local common_msgs_SampleHeader = require('common_msgs.SampleHeader')
-local sim_msgs_JointTruth = require('sim_msgs.JointTruth')
+local sensor_msgs_JointState = require('sensor_msgs.JointState')
 local sim_msgs_CborObservation = require('sim_msgs.CborObservation')
 
 local setmetatable = setmetatable
@@ -79,7 +79,7 @@ function WorldState._get_hash_recursive(parents)
   local hash = lcm._hash.new('0x1e56f36a590e109d')
     + common_msgs_SampleHeader._get_hash_recursive(newparents)
     + sim_msgs_BodyState._get_hash_recursive(newparents)
-    + sim_msgs_JointTruth._get_hash_recursive(newparents)
+    + sensor_msgs_JointState._get_hash_recursive(newparents)
     + sim_msgs_CborObservation._get_hash_recursive(newparents)
   hash:rotate(1)
 
@@ -139,7 +139,7 @@ function WorldState._decode_one(data)
   for i0 = 1, obj.bodies_length do
     obj.bodies[i0] = sim_msgs_BodyState._decode_one(data)
   end
-  obj.joint_truth = sim_msgs_JointTruth._decode_one(data)
+  obj.joint_truth = sensor_msgs_JointState._decode_one(data)
   obj.cbor_observations_length = lcm._pack.unpack('>i', data:read(4))
   obj.cbor_observations = {}
   for i0 = 1, obj.cbor_observations_length do
