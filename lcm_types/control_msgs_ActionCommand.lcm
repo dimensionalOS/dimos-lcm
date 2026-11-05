@@ -9,8 +9,8 @@ struct ActionCommand {
     int64_t based_on_time_ns;
     int64_t apply_at_ns;
     int64_t valid_until_ns;
-    int32_t joint_targets_length;
-    JointTarget joint_targets[joint_targets_length];
+    int32_t joint_commands_length;
+    JointCommand joint_commands[joint_commands_length];
     int32_t cbor_commands_length;
     CborCommand cbor_commands[cbor_commands_length];
 }

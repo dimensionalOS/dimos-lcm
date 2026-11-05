@@ -11,10 +11,10 @@ import java.util.*;
 import lcm.lcm.*;
  
 /**
- * A complete physical sample at one acquisition, not a solver checkpoint.
- * Contains every described body's absolute world pose, every configured motion
- * frame and joint, and all current configured extension properties. Consumers
- * replace the previous snapshot: omission never means "keep the old value".
+ * Complete physical acquisition, not a native solver checkpoint.
+ * One record per described rigid body/frame, including fixed sensor mounts;
+ * configured scalar joints and all current optional CBOR observations.
+ * Replaces the previous sample. Gravity is fixed startup configuration.
  */
 public final class WorldState implements lcm.lcm.LCMEncodable
 {
@@ -22,28 +22,21 @@ public final class WorldState implements lcm.lcm.LCMEncodable
 
     public String model_revision;
 
-    public int body_poses_length;
+    public int bodies_length;
 
     /**
-     * LCM Type: sim_msgs.BodyPose[body_poses_length]
+     * LCM Type: sim_msgs.BodyState[bodies_length]
      */
-    public sim_msgs.BodyPose body_poses[];
-
-    public int body_motion_length;
-
-    /**
-     * LCM Type: sim_msgs.BodyMotion[body_motion_length]
-     */
-    public sim_msgs.BodyMotion body_motion[];
+    public sim_msgs.BodyState bodies[];
 
     public sim_msgs.JointTruth joint_truth;
 
-    public int extensions_length;
+    public int cbor_observations_length;
 
     /**
-     * LCM Type: sim_msgs.CborExtension[extensions_length]
+     * LCM Type: sim_msgs.CborObservation[cbor_observations_length]
      */
-    public sim_msgs.CborExtension extensions[];
+    public sim_msgs.CborObservation cbor_observations[];
 
  
     public WorldState()
@@ -51,7 +44,7 @@ public final class WorldState implements lcm.lcm.LCMEncodable
     }
  
     public static final long LCM_FINGERPRINT;
-    public static final long LCM_FINGERPRINT_BASE = 0x533a7aa1693d6ef6L;
+    public static final long LCM_FINGERPRINT_BASE = 0x1e56f36a590e109dL;
  
     static {
         LCM_FINGERPRINT = _hashRecursive(new ArrayList<Class<?>>());
@@ -65,10 +58,9 @@ public final class WorldState implements lcm.lcm.LCMEncodable
         classes.add(sim_msgs.WorldState.class);
         long hash = LCM_FINGERPRINT_BASE
              + common_msgs.SampleHeader._hashRecursive(classes)
-             + sim_msgs.BodyPose._hashRecursive(classes)
-             + sim_msgs.BodyMotion._hashRecursive(classes)
+             + sim_msgs.BodyState._hashRecursive(classes)
              + sim_msgs.JointTruth._hashRecursive(classes)
-             + sim_msgs.CborExtension._hashRecursive(classes)
+             + sim_msgs.CborObservation._hashRecursive(classes)
             ;
         classes.remove(classes.size() - 1);
         return (hash<<1) + ((hash>>63)&1);
@@ -87,24 +79,18 @@ public final class WorldState implements lcm.lcm.LCMEncodable
  
         __strbuf = new char[this.model_revision.length()]; this.model_revision.getChars(0, this.model_revision.length(), __strbuf, 0); outs.writeInt(__strbuf.length+1); for (int _i = 0; _i < __strbuf.length; _i++) outs.write(__strbuf[_i]); outs.writeByte(0); 
  
-        outs.writeInt(this.body_poses_length); 
+        outs.writeInt(this.bodies_length); 
  
-        for (int a = 0; a < this.body_poses_length; a++) {
-            this.body_poses[a]._encodeRecursive(outs); 
-        }
- 
-        outs.writeInt(this.body_motion_length); 
- 
-        for (int a = 0; a < this.body_motion_length; a++) {
-            this.body_motion[a]._encodeRecursive(outs); 
+        for (int a = 0; a < this.bodies_length; a++) {
+            this.bodies[a]._encodeRecursive(outs); 
         }
  
         this.joint_truth._encodeRecursive(outs); 
  
-        outs.writeInt(this.extensions_length); 
+        outs.writeInt(this.cbor_observations_length); 
  
-        for (int a = 0; a < this.extensions_length; a++) {
-            this.extensions[a]._encodeRecursive(outs); 
+        for (int a = 0; a < this.cbor_observations_length; a++) {
+            this.cbor_observations[a]._encodeRecursive(outs); 
         }
  
     }
@@ -136,27 +122,20 @@ public final class WorldState implements lcm.lcm.LCMEncodable
  
         __strbuf = new char[ins.readInt()-1]; for (int _i = 0; _i < __strbuf.length; _i++) __strbuf[_i] = (char) (ins.readByte()&0xff); ins.readByte(); this.model_revision = new String(__strbuf);
  
-        this.body_poses_length = ins.readInt();
+        this.bodies_length = ins.readInt();
  
-        this.body_poses = new sim_msgs.BodyPose[(int) body_poses_length];
-        for (int a = 0; a < this.body_poses_length; a++) {
-            this.body_poses[a] = sim_msgs.BodyPose._decodeRecursiveFactory(ins);
-        }
- 
-        this.body_motion_length = ins.readInt();
- 
-        this.body_motion = new sim_msgs.BodyMotion[(int) body_motion_length];
-        for (int a = 0; a < this.body_motion_length; a++) {
-            this.body_motion[a] = sim_msgs.BodyMotion._decodeRecursiveFactory(ins);
+        this.bodies = new sim_msgs.BodyState[(int) bodies_length];
+        for (int a = 0; a < this.bodies_length; a++) {
+            this.bodies[a] = sim_msgs.BodyState._decodeRecursiveFactory(ins);
         }
  
         this.joint_truth = sim_msgs.JointTruth._decodeRecursiveFactory(ins);
  
-        this.extensions_length = ins.readInt();
+        this.cbor_observations_length = ins.readInt();
  
-        this.extensions = new sim_msgs.CborExtension[(int) extensions_length];
-        for (int a = 0; a < this.extensions_length; a++) {
-            this.extensions[a] = sim_msgs.CborExtension._decodeRecursiveFactory(ins);
+        this.cbor_observations = new sim_msgs.CborObservation[(int) cbor_observations_length];
+        for (int a = 0; a < this.cbor_observations_length; a++) {
+            this.cbor_observations[a] = sim_msgs.CborObservation._decodeRecursiveFactory(ins);
         }
  
     }
@@ -168,27 +147,20 @@ public final class WorldState implements lcm.lcm.LCMEncodable
  
         outobj.model_revision = this.model_revision;
  
-        outobj.body_poses_length = this.body_poses_length;
+        outobj.bodies_length = this.bodies_length;
  
-        outobj.body_poses = new sim_msgs.BodyPose[(int) body_poses_length];
-        for (int a = 0; a < this.body_poses_length; a++) {
-            outobj.body_poses[a] = this.body_poses[a].copy();
-        }
- 
-        outobj.body_motion_length = this.body_motion_length;
- 
-        outobj.body_motion = new sim_msgs.BodyMotion[(int) body_motion_length];
-        for (int a = 0; a < this.body_motion_length; a++) {
-            outobj.body_motion[a] = this.body_motion[a].copy();
+        outobj.bodies = new sim_msgs.BodyState[(int) bodies_length];
+        for (int a = 0; a < this.bodies_length; a++) {
+            outobj.bodies[a] = this.bodies[a].copy();
         }
  
         outobj.joint_truth = this.joint_truth.copy();
  
-        outobj.extensions_length = this.extensions_length;
+        outobj.cbor_observations_length = this.cbor_observations_length;
  
-        outobj.extensions = new sim_msgs.CborExtension[(int) extensions_length];
-        for (int a = 0; a < this.extensions_length; a++) {
-            outobj.extensions[a] = this.extensions[a].copy();
+        outobj.cbor_observations = new sim_msgs.CborObservation[(int) cbor_observations_length];
+        for (int a = 0; a < this.cbor_observations_length; a++) {
+            outobj.cbor_observations[a] = this.cbor_observations[a].copy();
         }
  
         return outobj;

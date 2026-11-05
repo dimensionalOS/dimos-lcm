@@ -5,16 +5,15 @@ use std::io::{self, Read, Write, Cursor};
 use std::sync::OnceLock;
 
 #[derive(Debug, Clone, Default, PartialEq)]
-pub struct CborExtension {
+pub struct CborObservation {
     pub entity_id: std::string::String,
     pub key: std::string::String,
-    pub schema: std::string::String,
     pub value: Vec<u8>,
 }
 
-impl CborExtension {
-    pub const HASH: i64 = 0x2B8C40FCF830AB0Du64 as i64;
-    pub const NAME: &str = "sim_msgs.CborExtension";
+impl CborObservation {
+    pub const HASH: i64 = 0xD18C67B8C1E53C58u64 as i64;
+    pub const NAME: &str = "sim_msgs.CborObservation";
 
     fn packed_fingerprint() -> u64 {
         static CACHE: OnceLock<u64> = OnceLock::new();
@@ -64,12 +63,6 @@ impl CborExtension {
             buf.write_all(bytes)?;
             buf.write_u8(0)?;
         }
-        {
-            let bytes = self.schema.as_bytes();
-            buf.write_u32::<BigEndian>((bytes.len() + 1) as u32)?;
-            buf.write_all(bytes)?;
-            buf.write_u8(0)?;
-        }
         buf.write_i32::<BigEndian>(self.value.len() as i32)?;
         buf.write_all(&self.value)?;
         Ok(())
@@ -90,13 +83,6 @@ impl CborExtension {
             std::string::String::from_utf8(bytes[..len - 1].to_vec())
                 .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?
         };
-        let schema = {
-            let len = buf.read_u32::<BigEndian>()? as usize;
-            let mut bytes = vec![0u8; len];
-            buf.read_exact(&mut bytes)?;
-            std::string::String::from_utf8(bytes[..len - 1].to_vec())
-                .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?
-        };
         let value_length = buf.read_i32::<BigEndian>()? as usize;
         let value = {
             let mut v = vec![0u8; value_length];
@@ -106,7 +92,6 @@ impl CborExtension {
         Ok(Self {
             entity_id,
             key,
-            schema,
             value,
         })
     }
@@ -115,7 +100,6 @@ impl CborExtension {
         let mut size = 0usize;
         size += 4 + self.entity_id.len() + 1;
         size += 4 + self.key.len() + 1;
-        size += 4 + self.schema.len() + 1;
         size += 4;
         size += self.value.len();
         size

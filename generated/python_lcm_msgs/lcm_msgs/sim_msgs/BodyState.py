@@ -10,27 +10,52 @@ import sys
 from lcm_msgs import geometry_msgs
 
 
-class BodyPose(object):
-    msg_name = "sim_msgs.BodyPose"
+class BodyState(object):
+    """
+    Pose maps body coordinates into world coordinates (quaternion XYZW).
+    Velocity and physical acceleration are at the named body-frame origin,
+    expressed in world axes. Twist: m/s and rad/s; Accel: m/s^2 and rad/s^2.
+    Linear acceleration includes gravity in free fall; it is not specific force.
+    Acquired at WorldState.header.time_ns; no nested timestamp.
+    """
 
-    __slots__ = ["body_id", "pose_world"]
+    msg_name = "sim_msgs.BodyState"
 
-    __typenames__ = ["string", "geometry_msgs.Pose"]
+    __slots__ = ["body_id", "pose", "twist", "acceleration"]
 
-    __dimensions__ = [None, None]
+    __typenames__ = [
+        "string",
+        "geometry_msgs.Pose",
+        "geometry_msgs.Twist",
+        "geometry_msgs.Accel",
+    ]
+
+    __dimensions__ = [None, None, None, None]
 
     body_id: "string"
-    pose_world: geometry_msgs.Pose
+    pose: geometry_msgs.Pose
+    twist: geometry_msgs.Twist
+    acceleration: geometry_msgs.Accel
 
-    def __init__(self, body_id="", pose_world=geometry_msgs.Pose()):
+    def __init__(
+        self,
+        body_id="",
+        pose=geometry_msgs.Pose(),
+        twist=geometry_msgs.Twist(),
+        acceleration=geometry_msgs.Accel(),
+    ):
         # LCM Type: string
         self.body_id = body_id
         # LCM Type: geometry_msgs.Pose
-        self.pose_world = pose_world
+        self.pose = pose
+        # LCM Type: geometry_msgs.Twist
+        self.twist = twist
+        # LCM Type: geometry_msgs.Accel
+        self.acceleration = acceleration
 
     def lcm_encode(self):
         buf = BytesIO()
-        buf.write(BodyPose._get_packed_fingerprint())
+        buf.write(BodyState._get_packed_fingerprint())
         self._encode_one(buf)
         return buf.getvalue()
 
@@ -40,10 +65,20 @@ class BodyPose(object):
         buf.write(__body_id_encoded)
         buf.write(b"\0")
         assert (
-            self.pose_world._get_packed_fingerprint()
+            self.pose._get_packed_fingerprint()
             == geometry_msgs.Pose._get_packed_fingerprint()
         )
-        self.pose_world._encode_one(buf)
+        self.pose._encode_one(buf)
+        assert (
+            self.twist._get_packed_fingerprint()
+            == geometry_msgs.Twist._get_packed_fingerprint()
+        )
+        self.twist._encode_one(buf)
+        assert (
+            self.acceleration._get_packed_fingerprint()
+            == geometry_msgs.Accel._get_packed_fingerprint()
+        )
+        self.acceleration._encode_one(buf)
 
     @classmethod
     def lcm_decode(cls, data: bytes):
@@ -60,7 +95,9 @@ class BodyPose(object):
         self = cls()
         __body_id_len = struct.unpack(">I", buf.read(4))[0]
         self.body_id = buf.read(__body_id_len)[:-1].decode("utf-8", "replace")
-        self.pose_world = cls._get_field_type("pose_world")._decode_one(buf)
+        self.pose = cls._get_field_type("pose")._decode_one(buf)
+        self.twist = cls._get_field_type("twist")._decode_one(buf)
+        self.acceleration = cls._get_field_type("acceleration")._decode_one(buf)
         return self
 
     @classmethod
@@ -82,7 +119,10 @@ class BodyPose(object):
             return 0
         newparents = parents + [cls]
         tmphash = (
-            0xE45A13BEF82DC7D4 + geometry_msgs.Pose._get_hash_recursive(newparents)
+            0xD4DF2E3821478C43
+            + geometry_msgs.Pose._get_hash_recursive(newparents)
+            + geometry_msgs.Twist._get_hash_recursive(newparents)
+            + geometry_msgs.Accel._get_hash_recursive(newparents)
         ) & 0xFFFFFFFFFFFFFFFF
         tmphash = (
             ((tmphash << 1) & 0xFFFFFFFFFFFFFFFF) + (tmphash >> 63)

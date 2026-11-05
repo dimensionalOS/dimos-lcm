@@ -5,14 +5,16 @@ use std::io::{self, Read, Write, Cursor};
 use std::sync::OnceLock;
 
 #[derive(Debug, Clone, Default, PartialEq)]
-pub struct BodyPose {
+pub struct BodyState {
     pub body_id: std::string::String,
-    pub pose_world: crate::geometry_msgs::Pose,
+    pub pose: crate::geometry_msgs::Pose,
+    pub twist: crate::geometry_msgs::Twist,
+    pub acceleration: crate::geometry_msgs::Accel,
 }
 
-impl BodyPose {
-    pub const HASH: i64 = 0xE45A13BEF82DC7D4u64 as i64;
-    pub const NAME: &str = "sim_msgs.BodyPose";
+impl BodyState {
+    pub const HASH: i64 = 0xD4DF2E3821478C43u64 as i64;
+    pub const NAME: &str = "sim_msgs.BodyState";
 
     fn packed_fingerprint() -> u64 {
         static CACHE: OnceLock<u64> = OnceLock::new();
@@ -27,6 +29,8 @@ impl BodyPose {
         parents.push(self_hash);
         let mut tmphash = self_hash as u64;
         tmphash = tmphash.wrapping_add(crate::geometry_msgs::Pose::hash_recursive(parents));
+        tmphash = tmphash.wrapping_add(crate::geometry_msgs::Twist::hash_recursive(parents));
+        tmphash = tmphash.wrapping_add(crate::geometry_msgs::Accel::hash_recursive(parents));
         parents.pop();
         // rotate left by 1
         tmphash << 1 | tmphash >> 63
@@ -57,7 +61,9 @@ impl BodyPose {
             buf.write_all(bytes)?;
             buf.write_u8(0)?;
         }
-        self.pose_world.encode_one(buf)?;
+        self.pose.encode_one(buf)?;
+        self.twist.encode_one(buf)?;
+        self.acceleration.encode_one(buf)?;
         Ok(())
     }
 
@@ -69,17 +75,23 @@ impl BodyPose {
             std::string::String::from_utf8(bytes[..len - 1].to_vec())
                 .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?
         };
-        let pose_world = crate::geometry_msgs::Pose::decode_one(buf)?;
+        let pose = crate::geometry_msgs::Pose::decode_one(buf)?;
+        let twist = crate::geometry_msgs::Twist::decode_one(buf)?;
+        let acceleration = crate::geometry_msgs::Accel::decode_one(buf)?;
         Ok(Self {
             body_id,
-            pose_world,
+            pose,
+            twist,
+            acceleration,
         })
     }
 
     pub fn encoded_size(&self) -> usize {
         let mut size = 0usize;
         size += 4 + self.body_id.len() + 1;
-        size += self.pose_world.encoded_size();
+        size += self.pose.encoded_size();
+        size += self.twist.encoded_size();
+        size += self.acceleration.encoded_size();
         size
     }
 

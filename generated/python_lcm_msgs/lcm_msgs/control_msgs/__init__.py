@@ -44,7 +44,6 @@ from .MultiDOFCommand import MultiDOFCommand as MultiDOFCommand
 from .HardwareDeviceDiagnostics import (
     HardwareDeviceDiagnostics as HardwareDeviceDiagnostics,
 )
-from .JointTarget import JointTarget as JointTarget
 from .HardwareDeviceStatus import HardwareDeviceStatus as HardwareDeviceStatus
 from .CborCommand import CborCommand as CborCommand
 from .SteeringControllerStatus import (

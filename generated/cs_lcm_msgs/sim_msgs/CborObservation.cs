@@ -10,32 +10,31 @@ using LCM.LCM;
  
 namespace sim_msgs
 {
-    public sealed class CborExtension : LCM.LCM.LCMEncodable
+    public sealed class CborObservation : LCM.LCM.LCMEncodable
     {
         public String entity_id;
         public String key;
-        public String schema;
         public int value_length;
         public byte[] value;
  
-        public CborExtension()
+        public CborObservation()
         {
         }
  
         public static readonly ulong LCM_FINGERPRINT;
-        public static readonly ulong LCM_FINGERPRINT_BASE = 0x2b8c40fcf830ab0dL;
+        public static readonly ulong LCM_FINGERPRINT_BASE = 0xd18c67b8c1e53c58L;
  
-        static CborExtension()
+        static CborObservation()
         {
             LCM_FINGERPRINT = _hashRecursive(new List<String>());
         }
  
         public static ulong _hashRecursive(List<String> classes)
         {
-            if (classes.Contains("sim_msgs.CborExtension"))
+            if (classes.Contains("sim_msgs.CborObservation"))
                 return 0L;
  
-            classes.Add("sim_msgs.CborExtension");
+            classes.Add("sim_msgs.CborObservation");
             ulong hash = LCM_FINGERPRINT_BASE
                 ;
             classes.RemoveAt(classes.Count - 1);
@@ -55,8 +54,6 @@ namespace sim_msgs
  
             __strbuf = System.Text.Encoding.GetEncoding("US-ASCII").GetBytes(this.key); outs.Write(__strbuf.Length+1); outs.Write(__strbuf, 0, __strbuf.Length); outs.Write((byte) 0); 
  
-            __strbuf = System.Text.Encoding.GetEncoding("US-ASCII").GetBytes(this.schema); outs.Write(__strbuf.Length+1); outs.Write(__strbuf, 0, __strbuf.Length); outs.Write((byte) 0); 
- 
             outs.Write(this.value_length); 
  
             for (int a = 0; a < this.value_length; a++) {
@@ -65,11 +62,11 @@ namespace sim_msgs
  
         }
  
-        public CborExtension(byte[] data) : this(new LCMDataInputStream(data))
+        public CborObservation(byte[] data) : this(new LCMDataInputStream(data))
         {
         }
  
-        public CborExtension(LCMDataInputStream ins)
+        public CborObservation(LCMDataInputStream ins)
         {
             if ((ulong) ins.ReadInt64() != LCM_FINGERPRINT)
                 throw new System.IO.IOException("LCM Decode error: bad fingerprint");
@@ -77,9 +74,9 @@ namespace sim_msgs
             _decodeRecursive(ins);
         }
  
-        public static sim_msgs.CborExtension _decodeRecursiveFactory(LCMDataInputStream ins)
+        public static sim_msgs.CborObservation _decodeRecursiveFactory(LCMDataInputStream ins)
         {
-            sim_msgs.CborExtension o = new sim_msgs.CborExtension();
+            sim_msgs.CborObservation o = new sim_msgs.CborObservation();
             o._decodeRecursive(ins);
             return o;
         }
@@ -91,8 +88,6 @@ namespace sim_msgs
  
             __strbuf = new byte[ins.ReadInt32()-1]; ins.ReadFully(__strbuf); ins.ReadByte(); this.key = System.Text.Encoding.GetEncoding("US-ASCII").GetString(__strbuf);
  
-            __strbuf = new byte[ins.ReadInt32()-1]; ins.ReadFully(__strbuf); ins.ReadByte(); this.schema = System.Text.Encoding.GetEncoding("US-ASCII").GetString(__strbuf);
- 
             this.value_length = ins.ReadInt32();
  
             this.value = new byte[(int) value_length];
@@ -102,14 +97,12 @@ namespace sim_msgs
  
         }
  
-        public sim_msgs.CborExtension Copy()
+        public sim_msgs.CborObservation Copy()
         {
-            sim_msgs.CborExtension outobj = new sim_msgs.CborExtension();
+            sim_msgs.CborObservation outobj = new sim_msgs.CborObservation();
             outobj.entity_id = this.entity_id;
  
             outobj.key = this.key;
- 
-            outobj.schema = this.schema;
  
             outobj.value_length = this.value_length;
  

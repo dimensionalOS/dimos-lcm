@@ -7,6 +7,8 @@ DO NOT MODIFY BY HAND!!!!
 local lcm = require('lcm')
 
 local geometry_msgs_Pose = require('geometry_msgs.Pose')
+local geometry_msgs_Accel = require('geometry_msgs.Accel')
+local geometry_msgs_Twist = require('geometry_msgs.Twist')
 
 local setmetatable = setmetatable
 local ipairs = ipairs
@@ -38,85 +40,93 @@ function _buffer_helper:read(n_bytes)
   return partial
 end
 
-local BodyPose = {}
-BodyPose.__index = BodyPose
+local BodyState = {}
+BodyState.__index = BodyState
 
-BodyPose.name = 'sim_msgs.BodyPose'
-BodyPose.packagename = 'sim_msgs'
-BodyPose.shortname = 'BodyPose'
+BodyState.name = 'sim_msgs.BodyState'
+BodyState.packagename = 'sim_msgs'
+BodyState.shortname = 'BodyState'
 
-function BodyPose:new()
+function BodyState:new()
 
   local obj = {}
 
   obj.body_id = ''
-  obj.pose_world = nil
+  obj.pose = nil
+  obj.twist = nil
+  obj.acceleration = nil
 
   setmetatable(obj, self)
 
   return obj
 end
 
-function BodyPose._get_hash_recursive(parents)
+function BodyState._get_hash_recursive(parents)
 
   local newparents = {}
 
   for _, v in ipairs(parents) do
-    if v == BodyPose then return lcm._hash.new('0x0') end
+    if v == BodyState then return lcm._hash.new('0x0') end
     table.insert(newparents, v)
   end
 
-  table.insert(newparents, BodyPose)
+  table.insert(newparents, BodyState)
 
-  local hash = lcm._hash.new('0xe45a13bef82dc7d4')
+  local hash = lcm._hash.new('0xd4df2e3821478c43')
     + geometry_msgs_Pose._get_hash_recursive(newparents)
+    + geometry_msgs_Twist._get_hash_recursive(newparents)
+    + geometry_msgs_Accel._get_hash_recursive(newparents)
   hash:rotate(1)
 
   return hash
 end
 
-BodyPose._packed_fingerprint = lcm._pack.pack('>X', BodyPose._get_hash_recursive({}))
+BodyState._packed_fingerprint = lcm._pack.pack('>X', BodyState._get_hash_recursive({}))
 
-function BodyPose:encode()
+function BodyState:encode()
 
-  return BodyPose._packed_fingerprint .. self:_encode_one()
+  return BodyState._packed_fingerprint .. self:_encode_one()
 end
 
-function BodyPose:_encode_one()
+function BodyState:_encode_one()
 
   local buf_table = {}
 
   local __body_id_tmpstr = lcm._pack.prepare_string(self.body_id)
   table.insert(buf_table, lcm._pack.pack('>I', #__body_id_tmpstr + 1))
   table.insert(buf_table, __body_id_tmpstr .. '\0')
-  table.insert(buf_table, self.pose_world:_encode_one())
+  table.insert(buf_table, self.pose:_encode_one())
+  table.insert(buf_table, self.twist:_encode_one())
+  table.insert(buf_table, self.acceleration:_encode_one())
 
   return table.concat(buf_table)
 end
 
-function BodyPose.decode(data)
+function BodyState.decode(data)
 
-  if data:sub(1, 8) ~= BodyPose._packed_fingerprint then
+  if data:sub(1, 8) ~= BodyState._packed_fingerprint then
     error('bad fingerprint')
   end
 
-  return BodyPose._decode_one(data:sub(9))
+  return BodyState._decode_one(data:sub(9))
 end
 
-function BodyPose._decode_one(data)
+function BodyState._decode_one(data)
 
   if not data.read then
     data = _buffer_helper:new(data)
   end
 
-  local obj = BodyPose:new()
+  local obj = BodyState:new()
 
   local __body_id_tmpstrlen = lcm._pack.unpack('>I', data:read(4))
   obj.body_id = lcm._pack.prepare_string(data:read(__body_id_tmpstrlen))
-  obj.pose_world = geometry_msgs_Pose._decode_one(data)
+  obj.pose = geometry_msgs_Pose._decode_one(data)
+  obj.twist = geometry_msgs_Twist._decode_one(data)
+  obj.acceleration = geometry_msgs_Accel._decode_one(data)
 
   return obj
 end
 
-return BodyPose
+return BodyState
 

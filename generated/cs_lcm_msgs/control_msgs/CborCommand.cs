@@ -14,7 +14,6 @@ namespace control_msgs
     {
         public String entity_id;
         public String key;
-        public String schema;
         public int value_length;
         public byte[] value;
  
@@ -23,7 +22,7 @@ namespace control_msgs
         }
  
         public static readonly ulong LCM_FINGERPRINT;
-        public static readonly ulong LCM_FINGERPRINT_BASE = 0x2b8c40fcf830ab0dL;
+        public static readonly ulong LCM_FINGERPRINT_BASE = 0xd18c67b8c1e53c58L;
  
         static CborCommand()
         {
@@ -54,8 +53,6 @@ namespace control_msgs
             __strbuf = System.Text.Encoding.GetEncoding("US-ASCII").GetBytes(this.entity_id); outs.Write(__strbuf.Length+1); outs.Write(__strbuf, 0, __strbuf.Length); outs.Write((byte) 0); 
  
             __strbuf = System.Text.Encoding.GetEncoding("US-ASCII").GetBytes(this.key); outs.Write(__strbuf.Length+1); outs.Write(__strbuf, 0, __strbuf.Length); outs.Write((byte) 0); 
- 
-            __strbuf = System.Text.Encoding.GetEncoding("US-ASCII").GetBytes(this.schema); outs.Write(__strbuf.Length+1); outs.Write(__strbuf, 0, __strbuf.Length); outs.Write((byte) 0); 
  
             outs.Write(this.value_length); 
  
@@ -91,8 +88,6 @@ namespace control_msgs
  
             __strbuf = new byte[ins.ReadInt32()-1]; ins.ReadFully(__strbuf); ins.ReadByte(); this.key = System.Text.Encoding.GetEncoding("US-ASCII").GetString(__strbuf);
  
-            __strbuf = new byte[ins.ReadInt32()-1]; ins.ReadFully(__strbuf); ins.ReadByte(); this.schema = System.Text.Encoding.GetEncoding("US-ASCII").GetString(__strbuf);
- 
             this.value_length = ins.ReadInt32();
  
             this.value = new byte[(int) value_length];
@@ -108,8 +103,6 @@ namespace control_msgs
             outobj.entity_id = this.entity_id;
  
             outobj.key = this.key;
- 
-            outobj.schema = this.schema;
  
             outobj.value_length = this.value_length;
  

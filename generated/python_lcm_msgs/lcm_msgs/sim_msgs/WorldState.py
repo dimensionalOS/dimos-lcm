@@ -9,18 +9,17 @@ import sys
 
 from lcm_msgs import common_msgs
 from . import *
-from .BodyPose import BodyPose
-from .CborExtension import CborExtension
 from .JointTruth import JointTruth
-from .BodyMotion import BodyMotion
+from .BodyState import BodyState
+from .CborObservation import CborObservation
 
 
 class WorldState(object):
     """
-    A complete physical sample at one acquisition, not a solver checkpoint.
-    Contains every described body's absolute world pose, every configured motion
-    frame and joint, and all current configured extension properties. Consumers
-    replace the previous snapshot: omission never means "keep the old value".
+    Complete physical acquisition, not a native solver checkpoint.
+    One record per described rigid body/frame, including fixed sensor mounts;
+    configured scalar joints and all current optional CBOR observations.
+    Replaces the previous sample. Gravity is fixed startup configuration.
     """
 
     msg_name = "sim_msgs.WorldState"
@@ -28,79 +27,65 @@ class WorldState(object):
     __slots__ = [
         "header",
         "model_revision",
-        "body_poses_length",
-        "body_poses",
-        "body_motion_length",
-        "body_motion",
+        "bodies_length",
+        "bodies",
         "joint_truth",
-        "extensions_length",
-        "extensions",
+        "cbor_observations_length",
+        "cbor_observations",
     ]
 
     __typenames__ = [
         "common_msgs.SampleHeader",
         "string",
         "int32_t",
-        "BodyPose",
-        "int32_t",
-        "BodyMotion",
+        "BodyState",
         "JointTruth",
         "int32_t",
-        "CborExtension",
+        "CborObservation",
     ]
 
     __dimensions__ = [
         None,
         None,
         None,
-        ["body_poses_length"],
-        None,
-        ["body_motion_length"],
+        ["bodies_length"],
         None,
         None,
-        ["extensions_length"],
+        ["cbor_observations_length"],
     ]
 
     header: common_msgs.SampleHeader
     model_revision: "string"
-    body_poses_length: "int32_t"
-    body_poses: BodyPose
-    body_motion_length: "int32_t"
-    body_motion: BodyMotion
+    bodies_length: "int32_t"
+    bodies: BodyState
     joint_truth: JointTruth
-    extensions_length: "int32_t"
-    extensions: CborExtension
+    cbor_observations_length: "int32_t"
+    cbor_observations: CborObservation
 
     def __init__(
         self,
         header=common_msgs.SampleHeader(),
         model_revision="",
-        body_poses_length=0,
-        body_poses=[],
-        body_motion_length=0,
-        body_motion=[],
+        bodies_length=0,
+        bodies=[],
         joint_truth=JointTruth(),
-        extensions_length=0,
-        extensions=[],
+        cbor_observations_length=0,
+        cbor_observations=[],
     ):
         # LCM Type: common_msgs.SampleHeader
         self.header = header
         # LCM Type: string
         self.model_revision = model_revision
         # LCM Type: int32_t
-        self.body_poses_length = body_poses_length
-        # LCM Type: BodyPose[body_poses_length]
-        self.body_poses = body_poses
-        # LCM Type: int32_t
-        self.body_motion_length = body_motion_length
-        # LCM Type: BodyMotion[body_motion_length]
-        self.body_motion = body_motion
+        self.bodies_length = bodies_length
+        # LCM Type: BodyState[bodies_length]
+        self.bodies = bodies
         # LCM Type: JointTruth
         self.joint_truth = joint_truth
         # LCM Type: int32_t
-        self.extensions_length = extensions_length
-        # LCM Type: CborExtension[extensions_length]
-        self.extensions = extensions
+        self.cbor_observations_length = cbor_observations_length
+        # LCM Type: CborObservation[cbor_observations_length]
+        self.cbor_observations = cbor_observations
 
     def lcm_encode(self):
         buf = BytesIO()
@@ -118,32 +103,25 @@ class WorldState(object):
         buf.write(struct.pack(">I", len(__model_revision_encoded) + 1))
         buf.write(__model_revision_encoded)
         buf.write(b"\0")
-        buf.write(struct.pack(">i", self.body_poses_length))
-        for i0 in range(self.body_poses_length):
+        buf.write(struct.pack(">i", self.bodies_length))
+        for i0 in range(self.bodies_length):
             assert (
-                self.body_poses[i0]._get_packed_fingerprint()
-                == BodyPose._get_packed_fingerprint()
+                self.bodies[i0]._get_packed_fingerprint()
+                == BodyState._get_packed_fingerprint()
             )
-            self.body_poses[i0]._encode_one(buf)
-        buf.write(struct.pack(">i", self.body_motion_length))
-        for i0 in range(self.body_motion_length):
-            assert (
-                self.body_motion[i0]._get_packed_fingerprint()
-                == BodyMotion._get_packed_fingerprint()
-            )
-            self.body_motion[i0]._encode_one(buf)
+            self.bodies[i0]._encode_one(buf)
         assert (
             self.joint_truth._get_packed_fingerprint()
             == JointTruth._get_packed_fingerprint()
         )
         self.joint_truth._encode_one(buf)
-        buf.write(struct.pack(">i", self.extensions_length))
-        for i0 in range(self.extensions_length):
+        buf.write(struct.pack(">i", self.cbor_observations_length))
+        for i0 in range(self.cbor_observations_length):
             assert (
-                self.extensions[i0]._get_packed_fingerprint()
-                == CborExtension._get_packed_fingerprint()
+                self.cbor_observations[i0]._get_packed_fingerprint()
+                == CborObservation._get_packed_fingerprint()
             )
-            self.extensions[i0]._encode_one(buf)
+            self.cbor_observations[i0]._encode_one(buf)
 
     @classmethod
     def lcm_decode(cls, data: bytes):
@@ -163,19 +141,17 @@ class WorldState(object):
         self.model_revision = buf.read(__model_revision_len)[:-1].decode(
             "utf-8", "replace"
         )
-        self.body_poses_length = struct.unpack(">i", buf.read(4))[0]
-        self.body_poses = []
-        for i0 in range(self.body_poses_length):
-            self.body_poses.append(cls._get_field_type("body_poses")._decode_one(buf))
-        self.body_motion_length = struct.unpack(">i", buf.read(4))[0]
-        self.body_motion = []
-        for i0 in range(self.body_motion_length):
-            self.body_motion.append(cls._get_field_type("body_motion")._decode_one(buf))
+        self.bodies_length = struct.unpack(">i", buf.read(4))[0]
+        self.bodies = []
+        for i0 in range(self.bodies_length):
+            self.bodies.append(cls._get_field_type("bodies")._decode_one(buf))
         self.joint_truth = cls._get_field_type("joint_truth")._decode_one(buf)
-        self.extensions_length = struct.unpack(">i", buf.read(4))[0]
-        self.extensions = []
-        for i0 in range(self.extensions_length):
-            self.extensions.append(cls._get_field_type("extensions")._decode_one(buf))
+        self.cbor_observations_length = struct.unpack(">i", buf.read(4))[0]
+        self.cbor_observations = []
+        for i0 in range(self.cbor_observations_length):
+            self.cbor_observations.append(
+                cls._get_field_type("cbor_observations")._decode_one(buf)
+            )
         return self
 
     @classmethod
@@ -197,12 +173,11 @@ class WorldState(object):
             return 0
         newparents = parents + [cls]
         tmphash = (
-            0x533A7AA1693D6EF6
+            0x1E56F36A590E109D
             + common_msgs.SampleHeader._get_hash_recursive(newparents)
-            + BodyPose._get_hash_recursive(newparents)
-            + BodyMotion._get_hash_recursive(newparents)
+            + BodyState._get_hash_recursive(newparents)
             + JointTruth._get_hash_recursive(newparents)
-            + CborExtension._get_hash_recursive(newparents)
+            + CborObservation._get_hash_recursive(newparents)
         ) & 0xFFFFFFFFFFFFFFFF
         tmphash = (
             ((tmphash << 1) & 0xFFFFFFFFFFFFFFFF) + (tmphash >> 63)

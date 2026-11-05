@@ -12,17 +12,15 @@ import lcm.lcm.*;
  
 /**
  * Optional entity property. entity_id is a resolved body or joint name, or "world".
- * (entity_id, key) is unique within a snapshot. schema identifies a versioned
- * payload contract; value contains exactly one CBOR item. Unknown optional
- * schemas may be ignored. This is data, never a command or clock/control signal.
+ * (entity_id, key) is unique within a snapshot. key identifies the property;
+ * producers and consumers agree its payload format. value is one CBOR item.
+ * Unknown optional keys may be ignored. This is data, not a command or clock signal.
  */
-public final class CborExtension implements lcm.lcm.LCMEncodable
+public final class CborObservation implements lcm.lcm.LCMEncodable
 {
     public String entity_id;
 
     public String key;
-
-    public String schema;
 
     public int value_length;
 
@@ -32,12 +30,12 @@ public final class CborExtension implements lcm.lcm.LCMEncodable
     public byte value[];
 
  
-    public CborExtension()
+    public CborObservation()
     {
     }
  
     public static final long LCM_FINGERPRINT;
-    public static final long LCM_FINGERPRINT_BASE = 0x2b8c40fcf830ab0dL;
+    public static final long LCM_FINGERPRINT_BASE = 0xd18c67b8c1e53c58L;
  
     static {
         LCM_FINGERPRINT = _hashRecursive(new ArrayList<Class<?>>());
@@ -45,10 +43,10 @@ public final class CborExtension implements lcm.lcm.LCMEncodable
  
     public static long _hashRecursive(ArrayList<Class<?>> classes)
     {
-        if (classes.contains(sim_msgs.CborExtension.class))
+        if (classes.contains(sim_msgs.CborObservation.class))
             return 0L;
  
-        classes.add(sim_msgs.CborExtension.class);
+        classes.add(sim_msgs.CborObservation.class);
         long hash = LCM_FINGERPRINT_BASE
             ;
         classes.remove(classes.size() - 1);
@@ -68,8 +66,6 @@ public final class CborExtension implements lcm.lcm.LCMEncodable
  
         __strbuf = new char[this.key.length()]; this.key.getChars(0, this.key.length(), __strbuf, 0); outs.writeInt(__strbuf.length+1); for (int _i = 0; _i < __strbuf.length; _i++) outs.write(__strbuf[_i]); outs.writeByte(0); 
  
-        __strbuf = new char[this.schema.length()]; this.schema.getChars(0, this.schema.length(), __strbuf, 0); outs.writeInt(__strbuf.length+1); for (int _i = 0; _i < __strbuf.length; _i++) outs.write(__strbuf[_i]); outs.writeByte(0); 
- 
         outs.writeInt(this.value_length); 
  
         if (this.value_length > 0)
@@ -77,12 +73,12 @@ public final class CborExtension implements lcm.lcm.LCMEncodable
  
     }
  
-    public CborExtension(byte[] data) throws IOException
+    public CborObservation(byte[] data) throws IOException
     {
         this(new LCMDataInputStream(data));
     }
  
-    public CborExtension(DataInput ins) throws IOException
+    public CborObservation(DataInput ins) throws IOException
     {
         if (ins.readLong() != LCM_FINGERPRINT)
             throw new IOException("LCM Decode error: bad fingerprint");
@@ -90,9 +86,9 @@ public final class CborExtension implements lcm.lcm.LCMEncodable
         _decodeRecursive(ins);
     }
  
-    public static sim_msgs.CborExtension _decodeRecursiveFactory(DataInput ins) throws IOException
+    public static sim_msgs.CborObservation _decodeRecursiveFactory(DataInput ins) throws IOException
     {
-        sim_msgs.CborExtension o = new sim_msgs.CborExtension();
+        sim_msgs.CborObservation o = new sim_msgs.CborObservation();
         o._decodeRecursive(ins);
         return o;
     }
@@ -104,22 +100,18 @@ public final class CborExtension implements lcm.lcm.LCMEncodable
  
         __strbuf = new char[ins.readInt()-1]; for (int _i = 0; _i < __strbuf.length; _i++) __strbuf[_i] = (char) (ins.readByte()&0xff); ins.readByte(); this.key = new String(__strbuf);
  
-        __strbuf = new char[ins.readInt()-1]; for (int _i = 0; _i < __strbuf.length; _i++) __strbuf[_i] = (char) (ins.readByte()&0xff); ins.readByte(); this.schema = new String(__strbuf);
- 
         this.value_length = ins.readInt();
  
         this.value = new byte[(int) value_length];
         ins.readFully(this.value, 0, (int) value_length); 
     }
  
-    public sim_msgs.CborExtension copy()
+    public sim_msgs.CborObservation copy()
     {
-        sim_msgs.CborExtension outobj = new sim_msgs.CborExtension();
+        sim_msgs.CborObservation outobj = new sim_msgs.CborObservation();
         outobj.entity_id = this.entity_id;
  
         outobj.key = this.key;
- 
-        outobj.schema = this.schema;
  
         outobj.value_length = this.value_length;
  

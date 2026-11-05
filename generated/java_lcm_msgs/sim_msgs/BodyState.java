@@ -10,19 +10,30 @@ import java.io.*;
 import java.util.*;
 import lcm.lcm.*;
  
-public final class BodyPose implements lcm.lcm.LCMEncodable
+/**
+ * Pose maps body coordinates into world coordinates (quaternion XYZW).
+ * Velocity and physical acceleration are at the named body-frame origin,
+ * expressed in world axes. Twist: m/s and rad/s; Accel: m/s^2 and rad/s^2.
+ * Linear acceleration includes gravity in free fall; it is not specific force.
+ * Acquired at WorldState.header.time_ns; no nested timestamp.
+ */
+public final class BodyState implements lcm.lcm.LCMEncodable
 {
     public String body_id;
 
-    public geometry_msgs.Pose pose_world;
+    public geometry_msgs.Pose pose;
+
+    public geometry_msgs.Twist twist;
+
+    public geometry_msgs.Accel acceleration;
 
  
-    public BodyPose()
+    public BodyState()
     {
     }
  
     public static final long LCM_FINGERPRINT;
-    public static final long LCM_FINGERPRINT_BASE = 0xe45a13bef82dc7d4L;
+    public static final long LCM_FINGERPRINT_BASE = 0xd4df2e3821478c43L;
  
     static {
         LCM_FINGERPRINT = _hashRecursive(new ArrayList<Class<?>>());
@@ -30,12 +41,14 @@ public final class BodyPose implements lcm.lcm.LCMEncodable
  
     public static long _hashRecursive(ArrayList<Class<?>> classes)
     {
-        if (classes.contains(sim_msgs.BodyPose.class))
+        if (classes.contains(sim_msgs.BodyState.class))
             return 0L;
  
-        classes.add(sim_msgs.BodyPose.class);
+        classes.add(sim_msgs.BodyState.class);
         long hash = LCM_FINGERPRINT_BASE
              + geometry_msgs.Pose._hashRecursive(classes)
+             + geometry_msgs.Twist._hashRecursive(classes)
+             + geometry_msgs.Accel._hashRecursive(classes)
             ;
         classes.remove(classes.size() - 1);
         return (hash<<1) + ((hash>>63)&1);
@@ -52,16 +65,20 @@ public final class BodyPose implements lcm.lcm.LCMEncodable
         char[] __strbuf = null;
         __strbuf = new char[this.body_id.length()]; this.body_id.getChars(0, this.body_id.length(), __strbuf, 0); outs.writeInt(__strbuf.length+1); for (int _i = 0; _i < __strbuf.length; _i++) outs.write(__strbuf[_i]); outs.writeByte(0); 
  
-        this.pose_world._encodeRecursive(outs); 
+        this.pose._encodeRecursive(outs); 
+ 
+        this.twist._encodeRecursive(outs); 
+ 
+        this.acceleration._encodeRecursive(outs); 
  
     }
  
-    public BodyPose(byte[] data) throws IOException
+    public BodyState(byte[] data) throws IOException
     {
         this(new LCMDataInputStream(data));
     }
  
-    public BodyPose(DataInput ins) throws IOException
+    public BodyState(DataInput ins) throws IOException
     {
         if (ins.readLong() != LCM_FINGERPRINT)
             throw new IOException("LCM Decode error: bad fingerprint");
@@ -69,9 +86,9 @@ public final class BodyPose implements lcm.lcm.LCMEncodable
         _decodeRecursive(ins);
     }
  
-    public static sim_msgs.BodyPose _decodeRecursiveFactory(DataInput ins) throws IOException
+    public static sim_msgs.BodyState _decodeRecursiveFactory(DataInput ins) throws IOException
     {
-        sim_msgs.BodyPose o = new sim_msgs.BodyPose();
+        sim_msgs.BodyState o = new sim_msgs.BodyState();
         o._decodeRecursive(ins);
         return o;
     }
@@ -81,16 +98,24 @@ public final class BodyPose implements lcm.lcm.LCMEncodable
         char[] __strbuf = null;
         __strbuf = new char[ins.readInt()-1]; for (int _i = 0; _i < __strbuf.length; _i++) __strbuf[_i] = (char) (ins.readByte()&0xff); ins.readByte(); this.body_id = new String(__strbuf);
  
-        this.pose_world = geometry_msgs.Pose._decodeRecursiveFactory(ins);
+        this.pose = geometry_msgs.Pose._decodeRecursiveFactory(ins);
+ 
+        this.twist = geometry_msgs.Twist._decodeRecursiveFactory(ins);
+ 
+        this.acceleration = geometry_msgs.Accel._decodeRecursiveFactory(ins);
  
     }
  
-    public sim_msgs.BodyPose copy()
+    public sim_msgs.BodyState copy()
     {
-        sim_msgs.BodyPose outobj = new sim_msgs.BodyPose();
+        sim_msgs.BodyState outobj = new sim_msgs.BodyState();
         outobj.body_id = this.body_id;
  
-        outobj.pose_world = this.pose_world.copy();
+        outobj.pose = this.pose.copy();
+ 
+        outobj.twist = this.twist.copy();
+ 
+        outobj.acceleration = this.acceleration.copy();
  
         return outobj;
     }

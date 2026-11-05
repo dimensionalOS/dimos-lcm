@@ -10,12 +10,12 @@ pub struct ActionCommand {
     pub based_on_time_ns: i64,
     pub apply_at_ns: i64,
     pub valid_until_ns: i64,
-    pub joint_targets: Vec<crate::control_msgs::JointTarget>,
+    pub joint_commands: Vec<crate::control_msgs::JointCommand>,
     pub cbor_commands: Vec<crate::control_msgs::CborCommand>,
 }
 
 impl ActionCommand {
-    pub const HASH: i64 = 0xE5E6A25C62CA4457u64 as i64;
+    pub const HASH: i64 = 0xD7A6FC8EBF6C2382u64 as i64;
     pub const NAME: &str = "control_msgs.ActionCommand";
 
     fn packed_fingerprint() -> u64 {
@@ -31,7 +31,7 @@ impl ActionCommand {
         parents.push(self_hash);
         let mut tmphash = self_hash as u64;
         tmphash = tmphash.wrapping_add(crate::common_msgs::SampleHeader::hash_recursive(parents));
-        tmphash = tmphash.wrapping_add(crate::control_msgs::JointTarget::hash_recursive(parents));
+        tmphash = tmphash.wrapping_add(crate::control_msgs::JointCommand::hash_recursive(parents));
         tmphash = tmphash.wrapping_add(crate::control_msgs::CborCommand::hash_recursive(parents));
         parents.pop();
         // rotate left by 1
@@ -61,8 +61,8 @@ impl ActionCommand {
         buf.write_i64::<BigEndian>(self.based_on_time_ns)?;
         buf.write_i64::<BigEndian>(self.apply_at_ns)?;
         buf.write_i64::<BigEndian>(self.valid_until_ns)?;
-        buf.write_i32::<BigEndian>(self.joint_targets.len() as i32)?;
-        for v0 in self.joint_targets.iter() {
+        buf.write_i32::<BigEndian>(self.joint_commands.len() as i32)?;
+        for v0 in self.joint_commands.iter() {
             v0.encode_one(buf)?;
         }
         buf.write_i32::<BigEndian>(self.cbor_commands.len() as i32)?;
@@ -77,11 +77,11 @@ impl ActionCommand {
         let based_on_time_ns = buf.read_i64::<BigEndian>()?;
         let apply_at_ns = buf.read_i64::<BigEndian>()?;
         let valid_until_ns = buf.read_i64::<BigEndian>()?;
-        let joint_targets_length = buf.read_i32::<BigEndian>()? as usize;
-        let joint_targets = {
-            let mut v = Vec::with_capacity(joint_targets_length);
-            for _ in 0..joint_targets_length {
-                let _elem_0 = crate::control_msgs::JointTarget::decode_one(buf)?;
+        let joint_commands_length = buf.read_i32::<BigEndian>()? as usize;
+        let joint_commands = {
+            let mut v = Vec::with_capacity(joint_commands_length);
+            for _ in 0..joint_commands_length {
+                let _elem_0 = crate::control_msgs::JointCommand::decode_one(buf)?;
                 v.push(_elem_0);
             }
             v
@@ -100,7 +100,7 @@ impl ActionCommand {
             based_on_time_ns,
             apply_at_ns,
             valid_until_ns,
-            joint_targets,
+            joint_commands,
             cbor_commands,
         })
     }
@@ -112,7 +112,7 @@ impl ActionCommand {
         size += 8;
         size += 8;
         size += 4;
-        for v0 in self.joint_targets.iter() {
+        for v0 in self.joint_commands.iter() {
             size += v0.encoded_size();
         }
         size += 4;

@@ -14,20 +14,18 @@ namespace sim_msgs
     {
         public common_msgs.SampleHeader header;
         public String model_revision;
-        public int body_poses_length;
-        public sim_msgs.BodyPose[] body_poses;
-        public int body_motion_length;
-        public sim_msgs.BodyMotion[] body_motion;
+        public int bodies_length;
+        public sim_msgs.BodyState[] bodies;
         public sim_msgs.JointTruth joint_truth;
-        public int extensions_length;
-        public sim_msgs.CborExtension[] extensions;
+        public int cbor_observations_length;
+        public sim_msgs.CborObservation[] cbor_observations;
  
         public WorldState()
         {
         }
  
         public static readonly ulong LCM_FINGERPRINT;
-        public static readonly ulong LCM_FINGERPRINT_BASE = 0x533a7aa1693d6ef6L;
+        public static readonly ulong LCM_FINGERPRINT_BASE = 0x1e56f36a590e109dL;
  
         static WorldState()
         {
@@ -42,10 +40,9 @@ namespace sim_msgs
             classes.Add("sim_msgs.WorldState");
             ulong hash = LCM_FINGERPRINT_BASE
                  + common_msgs.SampleHeader._hashRecursive(classes)
-                 + sim_msgs.BodyPose._hashRecursive(classes)
-                 + sim_msgs.BodyMotion._hashRecursive(classes)
+                 + sim_msgs.BodyState._hashRecursive(classes)
                  + sim_msgs.JointTruth._hashRecursive(classes)
-                 + sim_msgs.CborExtension._hashRecursive(classes)
+                 + sim_msgs.CborObservation._hashRecursive(classes)
                 ;
             classes.RemoveAt(classes.Count - 1);
             return (hash<<1) + ((hash>>63)&1);
@@ -64,24 +61,18 @@ namespace sim_msgs
  
             __strbuf = System.Text.Encoding.GetEncoding("US-ASCII").GetBytes(this.model_revision); outs.Write(__strbuf.Length+1); outs.Write(__strbuf, 0, __strbuf.Length); outs.Write((byte) 0); 
  
-            outs.Write(this.body_poses_length); 
+            outs.Write(this.bodies_length); 
  
-            for (int a = 0; a < this.body_poses_length; a++) {
-                this.body_poses[a]._encodeRecursive(outs); 
-            }
- 
-            outs.Write(this.body_motion_length); 
- 
-            for (int a = 0; a < this.body_motion_length; a++) {
-                this.body_motion[a]._encodeRecursive(outs); 
+            for (int a = 0; a < this.bodies_length; a++) {
+                this.bodies[a]._encodeRecursive(outs); 
             }
  
             this.joint_truth._encodeRecursive(outs); 
  
-            outs.Write(this.extensions_length); 
+            outs.Write(this.cbor_observations_length); 
  
-            for (int a = 0; a < this.extensions_length; a++) {
-                this.extensions[a]._encodeRecursive(outs); 
+            for (int a = 0; a < this.cbor_observations_length; a++) {
+                this.cbor_observations[a]._encodeRecursive(outs); 
             }
  
         }
@@ -112,27 +103,20 @@ namespace sim_msgs
  
             __strbuf = new byte[ins.ReadInt32()-1]; ins.ReadFully(__strbuf); ins.ReadByte(); this.model_revision = System.Text.Encoding.GetEncoding("US-ASCII").GetString(__strbuf);
  
-            this.body_poses_length = ins.ReadInt32();
+            this.bodies_length = ins.ReadInt32();
  
-            this.body_poses = new sim_msgs.BodyPose[(int) body_poses_length];
-            for (int a = 0; a < this.body_poses_length; a++) {
-                this.body_poses[a] = sim_msgs.BodyPose._decodeRecursiveFactory(ins);
-            }
- 
-            this.body_motion_length = ins.ReadInt32();
- 
-            this.body_motion = new sim_msgs.BodyMotion[(int) body_motion_length];
-            for (int a = 0; a < this.body_motion_length; a++) {
-                this.body_motion[a] = sim_msgs.BodyMotion._decodeRecursiveFactory(ins);
+            this.bodies = new sim_msgs.BodyState[(int) bodies_length];
+            for (int a = 0; a < this.bodies_length; a++) {
+                this.bodies[a] = sim_msgs.BodyState._decodeRecursiveFactory(ins);
             }
  
             this.joint_truth = sim_msgs.JointTruth._decodeRecursiveFactory(ins);
  
-            this.extensions_length = ins.ReadInt32();
+            this.cbor_observations_length = ins.ReadInt32();
  
-            this.extensions = new sim_msgs.CborExtension[(int) extensions_length];
-            for (int a = 0; a < this.extensions_length; a++) {
-                this.extensions[a] = sim_msgs.CborExtension._decodeRecursiveFactory(ins);
+            this.cbor_observations = new sim_msgs.CborObservation[(int) cbor_observations_length];
+            for (int a = 0; a < this.cbor_observations_length; a++) {
+                this.cbor_observations[a] = sim_msgs.CborObservation._decodeRecursiveFactory(ins);
             }
  
         }
@@ -144,27 +128,20 @@ namespace sim_msgs
  
             outobj.model_revision = this.model_revision;
  
-            outobj.body_poses_length = this.body_poses_length;
+            outobj.bodies_length = this.bodies_length;
  
-            outobj.body_poses = new sim_msgs.BodyPose[(int) body_poses_length];
-            for (int a = 0; a < this.body_poses_length; a++) {
-                outobj.body_poses[a] = this.body_poses[a].Copy();
-            }
- 
-            outobj.body_motion_length = this.body_motion_length;
- 
-            outobj.body_motion = new sim_msgs.BodyMotion[(int) body_motion_length];
-            for (int a = 0; a < this.body_motion_length; a++) {
-                outobj.body_motion[a] = this.body_motion[a].Copy();
+            outobj.bodies = new sim_msgs.BodyState[(int) bodies_length];
+            for (int a = 0; a < this.bodies_length; a++) {
+                outobj.bodies[a] = this.bodies[a].Copy();
             }
  
             outobj.joint_truth = this.joint_truth.Copy();
  
-            outobj.extensions_length = this.extensions_length;
+            outobj.cbor_observations_length = this.cbor_observations_length;
  
-            outobj.extensions = new sim_msgs.CborExtension[(int) extensions_length];
-            for (int a = 0; a < this.extensions_length; a++) {
-                outobj.extensions[a] = this.extensions[a].Copy();
+            outobj.cbor_observations = new sim_msgs.CborObservation[(int) cbor_observations_length];
+            for (int a = 0; a < this.cbor_observations_length; a++) {
+                outobj.cbor_observations[a] = this.cbor_observations[a].Copy();
             }
  
             return outobj;

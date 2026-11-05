@@ -10,31 +10,35 @@ using LCM.LCM;
  
 namespace sim_msgs
 {
-    public sealed class BodyPose : LCM.LCM.LCMEncodable
+    public sealed class BodyState : LCM.LCM.LCMEncodable
     {
         public String body_id;
-        public geometry_msgs.Pose pose_world;
+        public geometry_msgs.Pose pose;
+        public geometry_msgs.Twist twist;
+        public geometry_msgs.Accel acceleration;
  
-        public BodyPose()
+        public BodyState()
         {
         }
  
         public static readonly ulong LCM_FINGERPRINT;
-        public static readonly ulong LCM_FINGERPRINT_BASE = 0xe45a13bef82dc7d4L;
+        public static readonly ulong LCM_FINGERPRINT_BASE = 0xd4df2e3821478c43L;
  
-        static BodyPose()
+        static BodyState()
         {
             LCM_FINGERPRINT = _hashRecursive(new List<String>());
         }
  
         public static ulong _hashRecursive(List<String> classes)
         {
-            if (classes.Contains("sim_msgs.BodyPose"))
+            if (classes.Contains("sim_msgs.BodyState"))
                 return 0L;
  
-            classes.Add("sim_msgs.BodyPose");
+            classes.Add("sim_msgs.BodyState");
             ulong hash = LCM_FINGERPRINT_BASE
                  + geometry_msgs.Pose._hashRecursive(classes)
+                 + geometry_msgs.Twist._hashRecursive(classes)
+                 + geometry_msgs.Accel._hashRecursive(classes)
                 ;
             classes.RemoveAt(classes.Count - 1);
             return (hash<<1) + ((hash>>63)&1);
@@ -51,15 +55,19 @@ namespace sim_msgs
             byte[] __strbuf = null;
             __strbuf = System.Text.Encoding.GetEncoding("US-ASCII").GetBytes(this.body_id); outs.Write(__strbuf.Length+1); outs.Write(__strbuf, 0, __strbuf.Length); outs.Write((byte) 0); 
  
-            this.pose_world._encodeRecursive(outs); 
+            this.pose._encodeRecursive(outs); 
+ 
+            this.twist._encodeRecursive(outs); 
+ 
+            this.acceleration._encodeRecursive(outs); 
  
         }
  
-        public BodyPose(byte[] data) : this(new LCMDataInputStream(data))
+        public BodyState(byte[] data) : this(new LCMDataInputStream(data))
         {
         }
  
-        public BodyPose(LCMDataInputStream ins)
+        public BodyState(LCMDataInputStream ins)
         {
             if ((ulong) ins.ReadInt64() != LCM_FINGERPRINT)
                 throw new System.IO.IOException("LCM Decode error: bad fingerprint");
@@ -67,9 +75,9 @@ namespace sim_msgs
             _decodeRecursive(ins);
         }
  
-        public static sim_msgs.BodyPose _decodeRecursiveFactory(LCMDataInputStream ins)
+        public static sim_msgs.BodyState _decodeRecursiveFactory(LCMDataInputStream ins)
         {
-            sim_msgs.BodyPose o = new sim_msgs.BodyPose();
+            sim_msgs.BodyState o = new sim_msgs.BodyState();
             o._decodeRecursive(ins);
             return o;
         }
@@ -79,16 +87,24 @@ namespace sim_msgs
             byte[] __strbuf = null;
             __strbuf = new byte[ins.ReadInt32()-1]; ins.ReadFully(__strbuf); ins.ReadByte(); this.body_id = System.Text.Encoding.GetEncoding("US-ASCII").GetString(__strbuf);
  
-            this.pose_world = geometry_msgs.Pose._decodeRecursiveFactory(ins);
+            this.pose = geometry_msgs.Pose._decodeRecursiveFactory(ins);
+ 
+            this.twist = geometry_msgs.Twist._decodeRecursiveFactory(ins);
+ 
+            this.acceleration = geometry_msgs.Accel._decodeRecursiveFactory(ins);
  
         }
  
-        public sim_msgs.BodyPose Copy()
+        public sim_msgs.BodyState Copy()
         {
-            sim_msgs.BodyPose outobj = new sim_msgs.BodyPose();
+            sim_msgs.BodyState outobj = new sim_msgs.BodyState();
             outobj.body_id = this.body_id;
  
-            outobj.pose_world = this.pose_world.Copy();
+            outobj.pose = this.pose.Copy();
+ 
+            outobj.twist = this.twist.Copy();
+ 
+            outobj.acceleration = this.acceleration.Copy();
  
             return outobj;
         }

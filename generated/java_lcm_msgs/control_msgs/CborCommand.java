@@ -12,17 +12,15 @@ import lcm.lcm.*;
  
 /**
  * Backend-defined operation on a resolved body/joint name, or "world".
- * key identifies the operation; schema identifies its versioned payload contract.
- * value contains exactly one CBOR item. Unknown key/schema must be rejected;
- * this is a command, unlike an optional observed sim_msgs.CborExtension property.
+ * key identifies the operation and its agreed payload format.
+ * value is one CBOR item. Unknown keys or invalid payloads must be rejected;
+ * this is a command, unlike an optional observed sim_msgs.CborObservation property.
  */
 public final class CborCommand implements lcm.lcm.LCMEncodable
 {
     public String entity_id;
 
     public String key;
-
-    public String schema;
 
     public int value_length;
 
@@ -37,7 +35,7 @@ public final class CborCommand implements lcm.lcm.LCMEncodable
     }
  
     public static final long LCM_FINGERPRINT;
-    public static final long LCM_FINGERPRINT_BASE = 0x2b8c40fcf830ab0dL;
+    public static final long LCM_FINGERPRINT_BASE = 0xd18c67b8c1e53c58L;
  
     static {
         LCM_FINGERPRINT = _hashRecursive(new ArrayList<Class<?>>());
@@ -67,8 +65,6 @@ public final class CborCommand implements lcm.lcm.LCMEncodable
         __strbuf = new char[this.entity_id.length()]; this.entity_id.getChars(0, this.entity_id.length(), __strbuf, 0); outs.writeInt(__strbuf.length+1); for (int _i = 0; _i < __strbuf.length; _i++) outs.write(__strbuf[_i]); outs.writeByte(0); 
  
         __strbuf = new char[this.key.length()]; this.key.getChars(0, this.key.length(), __strbuf, 0); outs.writeInt(__strbuf.length+1); for (int _i = 0; _i < __strbuf.length; _i++) outs.write(__strbuf[_i]); outs.writeByte(0); 
- 
-        __strbuf = new char[this.schema.length()]; this.schema.getChars(0, this.schema.length(), __strbuf, 0); outs.writeInt(__strbuf.length+1); for (int _i = 0; _i < __strbuf.length; _i++) outs.write(__strbuf[_i]); outs.writeByte(0); 
  
         outs.writeInt(this.value_length); 
  
@@ -104,8 +100,6 @@ public final class CborCommand implements lcm.lcm.LCMEncodable
  
         __strbuf = new char[ins.readInt()-1]; for (int _i = 0; _i < __strbuf.length; _i++) __strbuf[_i] = (char) (ins.readByte()&0xff); ins.readByte(); this.key = new String(__strbuf);
  
-        __strbuf = new char[ins.readInt()-1]; for (int _i = 0; _i < __strbuf.length; _i++) __strbuf[_i] = (char) (ins.readByte()&0xff); ins.readByte(); this.schema = new String(__strbuf);
- 
         this.value_length = ins.readInt();
  
         this.value = new byte[(int) value_length];
@@ -118,8 +112,6 @@ public final class CborCommand implements lcm.lcm.LCMEncodable
         outobj.entity_id = this.entity_id;
  
         outobj.key = this.key;
- 
-        outobj.schema = this.schema;
  
         outobj.value_length = this.value_length;
  

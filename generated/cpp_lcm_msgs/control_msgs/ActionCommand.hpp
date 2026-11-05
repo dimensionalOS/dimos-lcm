@@ -11,7 +11,7 @@
 
 #include <vector>
 #include "common_msgs/SampleHeader.hpp"
-#include "control_msgs/JointTarget.hpp"
+#include "control_msgs/JointCommand.hpp"
 #include "control_msgs/CborCommand.hpp"
 
 namespace control_msgs
@@ -34,12 +34,12 @@ class ActionCommand
 
         int64_t    valid_until_ns;
 
-        int32_t    joint_targets_length;
+        int32_t    joint_commands_length;
 
         /**
-         * LCM Type: control_msgs.JointTarget[joint_targets_length]
+         * LCM Type: control_msgs.JointCommand[joint_commands_length]
          */
-        std::vector< control_msgs::JointTarget > joint_targets;
+        std::vector< control_msgs::JointCommand > joint_commands;
 
         int32_t    cbor_commands_length;
 
@@ -156,11 +156,11 @@ int ActionCommand::_encodeNoHash(void *buf, int offset, int maxlen) const
     tlen = __int64_t_encode_array(buf, offset + pos, maxlen - pos, &this->valid_until_ns, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    tlen = __int32_t_encode_array(buf, offset + pos, maxlen - pos, &this->joint_targets_length, 1);
+    tlen = __int32_t_encode_array(buf, offset + pos, maxlen - pos, &this->joint_commands_length, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    for (int a0 = 0; a0 < this->joint_targets_length; a0++) {
-        tlen = this->joint_targets[a0]._encodeNoHash(buf, offset + pos, maxlen - pos);
+    for (int a0 = 0; a0 < this->joint_commands_length; a0++) {
+        tlen = this->joint_commands[a0]._encodeNoHash(buf, offset + pos, maxlen - pos);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
@@ -191,16 +191,16 @@ int ActionCommand::_decodeNoHash(const void *buf, int offset, int maxlen)
     tlen = __int64_t_decode_array(buf, offset + pos, maxlen - pos, &this->valid_until_ns, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->joint_targets_length, 1);
+    tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->joint_commands_length, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
     try {
-        this->joint_targets.resize(this->joint_targets_length);
+        this->joint_commands.resize(this->joint_commands_length);
     } catch (...) {
         return -1;
     }
-    for (int a0 = 0; a0 < this->joint_targets_length; a0++) {
-        tlen = this->joint_targets[a0]._decodeNoHash(buf, offset + pos, maxlen - pos);
+    for (int a0 = 0; a0 < this->joint_commands_length; a0++) {
+        tlen = this->joint_commands[a0]._decodeNoHash(buf, offset + pos, maxlen - pos);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
@@ -228,8 +228,8 @@ int ActionCommand::_getEncodedSizeNoHash() const
     enc_size += __int64_t_encoded_array_size(NULL, 1);
     enc_size += __int64_t_encoded_array_size(NULL, 1);
     enc_size += __int32_t_encoded_array_size(NULL, 1);
-    for (int a0 = 0; a0 < this->joint_targets_length; a0++) {
-        enc_size += this->joint_targets[a0]._getEncodedSizeNoHash();
+    for (int a0 = 0; a0 < this->joint_commands_length; a0++) {
+        enc_size += this->joint_commands[a0]._getEncodedSizeNoHash();
     }
     enc_size += __int32_t_encoded_array_size(NULL, 1);
     for (int a0 = 0; a0 < this->cbor_commands_length; a0++) {
@@ -246,9 +246,9 @@ uint64_t ActionCommand::_computeHash(const __lcm_hash_ptr *p)
             return 0;
     const __lcm_hash_ptr cp = { p, ActionCommand::getHash };
 
-    uint64_t hash = 0xe5e6a25c62ca4457LL +
+    uint64_t hash = 0xd7a6fc8ebf6c2382LL +
          common_msgs::SampleHeader::_computeHash(&cp) +
-         control_msgs::JointTarget::_computeHash(&cp) +
+         control_msgs::JointCommand::_computeHash(&cp) +
          control_msgs::CborCommand::_computeHash(&cp);
 
     return (hash<<1) + ((hash>>63)&1);

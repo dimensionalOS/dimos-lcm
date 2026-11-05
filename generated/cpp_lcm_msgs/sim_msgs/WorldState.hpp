@@ -12,19 +12,18 @@
 #include <string>
 #include <vector>
 #include "common_msgs/SampleHeader.hpp"
-#include "sim_msgs/BodyPose.hpp"
-#include "sim_msgs/BodyMotion.hpp"
+#include "sim_msgs/BodyState.hpp"
 #include "sim_msgs/JointTruth.hpp"
-#include "sim_msgs/CborExtension.hpp"
+#include "sim_msgs/CborObservation.hpp"
 
 namespace sim_msgs
 {
 
 /**
- * A complete physical sample at one acquisition, not a solver checkpoint.
- * Contains every described body's absolute world pose, every configured motion
- * frame and joint, and all current configured extension properties. Consumers
- * replace the previous snapshot: omission never means "keep the old value".
+ * Complete physical acquisition, not a native solver checkpoint.
+ * One record per described rigid body/frame, including fixed sensor mounts;
+ * configured scalar joints and all current optional CBOR observations.
+ * Replaces the previous sample. Gravity is fixed startup configuration.
  */
 class WorldState
 {
@@ -33,28 +32,21 @@ class WorldState
 
         std::string model_revision;
 
-        int32_t    body_poses_length;
+        int32_t    bodies_length;
 
         /**
-         * LCM Type: sim_msgs.BodyPose[body_poses_length]
+         * LCM Type: sim_msgs.BodyState[bodies_length]
          */
-        std::vector< sim_msgs::BodyPose > body_poses;
-
-        int32_t    body_motion_length;
-
-        /**
-         * LCM Type: sim_msgs.BodyMotion[body_motion_length]
-         */
-        std::vector< sim_msgs::BodyMotion > body_motion;
+        std::vector< sim_msgs::BodyState > bodies;
 
         sim_msgs::JointTruth joint_truth;
 
-        int32_t    extensions_length;
+        int32_t    cbor_observations_length;
 
         /**
-         * LCM Type: sim_msgs.CborExtension[extensions_length]
+         * LCM Type: sim_msgs.CborObservation[cbor_observations_length]
          */
-        std::vector< sim_msgs::CborExtension > extensions;
+        std::vector< sim_msgs::CborObservation > cbor_observations;
 
     public:
         /**
@@ -160,30 +152,22 @@ int WorldState::_encodeNoHash(void *buf, int offset, int maxlen) const
         buf, offset + pos, maxlen - pos, &model_revision_cstr, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    tlen = __int32_t_encode_array(buf, offset + pos, maxlen - pos, &this->body_poses_length, 1);
+    tlen = __int32_t_encode_array(buf, offset + pos, maxlen - pos, &this->bodies_length, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    for (int a0 = 0; a0 < this->body_poses_length; a0++) {
-        tlen = this->body_poses[a0]._encodeNoHash(buf, offset + pos, maxlen - pos);
-        if(tlen < 0) return tlen; else pos += tlen;
-    }
-
-    tlen = __int32_t_encode_array(buf, offset + pos, maxlen - pos, &this->body_motion_length, 1);
-    if(tlen < 0) return tlen; else pos += tlen;
-
-    for (int a0 = 0; a0 < this->body_motion_length; a0++) {
-        tlen = this->body_motion[a0]._encodeNoHash(buf, offset + pos, maxlen - pos);
+    for (int a0 = 0; a0 < this->bodies_length; a0++) {
+        tlen = this->bodies[a0]._encodeNoHash(buf, offset + pos, maxlen - pos);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
     tlen = this->joint_truth._encodeNoHash(buf, offset + pos, maxlen - pos);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    tlen = __int32_t_encode_array(buf, offset + pos, maxlen - pos, &this->extensions_length, 1);
+    tlen = __int32_t_encode_array(buf, offset + pos, maxlen - pos, &this->cbor_observations_length, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    for (int a0 = 0; a0 < this->extensions_length; a0++) {
-        tlen = this->extensions[a0]._encodeNoHash(buf, offset + pos, maxlen - pos);
+    for (int a0 = 0; a0 < this->cbor_observations_length; a0++) {
+        tlen = this->cbor_observations[a0]._encodeNoHash(buf, offset + pos, maxlen - pos);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
@@ -206,45 +190,32 @@ int WorldState::_decodeNoHash(const void *buf, int offset, int maxlen)
         static_cast<const char*>(buf) + offset + pos, __model_revision_len__ - 1);
     pos += __model_revision_len__;
 
-    tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->body_poses_length, 1);
+    tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->bodies_length, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
     try {
-        this->body_poses.resize(this->body_poses_length);
+        this->bodies.resize(this->bodies_length);
     } catch (...) {
         return -1;
     }
-    for (int a0 = 0; a0 < this->body_poses_length; a0++) {
-        tlen = this->body_poses[a0]._decodeNoHash(buf, offset + pos, maxlen - pos);
-        if(tlen < 0) return tlen; else pos += tlen;
-    }
-
-    tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->body_motion_length, 1);
-    if(tlen < 0) return tlen; else pos += tlen;
-
-    try {
-        this->body_motion.resize(this->body_motion_length);
-    } catch (...) {
-        return -1;
-    }
-    for (int a0 = 0; a0 < this->body_motion_length; a0++) {
-        tlen = this->body_motion[a0]._decodeNoHash(buf, offset + pos, maxlen - pos);
+    for (int a0 = 0; a0 < this->bodies_length; a0++) {
+        tlen = this->bodies[a0]._decodeNoHash(buf, offset + pos, maxlen - pos);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
     tlen = this->joint_truth._decodeNoHash(buf, offset + pos, maxlen - pos);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->extensions_length, 1);
+    tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->cbor_observations_length, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
     try {
-        this->extensions.resize(this->extensions_length);
+        this->cbor_observations.resize(this->cbor_observations_length);
     } catch (...) {
         return -1;
     }
-    for (int a0 = 0; a0 < this->extensions_length; a0++) {
-        tlen = this->extensions[a0]._decodeNoHash(buf, offset + pos, maxlen - pos);
+    for (int a0 = 0; a0 < this->cbor_observations_length; a0++) {
+        tlen = this->cbor_observations[a0]._decodeNoHash(buf, offset + pos, maxlen - pos);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
@@ -257,17 +228,13 @@ int WorldState::_getEncodedSizeNoHash() const
     enc_size += this->header._getEncodedSizeNoHash();
     enc_size += this->model_revision.size() + 4 + 1;
     enc_size += __int32_t_encoded_array_size(NULL, 1);
-    for (int a0 = 0; a0 < this->body_poses_length; a0++) {
-        enc_size += this->body_poses[a0]._getEncodedSizeNoHash();
-    }
-    enc_size += __int32_t_encoded_array_size(NULL, 1);
-    for (int a0 = 0; a0 < this->body_motion_length; a0++) {
-        enc_size += this->body_motion[a0]._getEncodedSizeNoHash();
+    for (int a0 = 0; a0 < this->bodies_length; a0++) {
+        enc_size += this->bodies[a0]._getEncodedSizeNoHash();
     }
     enc_size += this->joint_truth._getEncodedSizeNoHash();
     enc_size += __int32_t_encoded_array_size(NULL, 1);
-    for (int a0 = 0; a0 < this->extensions_length; a0++) {
-        enc_size += this->extensions[a0]._getEncodedSizeNoHash();
+    for (int a0 = 0; a0 < this->cbor_observations_length; a0++) {
+        enc_size += this->cbor_observations[a0]._getEncodedSizeNoHash();
     }
     return enc_size;
 }
@@ -280,12 +247,11 @@ uint64_t WorldState::_computeHash(const __lcm_hash_ptr *p)
             return 0;
     const __lcm_hash_ptr cp = { p, WorldState::getHash };
 
-    uint64_t hash = 0x533a7aa1693d6ef6LL +
+    uint64_t hash = 0x1e56f36a590e109dLL +
          common_msgs::SampleHeader::_computeHash(&cp) +
-         sim_msgs::BodyPose::_computeHash(&cp) +
-         sim_msgs::BodyMotion::_computeHash(&cp) +
+         sim_msgs::BodyState::_computeHash(&cp) +
          sim_msgs::JointTruth::_computeHash(&cp) +
-         sim_msgs::CborExtension::_computeHash(&cp);
+         sim_msgs::CborObservation::_computeHash(&cp);
 
     return (hash<<1) + ((hash>>63)&1);
 }

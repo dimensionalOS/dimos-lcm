@@ -17,9 +17,9 @@ namespace control_msgs
 
 /**
  * Backend-defined operation on a resolved body/joint name, or "world".
- * key identifies the operation; schema identifies its versioned payload contract.
- * value contains exactly one CBOR item. Unknown key/schema must be rejected;
- * this is a command, unlike an optional observed sim_msgs.CborExtension property.
+ * key identifies the operation and its agreed payload format.
+ * value is one CBOR item. Unknown keys or invalid payloads must be rejected;
+ * this is a command, unlike an optional observed sim_msgs.CborObservation property.
  */
 class CborCommand
 {
@@ -27,8 +27,6 @@ class CborCommand
         std::string entity_id;
 
         std::string key;
-
-        std::string schema;
 
         int32_t    value_length;
 
@@ -143,11 +141,6 @@ int CborCommand::_encodeNoHash(void *buf, int offset, int maxlen) const
         buf, offset + pos, maxlen - pos, &key_cstr, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    char* schema_cstr = const_cast<char*>(this->schema.c_str());
-    tlen = __string_encode_array(
-        buf, offset + pos, maxlen - pos, &schema_cstr, 1);
-    if(tlen < 0) return tlen; else pos += tlen;
-
     tlen = __int32_t_encode_array(buf, offset + pos, maxlen - pos, &this->value_length, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
@@ -181,15 +174,6 @@ int CborCommand::_decodeNoHash(const void *buf, int offset, int maxlen)
         static_cast<const char*>(buf) + offset + pos, __key_len__ - 1);
     pos += __key_len__;
 
-    int32_t __schema_len__;
-    tlen = __int32_t_decode_array(
-        buf, offset + pos, maxlen - pos, &__schema_len__, 1);
-    if(tlen < 0) return tlen; else pos += tlen;
-    if(__schema_len__ > maxlen - pos) return -1;
-    this->schema.assign(
-        static_cast<const char*>(buf) + offset + pos, __schema_len__ - 1);
-    pos += __schema_len__;
-
     tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->value_length, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
@@ -207,7 +191,6 @@ int CborCommand::_getEncodedSizeNoHash() const
     int enc_size = 0;
     enc_size += this->entity_id.size() + 4 + 1;
     enc_size += this->key.size() + 4 + 1;
-    enc_size += this->schema.size() + 4 + 1;
     enc_size += __int32_t_encoded_array_size(NULL, 1);
     enc_size += __byte_encoded_array_size(NULL, this->value_length);
     return enc_size;
@@ -215,7 +198,7 @@ int CborCommand::_getEncodedSizeNoHash() const
 
 uint64_t CborCommand::_computeHash(const __lcm_hash_ptr *)
 {
-    uint64_t hash = 0x2b8c40fcf830ab0dLL;
+    uint64_t hash = 0xd18c67b8c1e53c58LL;
     return (hash<<1) + ((hash>>63)&1);
 }
 

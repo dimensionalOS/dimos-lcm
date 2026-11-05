@@ -66,9 +66,6 @@ pub use joint_controller_state::JointControllerState;
 mod joint_jog;
 pub use joint_jog::JointJog;
 
-mod joint_target;
-pub use joint_target::JointTarget;
-
 mod joint_tolerance;
 pub use joint_tolerance::JointTolerance;
 

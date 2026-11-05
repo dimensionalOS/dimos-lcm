@@ -36,20 +36,19 @@ function _buffer_helper:read(n_bytes)
   return partial
 end
 
-local CborExtension = {}
-CborExtension.__index = CborExtension
+local CborObservation = {}
+CborObservation.__index = CborObservation
 
-CborExtension.name = 'sim_msgs.CborExtension'
-CborExtension.packagename = 'sim_msgs'
-CborExtension.shortname = 'CborExtension'
+CborObservation.name = 'sim_msgs.CborObservation'
+CborObservation.packagename = 'sim_msgs'
+CborObservation.shortname = 'CborObservation'
 
-function CborExtension:new()
+function CborObservation:new()
 
   local obj = {}
 
   obj.entity_id = ''
   obj.key = ''
-  obj.schema = ''
   obj.value_length = 0
   obj.value = {}
 
@@ -58,31 +57,31 @@ function CborExtension:new()
   return obj
 end
 
-function CborExtension._get_hash_recursive(parents)
+function CborObservation._get_hash_recursive(parents)
 
   local newparents = {}
 
   for _, v in ipairs(parents) do
-    if v == CborExtension then return lcm._hash.new('0x0') end
+    if v == CborObservation then return lcm._hash.new('0x0') end
     table.insert(newparents, v)
   end
 
-  table.insert(newparents, CborExtension)
+  table.insert(newparents, CborObservation)
 
-  local hash = lcm._hash.new('0x2b8c40fcf830ab0d')
+  local hash = lcm._hash.new('0xd18c67b8c1e53c58')
   hash:rotate(1)
 
   return hash
 end
 
-CborExtension._packed_fingerprint = lcm._pack.pack('>X', CborExtension._get_hash_recursive({}))
+CborObservation._packed_fingerprint = lcm._pack.pack('>X', CborObservation._get_hash_recursive({}))
 
-function CborExtension:encode()
+function CborObservation:encode()
 
-  return CborExtension._packed_fingerprint .. self:_encode_one()
+  return CborObservation._packed_fingerprint .. self:_encode_one()
 end
 
-function CborExtension:_encode_one()
+function CborObservation:_encode_one()
 
   local buf_table = {}
 
@@ -92,43 +91,38 @@ function CborExtension:_encode_one()
   local __key_tmpstr = lcm._pack.prepare_string(self.key)
   table.insert(buf_table, lcm._pack.pack('>I', #__key_tmpstr + 1))
   table.insert(buf_table, __key_tmpstr .. '\0')
-  local __schema_tmpstr = lcm._pack.prepare_string(self.schema)
-  table.insert(buf_table, lcm._pack.pack('>I', #__schema_tmpstr + 1))
-  table.insert(buf_table, __schema_tmpstr .. '\0')
   table.insert(buf_table, lcm._pack.pack('>i', self.value_length))
   table.insert(buf_table, lcm._pack.pack(string.format('>%dB', self.value_length), unpack(self.value)))
 
   return table.concat(buf_table)
 end
 
-function CborExtension.decode(data)
+function CborObservation.decode(data)
 
-  if data:sub(1, 8) ~= CborExtension._packed_fingerprint then
+  if data:sub(1, 8) ~= CborObservation._packed_fingerprint then
     error('bad fingerprint')
   end
 
-  return CborExtension._decode_one(data:sub(9))
+  return CborObservation._decode_one(data:sub(9))
 end
 
-function CborExtension._decode_one(data)
+function CborObservation._decode_one(data)
 
   if not data.read then
     data = _buffer_helper:new(data)
   end
 
-  local obj = CborExtension:new()
+  local obj = CborObservation:new()
 
   local __entity_id_tmpstrlen = lcm._pack.unpack('>I', data:read(4))
   obj.entity_id = lcm._pack.prepare_string(data:read(__entity_id_tmpstrlen))
   local __key_tmpstrlen = lcm._pack.unpack('>I', data:read(4))
   obj.key = lcm._pack.prepare_string(data:read(__key_tmpstrlen))
-  local __schema_tmpstrlen = lcm._pack.unpack('>I', data:read(4))
-  obj.schema = lcm._pack.prepare_string(data:read(__schema_tmpstrlen))
   obj.value_length = lcm._pack.unpack('>i', data:read(4))
   obj.value = {lcm._pack.unpack(string.format('>%dB', obj.value_length), data:read(obj.value_length))}
 
   return obj
 end
 
-return CborExtension
+return CborObservation
 

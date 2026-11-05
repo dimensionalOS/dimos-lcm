@@ -6,11 +6,10 @@ DO NOT MODIFY BY HAND!!!!
 
 local lcm = require('lcm')
 
+local sim_msgs_BodyState = require('sim_msgs.BodyState')
 local common_msgs_SampleHeader = require('common_msgs.SampleHeader')
-local sim_msgs_BodyPose = require('sim_msgs.BodyPose')
 local sim_msgs_JointTruth = require('sim_msgs.JointTruth')
-local sim_msgs_BodyMotion = require('sim_msgs.BodyMotion')
-local sim_msgs_CborExtension = require('sim_msgs.CborExtension')
+local sim_msgs_CborObservation = require('sim_msgs.CborObservation')
 
 local setmetatable = setmetatable
 local ipairs = ipairs
@@ -55,13 +54,11 @@ function WorldState:new()
 
   obj.header = nil
   obj.model_revision = ''
-  obj.body_poses_length = 0
-  obj.body_poses = {}
-  obj.body_motion_length = 0
-  obj.body_motion = {}
+  obj.bodies_length = 0
+  obj.bodies = {}
   obj.joint_truth = nil
-  obj.extensions_length = 0
-  obj.extensions = {}
+  obj.cbor_observations_length = 0
+  obj.cbor_observations = {}
 
   setmetatable(obj, self)
 
@@ -79,12 +76,11 @@ function WorldState._get_hash_recursive(parents)
 
   table.insert(newparents, WorldState)
 
-  local hash = lcm._hash.new('0x533a7aa1693d6ef6')
+  local hash = lcm._hash.new('0x1e56f36a590e109d')
     + common_msgs_SampleHeader._get_hash_recursive(newparents)
-    + sim_msgs_BodyPose._get_hash_recursive(newparents)
-    + sim_msgs_BodyMotion._get_hash_recursive(newparents)
+    + sim_msgs_BodyState._get_hash_recursive(newparents)
     + sim_msgs_JointTruth._get_hash_recursive(newparents)
-    + sim_msgs_CborExtension._get_hash_recursive(newparents)
+    + sim_msgs_CborObservation._get_hash_recursive(newparents)
   hash:rotate(1)
 
   return hash
@@ -105,18 +101,14 @@ function WorldState:_encode_one()
   local __model_revision_tmpstr = lcm._pack.prepare_string(self.model_revision)
   table.insert(buf_table, lcm._pack.pack('>I', #__model_revision_tmpstr + 1))
   table.insert(buf_table, __model_revision_tmpstr .. '\0')
-  table.insert(buf_table, lcm._pack.pack('>i', self.body_poses_length))
-  for i0 = 1, self.body_poses_length do
-    table.insert(buf_table, self.body_poses[i0]:_encode_one())
-  end
-  table.insert(buf_table, lcm._pack.pack('>i', self.body_motion_length))
-  for i0 = 1, self.body_motion_length do
-    table.insert(buf_table, self.body_motion[i0]:_encode_one())
+  table.insert(buf_table, lcm._pack.pack('>i', self.bodies_length))
+  for i0 = 1, self.bodies_length do
+    table.insert(buf_table, self.bodies[i0]:_encode_one())
   end
   table.insert(buf_table, self.joint_truth:_encode_one())
-  table.insert(buf_table, lcm._pack.pack('>i', self.extensions_length))
-  for i0 = 1, self.extensions_length do
-    table.insert(buf_table, self.extensions[i0]:_encode_one())
+  table.insert(buf_table, lcm._pack.pack('>i', self.cbor_observations_length))
+  for i0 = 1, self.cbor_observations_length do
+    table.insert(buf_table, self.cbor_observations[i0]:_encode_one())
   end
 
   return table.concat(buf_table)
@@ -142,21 +134,16 @@ function WorldState._decode_one(data)
   obj.header = common_msgs_SampleHeader._decode_one(data)
   local __model_revision_tmpstrlen = lcm._pack.unpack('>I', data:read(4))
   obj.model_revision = lcm._pack.prepare_string(data:read(__model_revision_tmpstrlen))
-  obj.body_poses_length = lcm._pack.unpack('>i', data:read(4))
-  obj.body_poses = {}
-  for i0 = 1, obj.body_poses_length do
-    obj.body_poses[i0] = sim_msgs_BodyPose._decode_one(data)
-  end
-  obj.body_motion_length = lcm._pack.unpack('>i', data:read(4))
-  obj.body_motion = {}
-  for i0 = 1, obj.body_motion_length do
-    obj.body_motion[i0] = sim_msgs_BodyMotion._decode_one(data)
+  obj.bodies_length = lcm._pack.unpack('>i', data:read(4))
+  obj.bodies = {}
+  for i0 = 1, obj.bodies_length do
+    obj.bodies[i0] = sim_msgs_BodyState._decode_one(data)
   end
   obj.joint_truth = sim_msgs_JointTruth._decode_one(data)
-  obj.extensions_length = lcm._pack.unpack('>i', data:read(4))
-  obj.extensions = {}
-  for i0 = 1, obj.extensions_length do
-    obj.extensions[i0] = sim_msgs_CborExtension._decode_one(data)
+  obj.cbor_observations_length = lcm._pack.unpack('>i', data:read(4))
+  obj.cbor_observations = {}
+  for i0 = 1, obj.cbor_observations_length do
+    obj.cbor_observations[i0] = sim_msgs_CborObservation._decode_one(data)
   end
 
   return obj

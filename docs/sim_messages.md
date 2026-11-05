@@ -1,12 +1,11 @@
-# Option F: complete physical state and one action input
+# Option G: one body state and one action input
 
 `sim_msgs.WorldState` is one complete acquisition. Its `SampleHeader` and
 `model_revision` apply to every nested record. It contains:
 
-- `BodyPose[] body_poses`: every described rigid body's absolute world pose.
-- `BodyMotion[] body_motion`: motion at every configured frame origin.
+- `BodyState[] bodies`: every described body/frame with `pose: Pose`, `twist: Twist` and `acceleration: Accel`.
 - `JointTruth joint_truth`: named scalar positions, velocities and available efforts.
-- `CborExtension[] extensions`: all current optional entity properties in the export.
+- `CborObservation[] cbor_observations`: all current optional entity properties in the export.
 
 Each snapshot replaces the previous snapshot. A missing extension does not retain
 its earlier value. Stationary bodies remain present. The message contains neither
@@ -14,10 +13,15 @@ sensor measurements nor a native solver checkpoint. Array-count fields are wire
 metadata and must agree with the arrays they describe.
 
 Positions use metres, angles radians, right-handed world axes with Z up. Poses are
-world-from-body with XYZW unit quaternions. Linear/angular velocity and linear
+world-from-body with XYZW unit quaternions. Linear/angular velocity and linear/angular
 acceleration are in world axes at the named frame origin. Linear acceleration
 includes free fall; an IMU computes sensor-frame specific force from acceleration
-minus gravity. Body IDs identify rigid frames; joint IDs identify scalar DOFs.
+minus configured gravity. Body IDs identify rigid frames; joint IDs identify scalar DOFs.
+
+One BodyState replaces the overlapping BodyPose/BodyMotion records. Gravity is
+fixed scene configuration, delivered to the IMU at startup, never repeated in the
+WorldState payload. Every body exports all kinematic fields. BodyState, WorldState, ActionCommand and both CBOR types have new
+wire fingerprints relative to F; there is no mixed-codec compatibility.
 
 ## Acquisition identity
 
@@ -34,16 +38,16 @@ values above JavaScript's safe integer range (TypeScript uses bigint).
 
 ## Optional properties
 
-`CborExtension` contains `entity_id`, `key`, `schema`, `value_length`, and `value`.
+`CborObservation` contains `entity_id`, `key`, `value_length`, and `value`.
 The entity ID is a resolved body/joint name or `world`; `(entity_id, key)` must
-be unique in the snapshot. `schema` is a versioned property contract, such as
-`example.thermal.v1`. `value` encodes exactly one CBOR value conforming to it.
+be unique in the snapshot. The key identifies the property and its agreed payload
+format. `value` encodes exactly one CBOR value; there is no separate schema field.
 
-Unknown optional schemas may be ignored without losing typed physical fields.
-A consumer requiring an extension must check its schema and availability; CBOR
+Unknown optional keys may be ignored without losing typed physical fields.
+A consumer requiring an extension must check its key, payload and availability; CBOR
 encoding alone does not establish units or semantics. Extensions carry data,
 not commands, entity discovery, controller readiness or clock signals. Each
-backend's `read_extensions()` supplies its current values; the MuJoCo backend
+backend's `read_cbor_observations()` supplies its current values; the MuJoCo backend
 has no optional properties to report and returns an empty list.
 
 ## One action input
@@ -55,8 +59,8 @@ header: common_msgs.SampleHeader
 based_on_time_ns: int64
 apply_at_ns: int64
 valid_until_ns: int64
-joint_targets_length: int32
-joint_targets: control_msgs.JointTarget[]
+joint_commands_length: int32
+joint_commands: control_msgs.JointCommand[]
 cbor_commands_length: int32
 cbor_commands: control_msgs.CborCommand[]
 ```
@@ -68,7 +72,7 @@ A backend validates all entries before changing state. Unknown CBOR operations
 reject the whole action; they cannot be silently ignored like optional observations.
 An accepted source/sequence is not executed again in the same epoch.
 
-Each `JointTarget` names a joint and specifies desired position/velocity, kp, kd
+Each `JointCommand` names a joint and specifies desired position/velocity, kp, kd
 and feedforward effort:
 
 ```text
@@ -79,17 +83,18 @@ Targets persist until expiry, when SimModule holds those joints. A registered
 controller must answer its exact current measurement boundary with its full joint
 set. CBOR-only actions cannot satisfy that motor-control boundary.
 
-`CborCommand` has `entity_id: string`, `key: string`, `schema: string`,
+`CborCommand` has `entity_id: string`, `key: string`,
 `value_length: int32`, `value: byte[]`. It carries exactly one CBOR item, addressed
 to a known body/joint or `world`; `(entity_id,key)` is unique within the action.
-The schema defines operation semantics and effect lifetime. Execution is once at
+The addressed key defines operation semantics, payload format and effect lifetime. Execution is once at
 acceptance, not every physics step; expiry does **not** undo CBOR effects. No wrench
 command is defined. The included MuJoCo backend implements joint targets and rejects
 all CBOR commands; a backend can implement specific operations through `apply_action`
 without changing SimModule. There is no generic execution or operation registry.
 
-The upstream ROS `control_msgs.JointCommand` definition is restored unchanged; sim2
-uses `ActionCommand` instead of repurposing that unrelated message.
+`control_msgs.JointCommand` now names the six-field PD/feedforward record approved
+for G. This is name parity with ROS terminology, not the upstream ROS message
+layout; bindings using that upstream layout must not be mixed with these codecs.
 
 Independent sensor modules read WorldState and produce `sensor_msgs.Imu`,
 `JointState`, `Image`/`CameraInfo`, and `PointCloud2`. `SimulationClock` is a

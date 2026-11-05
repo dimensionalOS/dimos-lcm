@@ -6,14 +6,16 @@ use std::sync::OnceLock;
 
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct JointCommand {
-    pub header: crate::std_msgs::Header,
-    pub joint_names: Vec<std::string::String>,
-    pub interface_name: std::string::String,
-    pub values: Vec<f64>,
+    pub joint_id: std::string::String,
+    pub position: f64,
+    pub velocity: f64,
+    pub kp: f64,
+    pub kd: f64,
+    pub feedforward: f64,
 }
 
 impl JointCommand {
-    pub const HASH: i64 = 0xFD99FA6F28C147A8u64 as i64;
+    pub const HASH: i64 = 0x1DA228CF442CECEDu64 as i64;
     pub const NAME: &str = "control_msgs.JointCommand";
 
     fn packed_fingerprint() -> u64 {
@@ -27,8 +29,7 @@ impl JointCommand {
             return 0;
         }
         parents.push(self_hash);
-        let mut tmphash = self_hash as u64;
-        tmphash = tmphash.wrapping_add(crate::std_msgs::Header::hash_recursive(parents));
+        let tmphash = self_hash as u64;
         parents.pop();
         // rotate left by 1
         tmphash << 1 | tmphash >> 63
@@ -53,80 +54,51 @@ impl JointCommand {
     }
 
     pub fn encode_one<W: Write>(&self, buf: &mut W) -> io::Result<()> {
-        buf.write_i32::<BigEndian>(self.joint_names.len() as i32)?;
-        buf.write_i32::<BigEndian>(self.values.len() as i32)?;
-        self.header.encode_one(buf)?;
-        for v0 in self.joint_names.iter() {
-            {
-                let bytes = v0.as_bytes();
-                buf.write_u32::<BigEndian>((bytes.len() + 1) as u32)?;
-                buf.write_all(bytes)?;
-                buf.write_u8(0)?;
-            }
-        }
         {
-            let bytes = self.interface_name.as_bytes();
+            let bytes = self.joint_id.as_bytes();
             buf.write_u32::<BigEndian>((bytes.len() + 1) as u32)?;
             buf.write_all(bytes)?;
             buf.write_u8(0)?;
         }
-        for v0 in self.values.iter() {
-            buf.write_f64::<BigEndian>(*v0)?;
-        }
+        buf.write_f64::<BigEndian>(self.position)?;
+        buf.write_f64::<BigEndian>(self.velocity)?;
+        buf.write_f64::<BigEndian>(self.kp)?;
+        buf.write_f64::<BigEndian>(self.kd)?;
+        buf.write_f64::<BigEndian>(self.feedforward)?;
         Ok(())
     }
 
     pub fn decode_one<R: Read>(buf: &mut R) -> io::Result<Self> {
-        let joint_names_length = buf.read_i32::<BigEndian>()? as usize;
-        let values_length = buf.read_i32::<BigEndian>()? as usize;
-        let header = crate::std_msgs::Header::decode_one(buf)?;
-        let joint_names = {
-            let mut v = Vec::with_capacity(joint_names_length);
-            for _ in 0..joint_names_length {
-                let _elem_0 = {
-                    let len = buf.read_u32::<BigEndian>()? as usize;
-                    let mut bytes = vec![0u8; len];
-                    buf.read_exact(&mut bytes)?;
-                    std::string::String::from_utf8(bytes[..len - 1].to_vec())
-                        .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?
-                };
-                v.push(_elem_0);
-            }
-            v
-        };
-        let interface_name = {
+        let joint_id = {
             let len = buf.read_u32::<BigEndian>()? as usize;
             let mut bytes = vec![0u8; len];
             buf.read_exact(&mut bytes)?;
             std::string::String::from_utf8(bytes[..len - 1].to_vec())
                 .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?
         };
-        let values = {
-            let mut v = Vec::with_capacity(values_length);
-            for _ in 0..values_length {
-                let _elem_0 = buf.read_f64::<BigEndian>()?;
-                v.push(_elem_0);
-            }
-            v
-        };
+        let position = buf.read_f64::<BigEndian>()?;
+        let velocity = buf.read_f64::<BigEndian>()?;
+        let kp = buf.read_f64::<BigEndian>()?;
+        let kd = buf.read_f64::<BigEndian>()?;
+        let feedforward = buf.read_f64::<BigEndian>()?;
         Ok(Self {
-            header,
-            joint_names,
-            interface_name,
-            values,
+            joint_id,
+            position,
+            velocity,
+            kp,
+            kd,
+            feedforward,
         })
     }
 
     pub fn encoded_size(&self) -> usize {
         let mut size = 0usize;
-        size += 4;
-        size += 4;
-        size += self.header.encoded_size();
-        for s0 in self.joint_names.iter() {
-            size += 4 + s0.len() + 1;
-        }
-        size += 4 + self.interface_name.len() + 1;
-        size += self.values.len() * 8;
+        size += 4 + self.joint_id.len() + 1;
+        size += 8;
+        size += 8;
+        size += 8;
+        size += 8;
+        size += 8;
         size
     }
 

@@ -49,7 +49,6 @@ function CborCommand:new()
 
   obj.entity_id = ''
   obj.key = ''
-  obj.schema = ''
   obj.value_length = 0
   obj.value = {}
 
@@ -69,7 +68,7 @@ function CborCommand._get_hash_recursive(parents)
 
   table.insert(newparents, CborCommand)
 
-  local hash = lcm._hash.new('0x2b8c40fcf830ab0d')
+  local hash = lcm._hash.new('0xd18c67b8c1e53c58')
   hash:rotate(1)
 
   return hash
@@ -92,9 +91,6 @@ function CborCommand:_encode_one()
   local __key_tmpstr = lcm._pack.prepare_string(self.key)
   table.insert(buf_table, lcm._pack.pack('>I', #__key_tmpstr + 1))
   table.insert(buf_table, __key_tmpstr .. '\0')
-  local __schema_tmpstr = lcm._pack.prepare_string(self.schema)
-  table.insert(buf_table, lcm._pack.pack('>I', #__schema_tmpstr + 1))
-  table.insert(buf_table, __schema_tmpstr .. '\0')
   table.insert(buf_table, lcm._pack.pack('>i', self.value_length))
   table.insert(buf_table, lcm._pack.pack(string.format('>%dB', self.value_length), unpack(self.value)))
 
@@ -122,8 +118,6 @@ function CborCommand._decode_one(data)
   obj.entity_id = lcm._pack.prepare_string(data:read(__entity_id_tmpstrlen))
   local __key_tmpstrlen = lcm._pack.unpack('>I', data:read(4))
   obj.key = lcm._pack.prepare_string(data:read(__key_tmpstrlen))
-  local __schema_tmpstrlen = lcm._pack.unpack('>I', data:read(4))
-  obj.schema = lcm._pack.prepare_string(data:read(__schema_tmpstrlen))
   obj.value_length = lcm._pack.unpack('>i', data:read(4))
   obj.value = {lcm._pack.unpack(string.format('>%dB', obj.value_length), data:read(obj.value_length))}
 

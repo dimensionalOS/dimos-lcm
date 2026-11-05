@@ -8,14 +8,13 @@ use std::sync::OnceLock;
 pub struct WorldState {
     pub header: crate::common_msgs::SampleHeader,
     pub model_revision: std::string::String,
-    pub body_poses: Vec<crate::sim_msgs::BodyPose>,
-    pub body_motion: Vec<crate::sim_msgs::BodyMotion>,
+    pub bodies: Vec<crate::sim_msgs::BodyState>,
     pub joint_truth: crate::sim_msgs::JointTruth,
-    pub extensions: Vec<crate::sim_msgs::CborExtension>,
+    pub cbor_observations: Vec<crate::sim_msgs::CborObservation>,
 }
 
 impl WorldState {
-    pub const HASH: i64 = 0x533A7AA1693D6EF6u64 as i64;
+    pub const HASH: i64 = 0x1E56F36A590E109Du64 as i64;
     pub const NAME: &str = "sim_msgs.WorldState";
 
     fn packed_fingerprint() -> u64 {
@@ -31,10 +30,9 @@ impl WorldState {
         parents.push(self_hash);
         let mut tmphash = self_hash as u64;
         tmphash = tmphash.wrapping_add(crate::common_msgs::SampleHeader::hash_recursive(parents));
-        tmphash = tmphash.wrapping_add(crate::sim_msgs::BodyPose::hash_recursive(parents));
-        tmphash = tmphash.wrapping_add(crate::sim_msgs::BodyMotion::hash_recursive(parents));
+        tmphash = tmphash.wrapping_add(crate::sim_msgs::BodyState::hash_recursive(parents));
         tmphash = tmphash.wrapping_add(crate::sim_msgs::JointTruth::hash_recursive(parents));
-        tmphash = tmphash.wrapping_add(crate::sim_msgs::CborExtension::hash_recursive(parents));
+        tmphash = tmphash.wrapping_add(crate::sim_msgs::CborObservation::hash_recursive(parents));
         parents.pop();
         // rotate left by 1
         tmphash << 1 | tmphash >> 63
@@ -66,17 +64,13 @@ impl WorldState {
             buf.write_all(bytes)?;
             buf.write_u8(0)?;
         }
-        buf.write_i32::<BigEndian>(self.body_poses.len() as i32)?;
-        for v0 in self.body_poses.iter() {
-            v0.encode_one(buf)?;
-        }
-        buf.write_i32::<BigEndian>(self.body_motion.len() as i32)?;
-        for v0 in self.body_motion.iter() {
+        buf.write_i32::<BigEndian>(self.bodies.len() as i32)?;
+        for v0 in self.bodies.iter() {
             v0.encode_one(buf)?;
         }
         self.joint_truth.encode_one(buf)?;
-        buf.write_i32::<BigEndian>(self.extensions.len() as i32)?;
-        for v0 in self.extensions.iter() {
+        buf.write_i32::<BigEndian>(self.cbor_observations.len() as i32)?;
+        for v0 in self.cbor_observations.iter() {
             v0.encode_one(buf)?;
         }
         Ok(())
@@ -91,30 +85,21 @@ impl WorldState {
             std::string::String::from_utf8(bytes[..len - 1].to_vec())
                 .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?
         };
-        let body_poses_length = buf.read_i32::<BigEndian>()? as usize;
-        let body_poses = {
-            let mut v = Vec::with_capacity(body_poses_length);
-            for _ in 0..body_poses_length {
-                let _elem_0 = crate::sim_msgs::BodyPose::decode_one(buf)?;
-                v.push(_elem_0);
-            }
-            v
-        };
-        let body_motion_length = buf.read_i32::<BigEndian>()? as usize;
-        let body_motion = {
-            let mut v = Vec::with_capacity(body_motion_length);
-            for _ in 0..body_motion_length {
-                let _elem_0 = crate::sim_msgs::BodyMotion::decode_one(buf)?;
+        let bodies_length = buf.read_i32::<BigEndian>()? as usize;
+        let bodies = {
+            let mut v = Vec::with_capacity(bodies_length);
+            for _ in 0..bodies_length {
+                let _elem_0 = crate::sim_msgs::BodyState::decode_one(buf)?;
                 v.push(_elem_0);
             }
             v
         };
         let joint_truth = crate::sim_msgs::JointTruth::decode_one(buf)?;
-        let extensions_length = buf.read_i32::<BigEndian>()? as usize;
-        let extensions = {
-            let mut v = Vec::with_capacity(extensions_length);
-            for _ in 0..extensions_length {
-                let _elem_0 = crate::sim_msgs::CborExtension::decode_one(buf)?;
+        let cbor_observations_length = buf.read_i32::<BigEndian>()? as usize;
+        let cbor_observations = {
+            let mut v = Vec::with_capacity(cbor_observations_length);
+            for _ in 0..cbor_observations_length {
+                let _elem_0 = crate::sim_msgs::CborObservation::decode_one(buf)?;
                 v.push(_elem_0);
             }
             v
@@ -122,10 +107,9 @@ impl WorldState {
         Ok(Self {
             header,
             model_revision,
-            body_poses,
-            body_motion,
+            bodies,
             joint_truth,
-            extensions,
+            cbor_observations,
         })
     }
 
@@ -134,16 +118,12 @@ impl WorldState {
         size += self.header.encoded_size();
         size += 4 + self.model_revision.len() + 1;
         size += 4;
-        for v0 in self.body_poses.iter() {
-            size += v0.encoded_size();
-        }
-        size += 4;
-        for v0 in self.body_motion.iter() {
+        for v0 in self.bodies.iter() {
             size += v0.encoded_size();
         }
         size += self.joint_truth.encoded_size();
         size += 4;
-        for v0 in self.extensions.iter() {
+        for v0 in self.cbor_observations.iter() {
             size += v0.encoded_size();
         }
         size

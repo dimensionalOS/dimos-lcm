@@ -26,12 +26,12 @@ public final class ActionCommand implements lcm.lcm.LCMEncodable
 
     public long valid_until_ns;
 
-    public int joint_targets_length;
+    public int joint_commands_length;
 
     /**
-     * LCM Type: control_msgs.JointTarget[joint_targets_length]
+     * LCM Type: control_msgs.JointCommand[joint_commands_length]
      */
-    public control_msgs.JointTarget joint_targets[];
+    public control_msgs.JointCommand joint_commands[];
 
     public int cbor_commands_length;
 
@@ -46,7 +46,7 @@ public final class ActionCommand implements lcm.lcm.LCMEncodable
     }
  
     public static final long LCM_FINGERPRINT;
-    public static final long LCM_FINGERPRINT_BASE = 0xe5e6a25c62ca4457L;
+    public static final long LCM_FINGERPRINT_BASE = 0xd7a6fc8ebf6c2382L;
  
     static {
         LCM_FINGERPRINT = _hashRecursive(new ArrayList<Class<?>>());
@@ -60,7 +60,7 @@ public final class ActionCommand implements lcm.lcm.LCMEncodable
         classes.add(control_msgs.ActionCommand.class);
         long hash = LCM_FINGERPRINT_BASE
              + common_msgs.SampleHeader._hashRecursive(classes)
-             + control_msgs.JointTarget._hashRecursive(classes)
+             + control_msgs.JointCommand._hashRecursive(classes)
              + control_msgs.CborCommand._hashRecursive(classes)
             ;
         classes.remove(classes.size() - 1);
@@ -83,10 +83,10 @@ public final class ActionCommand implements lcm.lcm.LCMEncodable
  
         outs.writeLong(this.valid_until_ns); 
  
-        outs.writeInt(this.joint_targets_length); 
+        outs.writeInt(this.joint_commands_length); 
  
-        for (int a = 0; a < this.joint_targets_length; a++) {
-            this.joint_targets[a]._encodeRecursive(outs); 
+        for (int a = 0; a < this.joint_commands_length; a++) {
+            this.joint_commands[a]._encodeRecursive(outs); 
         }
  
         outs.writeInt(this.cbor_commands_length); 
@@ -127,11 +127,11 @@ public final class ActionCommand implements lcm.lcm.LCMEncodable
  
         this.valid_until_ns = ins.readLong();
  
-        this.joint_targets_length = ins.readInt();
+        this.joint_commands_length = ins.readInt();
  
-        this.joint_targets = new control_msgs.JointTarget[(int) joint_targets_length];
-        for (int a = 0; a < this.joint_targets_length; a++) {
-            this.joint_targets[a] = control_msgs.JointTarget._decodeRecursiveFactory(ins);
+        this.joint_commands = new control_msgs.JointCommand[(int) joint_commands_length];
+        for (int a = 0; a < this.joint_commands_length; a++) {
+            this.joint_commands[a] = control_msgs.JointCommand._decodeRecursiveFactory(ins);
         }
  
         this.cbor_commands_length = ins.readInt();
@@ -154,11 +154,11 @@ public final class ActionCommand implements lcm.lcm.LCMEncodable
  
         outobj.valid_until_ns = this.valid_until_ns;
  
-        outobj.joint_targets_length = this.joint_targets_length;
+        outobj.joint_commands_length = this.joint_commands_length;
  
-        outobj.joint_targets = new control_msgs.JointTarget[(int) joint_targets_length];
-        for (int a = 0; a < this.joint_targets_length; a++) {
-            outobj.joint_targets[a] = this.joint_targets[a].copy();
+        outobj.joint_commands = new control_msgs.JointCommand[(int) joint_commands_length];
+        for (int a = 0; a < this.joint_commands_length; a++) {
+            outobj.joint_commands[a] = this.joint_commands[a].copy();
         }
  
         outobj.cbor_commands_length = this.cbor_commands_length;

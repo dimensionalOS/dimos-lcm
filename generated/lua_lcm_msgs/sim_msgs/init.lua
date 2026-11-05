@@ -7,12 +7,11 @@ lcm-gen 1.5.2
 
 local M = {}
 
-M.CborExtension = require('sim_msgs.CborExtension')
-M.JointTruth = require('sim_msgs.JointTruth')
 M.SimulationClock = require('sim_msgs.SimulationClock')
-M.BodyMotion = require('sim_msgs.BodyMotion')
-M.BodyPose = require('sim_msgs.BodyPose')
+M.CborObservation = require('sim_msgs.CborObservation')
+M.JointTruth = require('sim_msgs.JointTruth')
 M.WorldState = require('sim_msgs.WorldState')
+M.BodyState = require('sim_msgs.BodyState')
 
 return M
 

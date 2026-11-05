@@ -8,12 +8,11 @@ use std::sync::OnceLock;
 pub struct CborCommand {
     pub entity_id: std::string::String,
     pub key: std::string::String,
-    pub schema: std::string::String,
     pub value: Vec<u8>,
 }
 
 impl CborCommand {
-    pub const HASH: i64 = 0x2B8C40FCF830AB0Du64 as i64;
+    pub const HASH: i64 = 0xD18C67B8C1E53C58u64 as i64;
     pub const NAME: &str = "control_msgs.CborCommand";
 
     fn packed_fingerprint() -> u64 {
@@ -64,12 +63,6 @@ impl CborCommand {
             buf.write_all(bytes)?;
             buf.write_u8(0)?;
         }
-        {
-            let bytes = self.schema.as_bytes();
-            buf.write_u32::<BigEndian>((bytes.len() + 1) as u32)?;
-            buf.write_all(bytes)?;
-            buf.write_u8(0)?;
-        }
         buf.write_i32::<BigEndian>(self.value.len() as i32)?;
         buf.write_all(&self.value)?;
         Ok(())
@@ -90,13 +83,6 @@ impl CborCommand {
             std::string::String::from_utf8(bytes[..len - 1].to_vec())
                 .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?
         };
-        let schema = {
-            let len = buf.read_u32::<BigEndian>()? as usize;
-            let mut bytes = vec![0u8; len];
-            buf.read_exact(&mut bytes)?;
-            std::string::String::from_utf8(bytes[..len - 1].to_vec())
-                .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?
-        };
         let value_length = buf.read_i32::<BigEndian>()? as usize;
         let value = {
             let mut v = vec![0u8; value_length];
@@ -106,7 +92,6 @@ impl CborCommand {
         Ok(Self {
             entity_id,
             key,
-            schema,
             value,
         })
     }
@@ -115,7 +100,6 @@ impl CborCommand {
         let mut size = 0usize;
         size += 4 + self.entity_id.len() + 1;
         size += 4 + self.key.len() + 1;
-        size += 4 + self.schema.len() + 1;
         size += 4;
         size += self.value.len();
         size

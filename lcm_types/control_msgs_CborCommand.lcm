@@ -1,13 +1,12 @@
 package control_msgs;
 
 // Backend-defined operation on a resolved body/joint name, or "world".
-// key identifies the operation; schema identifies its versioned payload contract.
-// value contains exactly one CBOR item. Unknown key/schema must be rejected;
-// this is a command, unlike an optional observed sim_msgs.CborExtension property.
+// key identifies the operation and its agreed payload format.
+// value is one CBOR item. Unknown keys or invalid payloads must be rejected;
+// this is a command, unlike an optional observed sim_msgs.CborObservation property.
 struct CborCommand {
     string entity_id;
     string key;
-    string schema;
     int32_t value_length;
     byte value[value_length];
 }

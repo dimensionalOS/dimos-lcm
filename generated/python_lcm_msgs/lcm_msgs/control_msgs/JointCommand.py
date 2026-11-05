@@ -7,60 +7,38 @@ from io import BytesIO
 import struct
 import sys
 
-from lcm_msgs import std_msgs
-
 
 class JointCommand(object):
     msg_name = "control_msgs.JointCommand"
 
-    __slots__ = [
-        "joint_names_length",
-        "values_length",
-        "header",
-        "joint_names",
-        "interface_name",
-        "values",
-    ]
+    __slots__ = ["joint_id", "position", "velocity", "kp", "kd", "feedforward"]
 
-    __typenames__ = [
-        "int32_t",
-        "int32_t",
-        "std_msgs.Header",
-        "string",
-        "string",
-        "double",
-    ]
+    __typenames__ = ["string", "double", "double", "double", "double", "double"]
 
-    __dimensions__ = [None, None, None, ["joint_names_length"], None, ["values_length"]]
+    __dimensions__ = [None, None, None, None, None, None]
 
-    joint_names_length: "int32_t"
-    values_length: "int32_t"
-    header: std_msgs.Header
-    joint_names: "string"
-    interface_name: "string"
-    values: "double"
+    joint_id: "string"
+    position: "double"
+    velocity: "double"
+    kp: "double"
+    kd: "double"
+    feedforward: "double"
 
     def __init__(
-        self,
-        joint_names_length=0,
-        values_length=0,
-        header=std_msgs.Header(),
-        joint_names=[],
-        interface_name="",
-        values=[],
+        self, joint_id="", position=0.0, velocity=0.0, kp=0.0, kd=0.0, feedforward=0.0
     ):
-        # LCM Type: int32_t
-        self.joint_names_length = joint_names_length
-        # LCM Type: int32_t
-        self.values_length = values_length
-        # LCM Type: std_msgs.Header
-        self.header = header
-        # LCM Type: string[joint_names_length]
-        self.joint_names = joint_names
         # LCM Type: string
-        self.interface_name = interface_name
-        # LCM Type: double[values_length]
-        self.values = values
+        self.joint_id = joint_id
+        # LCM Type: double
+        self.position = position
+        # LCM Type: double
+        self.velocity = velocity
+        # LCM Type: double
+        self.kp = kp
+        # LCM Type: double
+        self.kd = kd
+        # LCM Type: double
+        self.feedforward = feedforward
 
     def lcm_encode(self):
         buf = BytesIO()
@@ -69,23 +47,19 @@ class JointCommand(object):
         return buf.getvalue()
 
     def _encode_one(self, buf):
-        buf.write(struct.pack(">ii", self.joint_names_length, self.values_length))
-        assert (
-            self.header._get_packed_fingerprint()
-            == std_msgs.Header._get_packed_fingerprint()
-        )
-        self.header._encode_one(buf)
-        for i0 in range(self.joint_names_length):
-            __joint_names_encoded = self.joint_names[i0].encode("utf-8")
-            buf.write(struct.pack(">I", len(__joint_names_encoded) + 1))
-            buf.write(__joint_names_encoded)
-            buf.write(b"\0")
-        __interface_name_encoded = self.interface_name.encode("utf-8")
-        buf.write(struct.pack(">I", len(__interface_name_encoded) + 1))
-        buf.write(__interface_name_encoded)
+        __joint_id_encoded = self.joint_id.encode("utf-8")
+        buf.write(struct.pack(">I", len(__joint_id_encoded) + 1))
+        buf.write(__joint_id_encoded)
         buf.write(b"\0")
         buf.write(
-            struct.pack(">%dd" % self.values_length, *self.values[: self.values_length])
+            struct.pack(
+                ">ddddd",
+                self.position,
+                self.velocity,
+                self.kp,
+                self.kd,
+                self.feedforward,
+            )
         )
 
     @classmethod
@@ -101,20 +75,10 @@ class JointCommand(object):
     @classmethod
     def _decode_one(cls, buf):
         self = cls()
-        self.joint_names_length, self.values_length = struct.unpack(">ii", buf.read(8))
-        self.header = cls._get_field_type("header")._decode_one(buf)
-        self.joint_names = []
-        for i0 in range(self.joint_names_length):
-            __joint_names_len = struct.unpack(">I", buf.read(4))[0]
-            self.joint_names.append(
-                buf.read(__joint_names_len)[:-1].decode("utf-8", "replace")
-            )
-        __interface_name_len = struct.unpack(">I", buf.read(4))[0]
-        self.interface_name = buf.read(__interface_name_len)[:-1].decode(
-            "utf-8", "replace"
-        )
-        self.values = struct.unpack(
-            ">%dd" % self.values_length, buf.read(self.values_length * 8)
+        __joint_id_len = struct.unpack(">I", buf.read(4))[0]
+        self.joint_id = buf.read(__joint_id_len)[:-1].decode("utf-8", "replace")
+        self.position, self.velocity, self.kp, self.kd, self.feedforward = (
+            struct.unpack(">ddddd", buf.read(40))
         )
         return self
 
@@ -135,10 +99,7 @@ class JointCommand(object):
     def _get_hash_recursive(cls, parents):
         if cls in parents:
             return 0
-        newparents = parents + [cls]
-        tmphash = (
-            0xFD99FA6F28C147A8 + std_msgs.Header._get_hash_recursive(newparents)
-        ) & 0xFFFFFFFFFFFFFFFF
+        tmphash = (0x1DA228CF442CECED) & 0xFFFFFFFFFFFFFFFF
         tmphash = (
             ((tmphash << 1) & 0xFFFFFFFFFFFFFFFF) + (tmphash >> 63)
         ) & 0xFFFFFFFFFFFFFFFF

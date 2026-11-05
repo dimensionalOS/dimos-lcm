@@ -8,35 +8,32 @@ import struct
 import sys
 
 
-class CborExtension(object):
+class CborObservation(object):
     """
     Optional entity property. entity_id is a resolved body or joint name, or "world".
-    (entity_id, key) is unique within a snapshot. schema identifies a versioned
-    payload contract; value contains exactly one CBOR item. Unknown optional
-    schemas may be ignored. This is data, never a command or clock/control signal.
+    (entity_id, key) is unique within a snapshot. key identifies the property;
+    producers and consumers agree its payload format. value is one CBOR item.
+    Unknown optional keys may be ignored. This is data, not a command or clock signal.
     """
 
-    msg_name = "sim_msgs.CborExtension"
+    msg_name = "sim_msgs.CborObservation"
 
-    __slots__ = ["entity_id", "key", "schema", "value_length", "value"]
+    __slots__ = ["entity_id", "key", "value_length", "value"]
 
-    __typenames__ = ["string", "string", "string", "int32_t", "byte"]
+    __typenames__ = ["string", "string", "int32_t", "byte"]
 
-    __dimensions__ = [None, None, None, None, ["value_length"]]
+    __dimensions__ = [None, None, None, ["value_length"]]
 
     entity_id: "string"
     key: "string"
-    schema: "string"
     value_length: "int32_t"
     value: "byte"
 
-    def __init__(self, entity_id="", key="", schema="", value_length=0, value=b""):
+    def __init__(self, entity_id="", key="", value_length=0, value=b""):
         # LCM Type: string
         self.entity_id = entity_id
         # LCM Type: string
         self.key = key
-        # LCM Type: string
-        self.schema = schema
         # LCM Type: int32_t
         self.value_length = value_length
         # LCM Type: byte[value_length]
@@ -44,7 +41,7 @@ class CborExtension(object):
 
     def lcm_encode(self):
         buf = BytesIO()
-        buf.write(CborExtension._get_packed_fingerprint())
+        buf.write(CborObservation._get_packed_fingerprint())
         self._encode_one(buf)
         return buf.getvalue()
 
@@ -56,10 +53,6 @@ class CborExtension(object):
         __key_encoded = self.key.encode("utf-8")
         buf.write(struct.pack(">I", len(__key_encoded) + 1))
         buf.write(__key_encoded)
-        buf.write(b"\0")
-        __schema_encoded = self.schema.encode("utf-8")
-        buf.write(struct.pack(">I", len(__schema_encoded) + 1))
-        buf.write(__schema_encoded)
         buf.write(b"\0")
         buf.write(struct.pack(">i", self.value_length))
         buf.write(bytearray(self.value[: self.value_length]))
@@ -81,8 +74,6 @@ class CborExtension(object):
         self.entity_id = buf.read(__entity_id_len)[:-1].decode("utf-8", "replace")
         __key_len = struct.unpack(">I", buf.read(4))[0]
         self.key = buf.read(__key_len)[:-1].decode("utf-8", "replace")
-        __schema_len = struct.unpack(">I", buf.read(4))[0]
-        self.schema = buf.read(__schema_len)[:-1].decode("utf-8", "replace")
         self.value_length = struct.unpack(">i", buf.read(4))[0]
         self.value = buf.read(self.value_length)
         return self
@@ -104,7 +95,7 @@ class CborExtension(object):
     def _get_hash_recursive(cls, parents):
         if cls in parents:
             return 0
-        tmphash = (0x2B8C40FCF830AB0D) & 0xFFFFFFFFFFFFFFFF
+        tmphash = (0xD18C67B8C1E53C58) & 0xFFFFFFFFFFFFFFFF
         tmphash = (
             ((tmphash << 1) & 0xFFFFFFFFFFFFFFFF) + (tmphash >> 63)
         ) & 0xFFFFFFFFFFFFFFFF

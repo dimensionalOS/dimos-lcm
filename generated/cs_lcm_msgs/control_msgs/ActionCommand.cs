@@ -16,8 +16,8 @@ namespace control_msgs
         public long based_on_time_ns;
         public long apply_at_ns;
         public long valid_until_ns;
-        public int joint_targets_length;
-        public control_msgs.JointTarget[] joint_targets;
+        public int joint_commands_length;
+        public control_msgs.JointCommand[] joint_commands;
         public int cbor_commands_length;
         public control_msgs.CborCommand[] cbor_commands;
  
@@ -26,7 +26,7 @@ namespace control_msgs
         }
  
         public static readonly ulong LCM_FINGERPRINT;
-        public static readonly ulong LCM_FINGERPRINT_BASE = 0xe5e6a25c62ca4457L;
+        public static readonly ulong LCM_FINGERPRINT_BASE = 0xd7a6fc8ebf6c2382L;
  
         static ActionCommand()
         {
@@ -41,7 +41,7 @@ namespace control_msgs
             classes.Add("control_msgs.ActionCommand");
             ulong hash = LCM_FINGERPRINT_BASE
                  + common_msgs.SampleHeader._hashRecursive(classes)
-                 + control_msgs.JointTarget._hashRecursive(classes)
+                 + control_msgs.JointCommand._hashRecursive(classes)
                  + control_msgs.CborCommand._hashRecursive(classes)
                 ;
             classes.RemoveAt(classes.Count - 1);
@@ -64,10 +64,10 @@ namespace control_msgs
  
             outs.Write(this.valid_until_ns); 
  
-            outs.Write(this.joint_targets_length); 
+            outs.Write(this.joint_commands_length); 
  
-            for (int a = 0; a < this.joint_targets_length; a++) {
-                this.joint_targets[a]._encodeRecursive(outs); 
+            for (int a = 0; a < this.joint_commands_length; a++) {
+                this.joint_commands[a]._encodeRecursive(outs); 
             }
  
             outs.Write(this.cbor_commands_length); 
@@ -107,11 +107,11 @@ namespace control_msgs
  
             this.valid_until_ns = ins.ReadInt64();
  
-            this.joint_targets_length = ins.ReadInt32();
+            this.joint_commands_length = ins.ReadInt32();
  
-            this.joint_targets = new control_msgs.JointTarget[(int) joint_targets_length];
-            for (int a = 0; a < this.joint_targets_length; a++) {
-                this.joint_targets[a] = control_msgs.JointTarget._decodeRecursiveFactory(ins);
+            this.joint_commands = new control_msgs.JointCommand[(int) joint_commands_length];
+            for (int a = 0; a < this.joint_commands_length; a++) {
+                this.joint_commands[a] = control_msgs.JointCommand._decodeRecursiveFactory(ins);
             }
  
             this.cbor_commands_length = ins.ReadInt32();
@@ -134,11 +134,11 @@ namespace control_msgs
  
             outobj.valid_until_ns = this.valid_until_ns;
  
-            outobj.joint_targets_length = this.joint_targets_length;
+            outobj.joint_commands_length = this.joint_commands_length;
  
-            outobj.joint_targets = new control_msgs.JointTarget[(int) joint_targets_length];
-            for (int a = 0; a < this.joint_targets_length; a++) {
-                outobj.joint_targets[a] = this.joint_targets[a].Copy();
+            outobj.joint_commands = new control_msgs.JointCommand[(int) joint_commands_length];
+            for (int a = 0; a < this.joint_commands_length; a++) {
+                outobj.joint_commands[a] = this.joint_commands[a].Copy();
             }
  
             outobj.cbor_commands_length = this.cbor_commands_length;

@@ -1,17 +1,15 @@
 package sim_msgs;
 
-// A complete physical sample at one acquisition, not a solver checkpoint.
-// Contains every described body's absolute world pose, every configured motion
-// frame and joint, and all current configured extension properties. Consumers
-// replace the previous snapshot: omission never means "keep the old value".
+// Complete physical acquisition, not a native solver checkpoint.
+// One record per described rigid body/frame, including fixed sensor mounts;
+// configured scalar joints and all current optional CBOR observations.
+// Replaces the previous sample. Gravity is fixed startup configuration.
 struct WorldState {
     common_msgs.SampleHeader header;
     string model_revision;
-    int32_t body_poses_length;
-    BodyPose body_poses[body_poses_length];
-    int32_t body_motion_length;
-    BodyMotion body_motion[body_motion_length];
+    int32_t bodies_length;
+    BodyState bodies[bodies_length];
     JointTruth joint_truth;
-    int32_t extensions_length;
-    CborExtension extensions[extensions_length];
+    int32_t cbor_observations_length;
+    CborObservation cbor_observations[cbor_observations_length];
 }

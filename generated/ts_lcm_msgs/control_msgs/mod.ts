@@ -22,7 +22,6 @@ export * from "./JointCommand.ts";
 export * from "./JointComponentTolerance.ts";
 export * from "./JointControllerState.ts";
 export * from "./JointJog.ts";
-export * from "./JointTarget.ts";
 export * from "./JointTolerance.ts";
 export * from "./JointTrajectoryControllerState.ts";
 export * from "./JointWrenchTrajectory.ts";

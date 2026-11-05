@@ -10,7 +10,7 @@ import sys
 from lcm_msgs import common_msgs
 from . import *
 from .CborCommand import CborCommand
-from .JointTarget import JointTarget
+from .JointCommand import JointCommand
 
 
 class ActionCommand(object):
@@ -28,8 +28,8 @@ class ActionCommand(object):
         "based_on_time_ns",
         "apply_at_ns",
         "valid_until_ns",
-        "joint_targets_length",
-        "joint_targets",
+        "joint_commands_length",
+        "joint_commands",
         "cbor_commands_length",
         "cbor_commands",
     ]
@@ -40,7 +40,7 @@ class ActionCommand(object):
         "int64_t",
         "int64_t",
         "int32_t",
-        "JointTarget",
+        "JointCommand",
         "int32_t",
         "CborCommand",
     ]
@@ -51,7 +51,7 @@ class ActionCommand(object):
         None,
         None,
         None,
-        ["joint_targets_length"],
+        ["joint_commands_length"],
         None,
         ["cbor_commands_length"],
     ]
@@ -60,8 +60,8 @@ class ActionCommand(object):
     based_on_time_ns: "int64_t"
     apply_at_ns: "int64_t"
     valid_until_ns: "int64_t"
-    joint_targets_length: "int32_t"
-    joint_targets: JointTarget
+    joint_commands_length: "int32_t"
+    joint_commands: JointCommand
     cbor_commands_length: "int32_t"
     cbor_commands: CborCommand
 
@@ -71,8 +71,8 @@ class ActionCommand(object):
         based_on_time_ns=0,
         apply_at_ns=0,
         valid_until_ns=0,
-        joint_targets_length=0,
-        joint_targets=[],
+        joint_commands_length=0,
+        joint_commands=[],
         cbor_commands_length=0,
         cbor_commands=[],
     ):
@@ -85,9 +85,9 @@ class ActionCommand(object):
         # LCM Type: int64_t
         self.valid_until_ns = valid_until_ns
         # LCM Type: int32_t
-        self.joint_targets_length = joint_targets_length
-        # LCM Type: JointTarget[joint_targets_length]
-        self.joint_targets = joint_targets
+        self.joint_commands_length = joint_commands_length
+        # LCM Type: JointCommand[joint_commands_length]
+        self.joint_commands = joint_commands
         # LCM Type: int32_t
         self.cbor_commands_length = cbor_commands_length
         # LCM Type: CborCommand[cbor_commands_length]
@@ -111,15 +111,15 @@ class ActionCommand(object):
                 self.based_on_time_ns,
                 self.apply_at_ns,
                 self.valid_until_ns,
-                self.joint_targets_length,
+                self.joint_commands_length,
             )
         )
-        for i0 in range(self.joint_targets_length):
+        for i0 in range(self.joint_commands_length):
             assert (
-                self.joint_targets[i0]._get_packed_fingerprint()
-                == JointTarget._get_packed_fingerprint()
+                self.joint_commands[i0]._get_packed_fingerprint()
+                == JointCommand._get_packed_fingerprint()
             )
-            self.joint_targets[i0]._encode_one(buf)
+            self.joint_commands[i0]._encode_one(buf)
         buf.write(struct.pack(">i", self.cbor_commands_length))
         for i0 in range(self.cbor_commands_length):
             assert (
@@ -146,12 +146,12 @@ class ActionCommand(object):
             self.based_on_time_ns,
             self.apply_at_ns,
             self.valid_until_ns,
-            self.joint_targets_length,
+            self.joint_commands_length,
         ) = struct.unpack(">qqqi", buf.read(28))
-        self.joint_targets = []
-        for i0 in range(self.joint_targets_length):
-            self.joint_targets.append(
-                cls._get_field_type("joint_targets")._decode_one(buf)
+        self.joint_commands = []
+        for i0 in range(self.joint_commands_length):
+            self.joint_commands.append(
+                cls._get_field_type("joint_commands")._decode_one(buf)
             )
         self.cbor_commands_length = struct.unpack(">i", buf.read(4))[0]
         self.cbor_commands = []
@@ -180,9 +180,9 @@ class ActionCommand(object):
             return 0
         newparents = parents + [cls]
         tmphash = (
-            0xE5E6A25C62CA4457
+            0xD7A6FC8EBF6C2382
             + common_msgs.SampleHeader._get_hash_recursive(newparents)
-            + JointTarget._get_hash_recursive(newparents)
+            + JointCommand._get_hash_recursive(newparents)
             + CborCommand._get_hash_recursive(newparents)
         ) & 0xFFFFFFFFFFFFFFFF
         tmphash = (

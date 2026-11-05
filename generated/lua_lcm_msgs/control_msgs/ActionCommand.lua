@@ -6,9 +6,9 @@ DO NOT MODIFY BY HAND!!!!
 
 local lcm = require('lcm')
 
-local control_msgs_JointTarget = require('control_msgs.JointTarget')
 local common_msgs_SampleHeader = require('common_msgs.SampleHeader')
 local control_msgs_CborCommand = require('control_msgs.CborCommand')
+local control_msgs_JointCommand = require('control_msgs.JointCommand')
 
 local setmetatable = setmetatable
 local ipairs = ipairs
@@ -55,8 +55,8 @@ function ActionCommand:new()
   obj.based_on_time_ns = 0
   obj.apply_at_ns = 0
   obj.valid_until_ns = 0
-  obj.joint_targets_length = 0
-  obj.joint_targets = {}
+  obj.joint_commands_length = 0
+  obj.joint_commands = {}
   obj.cbor_commands_length = 0
   obj.cbor_commands = {}
 
@@ -76,9 +76,9 @@ function ActionCommand._get_hash_recursive(parents)
 
   table.insert(newparents, ActionCommand)
 
-  local hash = lcm._hash.new('0xe5e6a25c62ca4457')
+  local hash = lcm._hash.new('0xd7a6fc8ebf6c2382')
     + common_msgs_SampleHeader._get_hash_recursive(newparents)
-    + control_msgs_JointTarget._get_hash_recursive(newparents)
+    + control_msgs_JointCommand._get_hash_recursive(newparents)
     + control_msgs_CborCommand._get_hash_recursive(newparents)
   hash:rotate(1)
 
@@ -97,9 +97,9 @@ function ActionCommand:_encode_one()
   local buf_table = {}
 
   table.insert(buf_table, self.header:_encode_one())
-  table.insert(buf_table, lcm._pack.pack('>qqqi', self.based_on_time_ns, self.apply_at_ns, self.valid_until_ns, self.joint_targets_length))
-  for i0 = 1, self.joint_targets_length do
-    table.insert(buf_table, self.joint_targets[i0]:_encode_one())
+  table.insert(buf_table, lcm._pack.pack('>qqqi', self.based_on_time_ns, self.apply_at_ns, self.valid_until_ns, self.joint_commands_length))
+  for i0 = 1, self.joint_commands_length do
+    table.insert(buf_table, self.joint_commands[i0]:_encode_one())
   end
   table.insert(buf_table, lcm._pack.pack('>i', self.cbor_commands_length))
   for i0 = 1, self.cbor_commands_length do
@@ -127,10 +127,10 @@ function ActionCommand._decode_one(data)
   local obj = ActionCommand:new()
 
   obj.header = common_msgs_SampleHeader._decode_one(data)
-  obj.based_on_time_ns, obj.apply_at_ns, obj.valid_until_ns, obj.joint_targets_length = lcm._pack.unpack('>qqqi', data:read(28))
-  obj.joint_targets = {}
-  for i0 = 1, obj.joint_targets_length do
-    obj.joint_targets[i0] = control_msgs_JointTarget._decode_one(data)
+  obj.based_on_time_ns, obj.apply_at_ns, obj.valid_until_ns, obj.joint_commands_length = lcm._pack.unpack('>qqqi', data:read(28))
+  obj.joint_commands = {}
+  for i0 = 1, obj.joint_commands_length do
+    obj.joint_commands[i0] = control_msgs_JointCommand._decode_one(data)
   end
   obj.cbor_commands_length = lcm._pack.unpack('>i', data:read(4))
   obj.cbor_commands = {}
