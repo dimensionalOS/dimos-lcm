@@ -1,8 +1,0 @@
-package sim_msgs;
-
-struct SimulationClock {
-    common_msgs.SampleHeader header;
-    int64_t dt_ns;
-    string status; // running, waiting, fault, stopped
-    string detail;
-}

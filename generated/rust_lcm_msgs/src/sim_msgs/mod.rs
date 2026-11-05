@@ -6,8 +6,5 @@ pub use body_state::BodyState;
 mod cbor_observation;
 pub use cbor_observation::CborObservation;
 
-mod simulation_clock;
-pub use simulation_clock::SimulationClock;
-
 mod world_state;
 pub use world_state::WorldState;

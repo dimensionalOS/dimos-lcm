@@ -100,8 +100,8 @@ for G. This is name parity with ROS terminology, not the upstream ROS message
 layout; bindings using that upstream layout must not be mixed with these codecs.
 
 Independent sensor modules read WorldState and produce `sensor_msgs.Imu`,
-`JointState`, `Image`/`CameraInfo`, and `PointCloud2`. `SimulationClock` is a
-separate execution-status message. Sensor/TF acquisition headers introduced by
+`JointState`, `Image`/`CameraInfo`, and `PointCloud2`. Execution status is available
+through SimModule's `status()` RPC. Sensor/TF acquisition headers introduced by
 this draft require matching publisher/consumer codecs; this revision does not
 change those sensor message fingerprints again.
 
