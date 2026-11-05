@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dimos_lcm"
-version = "0.1.5"
+version = "0.1.7"
 description = "LCM-Foxglove bridge and message utilities for Dimensional Robotics"
 authors = [
     {name = "Dimensional Team", email = "build@dimensionalOS.com"},
@@ -38,7 +38,9 @@ packages = [
     "dimos_lcm.trajectory_msgs",
     "dimos_lcm.vision_msgs",
     "dimos_lcm.visualization_msgs",
-    "dimos_lcm.control_msgs"
+    "dimos_lcm.control_msgs",
+    "dimos_lcm.common_msgs",
+    "dimos_lcm.sim_msgs"
 ]
 
 [tool.setuptools.package-dir]
@@ -59,6 +61,8 @@ packages = [
 "dimos_lcm.vision_msgs" = "generated/python_lcm_msgs/lcm_msgs/vision_msgs"
 "dimos_lcm.visualization_msgs" = "generated/python_lcm_msgs/lcm_msgs/visualization_msgs"
 "dimos_lcm.control_msgs" = "generated/python_lcm_msgs/lcm_msgs/control_msgs"
+"dimos_lcm.common_msgs" = "generated/python_lcm_msgs/lcm_msgs/common_msgs"
+"dimos_lcm.sim_msgs" = "generated/python_lcm_msgs/lcm_msgs/sim_msgs"
 
 [tool.setuptools.package-data]
 "dimos_lcm" = [

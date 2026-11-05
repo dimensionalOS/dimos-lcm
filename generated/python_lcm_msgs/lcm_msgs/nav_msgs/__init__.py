@@ -4,8 +4,8 @@ DO NOT MODIFY BY HAND!!!!
 lcm-gen 1.5.2
 """
 
+from .OccupancyGrid import OccupancyGrid as OccupancyGrid
+from .GridCells import GridCells as GridCells
+from .MapMetaData import MapMetaData as MapMetaData
 from .Path import Path as Path
 from .Odometry import Odometry as Odometry
-from .OccupancyGrid import OccupancyGrid as OccupancyGrid
-from .MapMetaData import MapMetaData as MapMetaData
-from .GridCells import GridCells as GridCells

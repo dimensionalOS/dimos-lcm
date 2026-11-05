@@ -7,7 +7,7 @@ lcm-gen 1.5.2
 
 local M = {}
 
-M.MultiEchoLaserScan = require('sensor_msgs.MultiEchoLaserScan')
+M.TimeReference = require('sensor_msgs.TimeReference')
 M.MultiDOFJointState = require('sensor_msgs.MultiDOFJointState')
 M.JoyFeedbackArray = require('sensor_msgs.JoyFeedbackArray')
 M.JoyFeedback = require('sensor_msgs.JoyFeedback')
@@ -19,21 +19,21 @@ M.ChannelFloat32 = require('sensor_msgs.ChannelFloat32')
 M.RelativeHumidity = require('sensor_msgs.RelativeHumidity')
 M.Imu = require('sensor_msgs.Imu')
 M.PointCloud = require('sensor_msgs.PointCloud')
-M.PointField = require('sensor_msgs.PointField')
 M.NavSatFix = require('sensor_msgs.NavSatFix')
+M.PointField = require('sensor_msgs.PointField')
 M.LaserScan = require('sensor_msgs.LaserScan')
 M.CompressedImage = require('sensor_msgs.CompressedImage')
-M.MagneticField = require('sensor_msgs.MagneticField')
 M.Image = require('sensor_msgs.Image')
 M.PointCloud2 = require('sensor_msgs.PointCloud2')
 M.CameraInfo = require('sensor_msgs.CameraInfo')
 M.JointState = require('sensor_msgs.JointState')
+M.BatteryState = require('sensor_msgs.BatteryState')
 M.Illuminance = require('sensor_msgs.Illuminance')
 M.NavSatStatus = require('sensor_msgs.NavSatStatus')
 M.FluidPressure = require('sensor_msgs.FluidPressure')
-M.TimeReference = require('sensor_msgs.TimeReference')
+M.MultiEchoLaserScan = require('sensor_msgs.MultiEchoLaserScan')
 M.LaserEcho = require('sensor_msgs.LaserEcho')
-M.BatteryState = require('sensor_msgs.BatteryState')
+M.MagneticField = require('sensor_msgs.MagneticField')
 
 return M
 

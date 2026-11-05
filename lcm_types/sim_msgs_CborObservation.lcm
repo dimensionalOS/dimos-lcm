@@ -1,0 +1,12 @@
+package sim_msgs;
+
+// Optional entity property. entity_id is a resolved body or joint name, or "world".
+// (entity_id, key) is unique within a snapshot. key identifies the property;
+// producers and consumers agree its payload format. value is one CBOR item.
+// Unknown optional keys may be ignored. This is data, not a command or clock signal.
+struct CborObservation {
+    string entity_id;
+    string key;
+    int32_t value_length;
+    byte value[value_length];
+}

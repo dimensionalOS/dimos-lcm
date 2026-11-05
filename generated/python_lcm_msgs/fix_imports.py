@@ -12,6 +12,8 @@ from pathlib import Path
 
 # Message packages to update imports for
 MSG_PACKAGES = [
+    "common_msgs",
+    "sim_msgs",
     "control_msgs",
     "sensor_msgs",
     "geometry_msgs", 

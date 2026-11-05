@@ -1,0 +1,13 @@
+package sim_msgs;
+
+// Pose maps body coordinates into world coordinates (quaternion XYZW).
+// Velocity and physical acceleration are at the named body-frame origin,
+// expressed in world axes. Twist: m/s and rad/s; Accel: m/s^2 and rad/s^2.
+// Linear acceleration includes gravity in free fall; it is not specific force.
+// Acquired at WorldState.header.time_ns; no nested timestamp.
+struct BodyState {
+    string body_id;
+    geometry_msgs.Pose pose;
+    geometry_msgs.Twist twist;
+    geometry_msgs.Accel acceleration;
+}

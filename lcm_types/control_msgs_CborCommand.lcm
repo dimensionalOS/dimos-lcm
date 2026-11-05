@@ -1,0 +1,12 @@
+package control_msgs;
+
+// Backend-defined operation on a resolved body/joint name, or "world".
+// key identifies the operation and its agreed payload format.
+// value is one CBOR item. Unknown keys or invalid payloads must be rejected;
+// this is a command, unlike an optional observed sim_msgs.CborObservation property.
+struct CborCommand {
+    string entity_id;
+    string key;
+    int32_t value_length;
+    byte value[value_length];
+}

@@ -3,6 +3,7 @@
 
 pub mod actionlib_msgs;
 pub mod builtin_interfaces;
+pub mod common_msgs;
 pub mod control_msgs;
 pub mod diagnostic_msgs;
 pub mod foxglove_msgs;
@@ -10,6 +11,7 @@ pub mod geometry_msgs;
 pub mod nav_msgs;
 pub mod sensor_msgs;
 pub mod shape_msgs;
+pub mod sim_msgs;
 pub mod std_msgs;
 pub mod stereo_msgs;
 pub mod tf2_msgs;

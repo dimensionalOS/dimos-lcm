@@ -5,20 +5,20 @@ lcm-gen 1.5.2
 """
 
 from .VisionInfo import VisionInfo as VisionInfo
-from .VisionClass import VisionClass as VisionClass
-from .Pose2D import Pose2D as Pose2D
+from .Classification import Classification as Classification
 from .Point2D import Point2D as Point2D
+from .BoundingBox2DArray import BoundingBox2DArray as BoundingBox2DArray
+from .BoundingBox3DArray import BoundingBox3DArray as BoundingBox3DArray
+from .Detection2DArray import Detection2DArray as Detection2DArray
+from .BoundingBox2D import BoundingBox2D as BoundingBox2D
+from .VisionClass import VisionClass as VisionClass
+from .LabelInfo import LabelInfo as LabelInfo
+from .Detection3D import Detection3D as Detection3D
+from .Detection2D import Detection2D as Detection2D
+from .Pose2D import Pose2D as Pose2D
 from .ObjectHypothesisWithPose import (
     ObjectHypothesisWithPose as ObjectHypothesisWithPose,
 )
 from .ObjectHypothesis import ObjectHypothesis as ObjectHypothesis
-from .LabelInfo import LabelInfo as LabelInfo
-from .Detection3DArray import Detection3DArray as Detection3DArray
-from .Detection3D import Detection3D as Detection3D
-from .Detection2DArray import Detection2DArray as Detection2DArray
-from .Detection2D import Detection2D as Detection2D
-from .Classification import Classification as Classification
-from .BoundingBox3DArray import BoundingBox3DArray as BoundingBox3DArray
 from .BoundingBox3D import BoundingBox3D as BoundingBox3D
-from .BoundingBox2DArray import BoundingBox2DArray as BoundingBox2DArray
-from .BoundingBox2D import BoundingBox2D as BoundingBox2D
+from .Detection3DArray import Detection3DArray as Detection3DArray

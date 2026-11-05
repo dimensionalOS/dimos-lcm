@@ -7,10 +7,10 @@ lcm-gen 1.5.2
 
 local M = {}
 
-M.MeshTriangle = require('shape_msgs.MeshTriangle')
 M.SolidPrimitive = require('shape_msgs.SolidPrimitive')
-M.Plane = require('shape_msgs.Plane')
 M.Mesh = require('shape_msgs.Mesh')
+M.Plane = require('shape_msgs.Plane')
+M.MeshTriangle = require('shape_msgs.MeshTriangle')
 
 return M
 
