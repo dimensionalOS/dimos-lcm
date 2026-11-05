@@ -40,9 +40,9 @@ Deno.test("unified actions preserve joint targets, CBOR and validity", () => {
   assertEquals(m.cbor_commands[0].key, "increment");
   assertEquals(Array.from(m.cbor_commands[0].value), [1]);
   assertEquals((standalone.decode(payload) as standalone.control_msgs.ActionCommand).encode(), payload);
-  assertEquals(m.joint_commands[0].joint_id, "g1/elbow");
-  assertEquals(m.joint_commands[0].kp, 40);
-  assertEquals(m.joint_commands[0].feedforward, 2);
+  assertEquals(m.joint_commands.map(row => row.interface_name), ["position", "velocity", "kp", "kd", "effort"]);
+  assertEquals(m.joint_commands.map(row => Array.from(row.values)), [[.25], [-.5], [40], [1.5], [2]]);
+  assertEquals(m.joint_commands[0].joint_names, ["g1/elbow"]);
   assertEquals(m.valid_until_ns - m.apply_at_ns, 20000000n);
   assertEquals(m.encode(), payload);
 });

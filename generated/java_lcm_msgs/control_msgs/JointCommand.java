@@ -12,17 +12,23 @@ import lcm.lcm.*;
  
 public final class JointCommand implements lcm.lcm.LCMEncodable
 {
-    public String joint_id;
+    public int joint_names_length;
 
-    public double position;
+    public int values_length;
 
-    public double velocity;
+    public std_msgs.Header header;
 
-    public double kp;
+    /**
+     * LCM Type: string[joint_names_length]
+     */
+    public String joint_names[];
 
-    public double kd;
+    public String interface_name;
 
-    public double feedforward;
+    /**
+     * LCM Type: double[values_length]
+     */
+    public double values[];
 
  
     public JointCommand()
@@ -30,7 +36,7 @@ public final class JointCommand implements lcm.lcm.LCMEncodable
     }
  
     public static final long LCM_FINGERPRINT;
-    public static final long LCM_FINGERPRINT_BASE = 0x1da228cf442cecedL;
+    public static final long LCM_FINGERPRINT_BASE = 0xfd99fa6f28c147a8L;
  
     static {
         LCM_FINGERPRINT = _hashRecursive(new ArrayList<Class<?>>());
@@ -43,6 +49,7 @@ public final class JointCommand implements lcm.lcm.LCMEncodable
  
         classes.add(control_msgs.JointCommand.class);
         long hash = LCM_FINGERPRINT_BASE
+             + std_msgs.Header._hashRecursive(classes)
             ;
         classes.remove(classes.size() - 1);
         return (hash<<1) + ((hash>>63)&1);
@@ -57,17 +64,21 @@ public final class JointCommand implements lcm.lcm.LCMEncodable
     public void _encodeRecursive(DataOutput outs) throws IOException
     {
         char[] __strbuf = null;
-        __strbuf = new char[this.joint_id.length()]; this.joint_id.getChars(0, this.joint_id.length(), __strbuf, 0); outs.writeInt(__strbuf.length+1); for (int _i = 0; _i < __strbuf.length; _i++) outs.write(__strbuf[_i]); outs.writeByte(0); 
+        outs.writeInt(this.joint_names_length); 
  
-        outs.writeDouble(this.position); 
+        outs.writeInt(this.values_length); 
  
-        outs.writeDouble(this.velocity); 
+        this.header._encodeRecursive(outs); 
  
-        outs.writeDouble(this.kp); 
+        for (int a = 0; a < this.joint_names_length; a++) {
+            __strbuf = new char[this.joint_names[a].length()]; this.joint_names[a].getChars(0, this.joint_names[a].length(), __strbuf, 0); outs.writeInt(__strbuf.length+1); for (int _i = 0; _i < __strbuf.length; _i++) outs.write(__strbuf[_i]); outs.writeByte(0); 
+        }
  
-        outs.writeDouble(this.kd); 
+        __strbuf = new char[this.interface_name.length()]; this.interface_name.getChars(0, this.interface_name.length(), __strbuf, 0); outs.writeInt(__strbuf.length+1); for (int _i = 0; _i < __strbuf.length; _i++) outs.write(__strbuf[_i]); outs.writeByte(0); 
  
-        outs.writeDouble(this.feedforward); 
+        for (int a = 0; a < this.values_length; a++) {
+            outs.writeDouble(this.values[a]); 
+        }
  
     }
  
@@ -94,35 +105,43 @@ public final class JointCommand implements lcm.lcm.LCMEncodable
     public void _decodeRecursive(DataInput ins) throws IOException
     {
         char[] __strbuf = null;
-        __strbuf = new char[ins.readInt()-1]; for (int _i = 0; _i < __strbuf.length; _i++) __strbuf[_i] = (char) (ins.readByte()&0xff); ins.readByte(); this.joint_id = new String(__strbuf);
+        this.joint_names_length = ins.readInt();
  
-        this.position = ins.readDouble();
+        this.values_length = ins.readInt();
  
-        this.velocity = ins.readDouble();
+        this.header = std_msgs.Header._decodeRecursiveFactory(ins);
  
-        this.kp = ins.readDouble();
+        this.joint_names = new String[(int) joint_names_length];
+        for (int a = 0; a < this.joint_names_length; a++) {
+            __strbuf = new char[ins.readInt()-1]; for (int _i = 0; _i < __strbuf.length; _i++) __strbuf[_i] = (char) (ins.readByte()&0xff); ins.readByte(); this.joint_names[a] = new String(__strbuf);
+        }
  
-        this.kd = ins.readDouble();
+        __strbuf = new char[ins.readInt()-1]; for (int _i = 0; _i < __strbuf.length; _i++) __strbuf[_i] = (char) (ins.readByte()&0xff); ins.readByte(); this.interface_name = new String(__strbuf);
  
-        this.feedforward = ins.readDouble();
+        this.values = new double[(int) values_length];
+        for (int a = 0; a < this.values_length; a++) {
+            this.values[a] = ins.readDouble();
+        }
  
     }
  
     public control_msgs.JointCommand copy()
     {
         control_msgs.JointCommand outobj = new control_msgs.JointCommand();
-        outobj.joint_id = this.joint_id;
+        outobj.joint_names_length = this.joint_names_length;
  
-        outobj.position = this.position;
+        outobj.values_length = this.values_length;
  
-        outobj.velocity = this.velocity;
+        outobj.header = this.header.copy();
  
-        outobj.kp = this.kp;
+        outobj.joint_names = new String[(int) joint_names_length];
+        if (this.joint_names_length > 0)
+            System.arraycopy(this.joint_names, 0, outobj.joint_names, 0, (int) this.joint_names_length); 
+        outobj.interface_name = this.interface_name;
  
-        outobj.kd = this.kd;
- 
-        outobj.feedforward = this.feedforward;
- 
+        outobj.values = new double[(int) values_length];
+        if (this.values_length > 0)
+            System.arraycopy(this.values, 0, outobj.values, 0, (int) this.values_length); 
         return outobj;
     }
  

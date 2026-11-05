@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 import unittest
 
-from dimos_lcm.control_msgs import ActionCommand
+from dimos_lcm.control_msgs import ActionCommand, JointCommand
 from dimos_lcm.sim_msgs import WorldState
 
 FIXTURES = json.loads(Path(__file__).with_name("sim_wire_fixtures.json").read_text())
@@ -45,12 +45,22 @@ class SimMessagesTest(unittest.TestCase):
         self.assertEqual(message.cbor_commands[0].entity_id, "world")
         self.assertEqual(message.cbor_commands[0].key, "increment")
         self.assertEqual(bytes(message.cbor_commands[0].value), b"\x01")
-        t = message.joint_commands[0]
-        self.assertEqual((t.joint_id, t.position, t.velocity, t.kp, t.kd, t.feedforward),
-                         ("g1/elbow", .25, -.5, 40, 1.5, 2))
+        self.assertEqual([r.interface_name for r in message.joint_commands],
+                         ["position", "velocity", "kp", "kd", "effort"])
+        self.assertEqual([list(r.values) for r in message.joint_commands],
+                         [[.25], [-.5], [40], [1.5], [2]])
+        self.assertTrue(all(list(r.joint_names) == ["g1/elbow"] for r in message.joint_commands))
         self.assertEqual(message.valid_until_ns - message.apply_at_ns, 20_000_000)
         self.assertEqual(message.lcm_encode(), payload)
 
     def test_wrong_type_fingerprint_is_rejected(self):
         with self.assertRaises(ValueError):
             WorldState.lcm_decode(bytes.fromhex(FIXTURES["action_command"]))
+
+    def test_joint_command_preserves_published_016_wire_contract(self):
+        # Captured using the published 0.1.6 wheel, not regenerated from this branch.
+        payload = bytes.fromhex(FIXTURES["joint_command_v016"])
+        self.assertEqual(JointCommand._get_packed_fingerprint().hex(), "5aea1768c94f253e")
+        message = JointCommand.lcm_decode(payload)
+        self.assertEqual(message.interface_name, "position")
+        self.assertEqual(message.lcm_encode(), payload)

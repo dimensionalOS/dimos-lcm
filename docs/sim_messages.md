@@ -77,12 +77,33 @@ A backend validates all entries before changing state. Unknown CBOR operations
 reject the whole action; they cannot be silently ignored like optional observations.
 An accepted source/sequence is not executed again in the same epoch.
 
-Each `JointCommand` names a joint and specifies desired position/velocity, kp, kd
-and feedforward effort:
+`control_msgs.JointCommand` retains the published ROS layout unchanged:
 
 ```text
-tau = kp * (q_des - q) + kd * (dq_des - dq) + feedforward
+header: std_msgs.Header
+joint_names: string[]
+interface_name: string
+values: float64[]
 ```
+
+One record commands one interface across named joints. Sim2's current motor profile
+requires exactly five records in one ActionCommand: `position`, `velocity`, `kp`,
+`kd`, and `effort`. Each record must address the same nonempty set of unique joint
+names, with one finite value per name; array order may differ between records.
+Gains are nonnegative. Missing, duplicate or unsupported interfaces reject the
+whole action. No values or gains are inferred from previous commands.
+
+The action's outer SampleHeader and time window govern the entire batch; nested
+standard headers do not create independent scheduling or clock identities.
+The backend computes, for each joint:
+
+```text
+tau = kp * (position - q) + kd * (velocity - dq) + effort
+```
+
+`effort` is feedforward torque (Nm) or force (N). The `kp`/`kd` interfaces and this
+motor law are the Sim2 adapter's documented convention, not behavior guaranteed
+by every ROS controller. The message schema itself remains ROS-compatible.
 
 Targets persist until expiry, when SimModule holds those joints. A registered
 controller must answer its exact current measurement boundary with its full joint
@@ -96,10 +117,6 @@ acceptance, not every physics step; expiry does **not** undo CBOR effects. No wr
 command is defined. The included MuJoCo backend implements joint targets and rejects
 all CBOR commands; a backend can implement specific operations through `apply_action`
 without changing SimModule. There is no generic execution or operation registry.
-
-`control_msgs.JointCommand` now names the six-field PD/feedforward record approved
-for G. This is name parity with ROS terminology, not the upstream ROS message
-layout; bindings using that upstream layout must not be mixed with these codecs.
 
 Independent sensor modules read WorldState and produce `sensor_msgs.Imu`,
 `JointState`, `Image`/`CameraInfo`, and `PointCloud2`. Execution status is available
@@ -118,3 +135,36 @@ Python/TypeScript use shared wire fixtures for full state, large clock values,
 optional extensions, joint targets, CBOR commands and action validity. Generation also checks Rust.
 DimOS tests cover physical meaning, complete snapshot replacement, reset,
 control timing and independently acquired sensor outputs.
+
+## Extending observations without changing compiled readers
+
+Freeze WorldState and its nested typed core. Add optional properties through its
+existing `CborObservation[]`, using a namespaced, versioned key such as
+`example.temperature.v1`. A key's contract specifies units, schema and CBOR shape;
+never silently change its meaning. Old readers can ignore unrecognized optional
+keys and still decode body/joint state. Required properties need an explicit
+capability/availability check in the consumer.
+
+A new LCM payload type can also travel in this envelope: define a key such as
+`example.temperature.lcm.v1` whose value is one CBOR byte string containing the
+complete LCM-encoded payload, including its fingerprint. Consumers recognizing
+that key decode CBOR and then the named LCM type. Others skip it. This is an
+extension convention, not a second generic dispatch framework.
+
+Adding a possible type costs zero bytes when it is not sent. The empty extension
+array costs one existing int32 count (4 bytes), independent of how many possible
+types exist. A sent entry costs its entity/key strings, length and payload.
+Unknown data still costs transport and decoding/copying; this is extensibility,
+not zero-copy optimization.
+
+Adding a typed field to WorldState, or changing BodyState, changes the recursive
+LCM fingerprint and breaks old compiled readers even if the new array is empty.
+Such a change requires a new wire type/version. Unknown actions remain errors;
+they cannot be silently ignored like optional observations.
+
+`tests/test_sim_extensibility.py` compiles a C++ reader before defining a new
+payload type, verifies unknown extensions preserve the typed core, checks exact
+wire sizes, and demonstrates that a new typed field is rejected. Its fixed
+WorldState fingerprint and shared old fixture guard against accidental core edits.
+The JointCommand fixture was captured from published dimos-lcm 0.1.6 and must not
+be regenerated when adding simulation messages.
