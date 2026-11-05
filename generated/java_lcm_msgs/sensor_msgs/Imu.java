@@ -12,7 +12,7 @@ import lcm.lcm.*;
  
 public final class Imu implements lcm.lcm.LCMEncodable
 {
-    public common_msgs.SampleHeader header;
+    public std_msgs.Header header;
 
     public geometry_msgs.Quaternion orientation;
 
@@ -57,7 +57,7 @@ public final class Imu implements lcm.lcm.LCMEncodable
  
         classes.add(sensor_msgs.Imu.class);
         long hash = LCM_FINGERPRINT_BASE
-             + common_msgs.SampleHeader._hashRecursive(classes)
+             + std_msgs.Header._hashRecursive(classes)
              + geometry_msgs.Quaternion._hashRecursive(classes)
              + geometry_msgs.Vector3._hashRecursive(classes)
              + geometry_msgs.Vector3._hashRecursive(classes)
@@ -118,7 +118,7 @@ public final class Imu implements lcm.lcm.LCMEncodable
  
     public void _decodeRecursive(DataInput ins) throws IOException
     {
-        this.header = common_msgs.SampleHeader._decodeRecursiveFactory(ins);
+        this.header = std_msgs.Header._decodeRecursiveFactory(ins);
  
         this.orientation = geometry_msgs.Quaternion._decodeRecursiveFactory(ins);
  

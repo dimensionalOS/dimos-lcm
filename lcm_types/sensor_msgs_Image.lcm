@@ -2,7 +2,7 @@ package sensor_msgs;
 
 struct Image {
     int32_t data_length;
-    common_msgs.SampleHeader header;
+    std_msgs.Header header;
     int32_t height;
     int32_t width;
     string encoding;

@@ -8,7 +8,7 @@ import struct
 import sys
 
 from lcm_msgs import geometry_msgs
-from lcm_msgs import common_msgs
+from lcm_msgs import std_msgs
 
 
 class Imu(object):
@@ -25,7 +25,7 @@ class Imu(object):
     ]
 
     __typenames__ = [
-        "common_msgs.SampleHeader",
+        "std_msgs.Header",
         "geometry_msgs.Quaternion",
         "double",
         "geometry_msgs.Vector3",
@@ -36,7 +36,7 @@ class Imu(object):
 
     __dimensions__ = [None, None, [9], None, [9], None, [9]]
 
-    header: common_msgs.SampleHeader
+    header: std_msgs.Header
     orientation: geometry_msgs.Quaternion
     orientation_covariance: "double"
     angular_velocity: geometry_msgs.Vector3
@@ -46,7 +46,7 @@ class Imu(object):
 
     def __init__(
         self,
-        header=common_msgs.SampleHeader(),
+        header=std_msgs.Header(),
         orientation=geometry_msgs.Quaternion(),
         orientation_covariance=[0.0 for dim0 in range(9)],
         angular_velocity=geometry_msgs.Vector3(),
@@ -54,7 +54,7 @@ class Imu(object):
         linear_acceleration=geometry_msgs.Vector3(),
         linear_acceleration_covariance=[0.0 for dim0 in range(9)],
     ):
-        # LCM Type: common_msgs.SampleHeader
+        # LCM Type: std_msgs.Header
         self.header = header
         # LCM Type: geometry_msgs.Quaternion
         self.orientation = orientation
@@ -78,7 +78,7 @@ class Imu(object):
     def _encode_one(self, buf):
         assert (
             self.header._get_packed_fingerprint()
-            == common_msgs.SampleHeader._get_packed_fingerprint()
+            == std_msgs.Header._get_packed_fingerprint()
         )
         self.header._encode_one(buf)
         assert (
@@ -144,7 +144,7 @@ class Imu(object):
         newparents = parents + [cls]
         tmphash = (
             0x55C1E238541325F6
-            + common_msgs.SampleHeader._get_hash_recursive(newparents)
+            + std_msgs.Header._get_hash_recursive(newparents)
             + geometry_msgs.Quaternion._get_hash_recursive(newparents)
             + geometry_msgs.Vector3._get_hash_recursive(newparents)
             + geometry_msgs.Vector3._get_hash_recursive(newparents)

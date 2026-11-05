@@ -12,7 +12,7 @@
 # If you are interpreting this message, please check for a value of -1 in the first element of each 
 # covariance matrix, and disregard the associated estimate.
 
-common_msgs/SampleHeader header
+Header header
 
 geometry_msgs/Quaternion orientation
 float64[9] orientation_covariance # Row major about x, y, z axes

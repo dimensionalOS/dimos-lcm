@@ -8,7 +8,7 @@ local lcm = require('lcm')
 
 local geometry_msgs_Quaternion = require('geometry_msgs.Quaternion')
 local geometry_msgs_Vector3 = require('geometry_msgs.Vector3')
-local common_msgs_SampleHeader = require('common_msgs.SampleHeader')
+local std_msgs_Header = require('std_msgs.Header')
 
 local setmetatable = setmetatable
 local ipairs = ipairs
@@ -85,7 +85,7 @@ function Imu._get_hash_recursive(parents)
   table.insert(newparents, Imu)
 
   local hash = lcm._hash.new('0x55c1e238541325f6')
-    + common_msgs_SampleHeader._get_hash_recursive(newparents)
+    + std_msgs_Header._get_hash_recursive(newparents)
     + geometry_msgs_Quaternion._get_hash_recursive(newparents)
     + geometry_msgs_Vector3._get_hash_recursive(newparents)
     + geometry_msgs_Vector3._get_hash_recursive(newparents)
@@ -133,7 +133,7 @@ function Imu._decode_one(data)
 
   local obj = Imu:new()
 
-  obj.header = common_msgs_SampleHeader._decode_one(data)
+  obj.header = std_msgs_Header._decode_one(data)
   obj.orientation = geometry_msgs_Quaternion._decode_one(data)
   obj.orientation_covariance = {lcm._pack.unpack('>9d', data:read(72))}
   obj.angular_velocity = geometry_msgs_Vector3._decode_one(data)

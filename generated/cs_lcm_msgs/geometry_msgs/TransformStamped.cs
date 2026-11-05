@@ -12,7 +12,7 @@ namespace geometry_msgs
 {
     public sealed class TransformStamped : LCM.LCM.LCMEncodable
     {
-        public common_msgs.SampleHeader header;
+        public std_msgs.Header header;
         public String child_frame_id;
         public geometry_msgs.Transform transform;
  
@@ -35,7 +35,7 @@ namespace geometry_msgs
  
             classes.Add("geometry_msgs.TransformStamped");
             ulong hash = LCM_FINGERPRINT_BASE
-                 + common_msgs.SampleHeader._hashRecursive(classes)
+                 + std_msgs.Header._hashRecursive(classes)
                  + geometry_msgs.Transform._hashRecursive(classes)
                 ;
             classes.RemoveAt(classes.Count - 1);
@@ -81,7 +81,7 @@ namespace geometry_msgs
         public void _decodeRecursive(LCMDataInputStream ins)
         {
             byte[] __strbuf = null;
-            this.header = common_msgs.SampleHeader._decodeRecursiveFactory(ins);
+            this.header = std_msgs.Header._decodeRecursiveFactory(ins);
  
             __strbuf = new byte[ins.ReadInt32()-1]; ins.ReadFully(__strbuf); ins.ReadByte(); this.child_frame_id = System.Text.Encoding.GetEncoding("US-ASCII").GetString(__strbuf);
  

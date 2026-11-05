@@ -1,7 +1,7 @@
 package sensor_msgs;
 
 struct Imu {
-    common_msgs.SampleHeader header;
+    std_msgs.Header header;
     geometry_msgs.Quaternion orientation;
     double orientation_covariance[9];
     geometry_msgs.Vector3 angular_velocity;

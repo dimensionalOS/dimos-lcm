@@ -12,7 +12,7 @@ namespace sensor_msgs
 {
     public sealed class Imu : LCM.LCM.LCMEncodable
     {
-        public common_msgs.SampleHeader header;
+        public std_msgs.Header header;
         public geometry_msgs.Quaternion orientation;
         public double[] orientation_covariance;
         public geometry_msgs.Vector3 angular_velocity;
@@ -42,7 +42,7 @@ namespace sensor_msgs
  
             classes.Add("sensor_msgs.Imu");
             ulong hash = LCM_FINGERPRINT_BASE
-                 + common_msgs.SampleHeader._hashRecursive(classes)
+                 + std_msgs.Header._hashRecursive(classes)
                  + geometry_msgs.Quaternion._hashRecursive(classes)
                  + geometry_msgs.Vector3._hashRecursive(classes)
                  + geometry_msgs.Vector3._hashRecursive(classes)
@@ -102,7 +102,7 @@ namespace sensor_msgs
  
         public void _decodeRecursive(LCMDataInputStream ins)
         {
-            this.header = common_msgs.SampleHeader._decodeRecursiveFactory(ins);
+            this.header = std_msgs.Header._decodeRecursiveFactory(ins);
  
             this.orientation = geometry_msgs.Quaternion._decodeRecursiveFactory(ins);
  

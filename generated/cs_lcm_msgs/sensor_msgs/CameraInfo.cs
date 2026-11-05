@@ -13,7 +13,7 @@ namespace sensor_msgs
     public sealed class CameraInfo : LCM.LCM.LCMEncodable
     {
         public int D_length;
-        public common_msgs.SampleHeader header;
+        public std_msgs.Header header;
         public int height;
         public int width;
         public String distortion_model;
@@ -47,7 +47,7 @@ namespace sensor_msgs
  
             classes.Add("sensor_msgs.CameraInfo");
             ulong hash = LCM_FINGERPRINT_BASE
-                 + common_msgs.SampleHeader._hashRecursive(classes)
+                 + std_msgs.Header._hashRecursive(classes)
                  + sensor_msgs.RegionOfInterest._hashRecursive(classes)
                 ;
             classes.RemoveAt(classes.Count - 1);
@@ -121,7 +121,7 @@ namespace sensor_msgs
             byte[] __strbuf = null;
             this.D_length = ins.ReadInt32();
  
-            this.header = common_msgs.SampleHeader._decodeRecursiveFactory(ins);
+            this.header = std_msgs.Header._decodeRecursiveFactory(ins);
  
             this.height = ins.ReadInt32();
  

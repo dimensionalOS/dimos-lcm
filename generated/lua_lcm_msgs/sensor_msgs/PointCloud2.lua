@@ -7,7 +7,7 @@ DO NOT MODIFY BY HAND!!!!
 local lcm = require('lcm')
 
 local sensor_msgs_PointField = require('sensor_msgs.PointField')
-local common_msgs_SampleHeader = require('common_msgs.SampleHeader')
+local std_msgs_Header = require('std_msgs.Header')
 
 local setmetatable = setmetatable
 local ipairs = ipairs
@@ -79,7 +79,7 @@ function PointCloud2._get_hash_recursive(parents)
   table.insert(newparents, PointCloud2)
 
   local hash = lcm._hash.new('0xeabe7183c4d74215')
-    + common_msgs_SampleHeader._get_hash_recursive(newparents)
+    + std_msgs_Header._get_hash_recursive(newparents)
     + sensor_msgs_PointField._get_hash_recursive(newparents)
   hash:rotate(1)
 
@@ -128,7 +128,7 @@ function PointCloud2._decode_one(data)
   local obj = PointCloud2:new()
 
   obj.fields_length, obj.data_length = lcm._pack.unpack('>ii', data:read(8))
-  obj.header = common_msgs_SampleHeader._decode_one(data)
+  obj.header = std_msgs_Header._decode_one(data)
   obj.height, obj.width = lcm._pack.unpack('>ii', data:read(8))
   obj.fields = {}
   for i0 = 1, obj.fields_length do

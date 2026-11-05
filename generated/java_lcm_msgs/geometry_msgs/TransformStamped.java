@@ -12,7 +12,7 @@ import lcm.lcm.*;
  
 public final class TransformStamped implements lcm.lcm.LCMEncodable
 {
-    public common_msgs.SampleHeader header;
+    public std_msgs.Header header;
 
     public String child_frame_id;
 
@@ -37,7 +37,7 @@ public final class TransformStamped implements lcm.lcm.LCMEncodable
  
         classes.add(geometry_msgs.TransformStamped.class);
         long hash = LCM_FINGERPRINT_BASE
-             + common_msgs.SampleHeader._hashRecursive(classes)
+             + std_msgs.Header._hashRecursive(classes)
              + geometry_msgs.Transform._hashRecursive(classes)
             ;
         classes.remove(classes.size() - 1);
@@ -84,7 +84,7 @@ public final class TransformStamped implements lcm.lcm.LCMEncodable
     public void _decodeRecursive(DataInput ins) throws IOException
     {
         char[] __strbuf = null;
-        this.header = common_msgs.SampleHeader._decodeRecursiveFactory(ins);
+        this.header = std_msgs.Header._decodeRecursiveFactory(ins);
  
         __strbuf = new char[ins.readInt()-1]; for (int _i = 0; _i < __strbuf.length; _i++) __strbuf[_i] = (char) (ins.readByte()&0xff); ins.readByte(); this.child_frame_id = new String(__strbuf);
  

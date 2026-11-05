@@ -11,7 +11,7 @@
 
 #include <string>
 #include <vector>
-#include "common_msgs/SampleHeader.hpp"
+#include "std_msgs/Header.hpp"
 
 namespace sensor_msgs
 {
@@ -21,7 +21,7 @@ class Image
     public:
         int32_t    data_length;
 
-        common_msgs::SampleHeader header;
+        std_msgs::Header header;
 
         int32_t    height;
 
@@ -228,7 +228,7 @@ uint64_t Image::_computeHash(const __lcm_hash_ptr *p)
     const __lcm_hash_ptr cp = { p, Image::getHash };
 
     uint64_t hash = 0x79d36c21d3c16094LL +
-         common_msgs::SampleHeader::_computeHash(&cp);
+         std_msgs::Header::_computeHash(&cp);
 
     return (hash<<1) + ((hash>>63)&1);
 }

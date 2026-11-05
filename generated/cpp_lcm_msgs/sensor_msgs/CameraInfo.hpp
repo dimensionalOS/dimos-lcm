@@ -11,7 +11,7 @@
 
 #include <string>
 #include <vector>
-#include "common_msgs/SampleHeader.hpp"
+#include "std_msgs/Header.hpp"
 #include "sensor_msgs/RegionOfInterest.hpp"
 
 namespace sensor_msgs
@@ -22,7 +22,7 @@ class CameraInfo
     public:
         int32_t    D_length;
 
-        common_msgs::SampleHeader header;
+        std_msgs::Header header;
 
         int32_t    height;
 
@@ -274,7 +274,7 @@ uint64_t CameraInfo::_computeHash(const __lcm_hash_ptr *p)
     const __lcm_hash_ptr cp = { p, CameraInfo::getHash };
 
     uint64_t hash = 0xb4ea6258bc6d0702LL +
-         common_msgs::SampleHeader::_computeHash(&cp) +
+         std_msgs::Header::_computeHash(&cp) +
          sensor_msgs::RegionOfInterest::_computeHash(&cp);
 
     return (hash<<1) + ((hash>>63)&1);

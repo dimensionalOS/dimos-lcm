@@ -16,7 +16,7 @@ public final class PointCloud2 implements lcm.lcm.LCMEncodable
 
     public int data_length;
 
-    public common_msgs.SampleHeader header;
+    public std_msgs.Header header;
 
     public int height;
 
@@ -59,7 +59,7 @@ public final class PointCloud2 implements lcm.lcm.LCMEncodable
  
         classes.add(sensor_msgs.PointCloud2.class);
         long hash = LCM_FINGERPRINT_BASE
-             + common_msgs.SampleHeader._hashRecursive(classes)
+             + std_msgs.Header._hashRecursive(classes)
              + sensor_msgs.PointField._hashRecursive(classes)
             ;
         classes.remove(classes.size() - 1);
@@ -127,7 +127,7 @@ public final class PointCloud2 implements lcm.lcm.LCMEncodable
  
         this.data_length = ins.readInt();
  
-        this.header = common_msgs.SampleHeader._decodeRecursiveFactory(ins);
+        this.header = std_msgs.Header._decodeRecursiveFactory(ins);
  
         this.height = ins.readInt();
  

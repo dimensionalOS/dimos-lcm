@@ -5,7 +5,7 @@ struct JointState {
     int32_t position_length;
     int32_t velocity_length;
     int32_t effort_length;
-    common_msgs.SampleHeader header;
+    std_msgs.Header header;
     string name[name_length];
     double position[position_length];
     double velocity[velocity_length];

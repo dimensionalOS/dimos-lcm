@@ -1,7 +1,7 @@
 package geometry_msgs;
 
 struct TransformStamped {
-    common_msgs.SampleHeader header;
+    std_msgs.Header header;
     string child_frame_id;
     Transform transform;
 }

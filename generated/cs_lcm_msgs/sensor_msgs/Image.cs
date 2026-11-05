@@ -13,7 +13,7 @@ namespace sensor_msgs
     public sealed class Image : LCM.LCM.LCMEncodable
     {
         public int data_length;
-        public common_msgs.SampleHeader header;
+        public std_msgs.Header header;
         public int height;
         public int width;
         public String encoding;
@@ -40,7 +40,7 @@ namespace sensor_msgs
  
             classes.Add("sensor_msgs.Image");
             ulong hash = LCM_FINGERPRINT_BASE
-                 + common_msgs.SampleHeader._hashRecursive(classes)
+                 + std_msgs.Header._hashRecursive(classes)
                 ;
             classes.RemoveAt(classes.Count - 1);
             return (hash<<1) + ((hash>>63)&1);
@@ -99,7 +99,7 @@ namespace sensor_msgs
             byte[] __strbuf = null;
             this.data_length = ins.ReadInt32();
  
-            this.header = common_msgs.SampleHeader._decodeRecursiveFactory(ins);
+            this.header = std_msgs.Header._decodeRecursiveFactory(ins);
  
             this.height = ins.ReadInt32();
  

@@ -8,7 +8,7 @@ import struct
 import sys
 
 from . import *
-from lcm_msgs import common_msgs
+from lcm_msgs import std_msgs
 from .Transform import Transform
 
 
@@ -17,21 +17,18 @@ class TransformStamped(object):
 
     __slots__ = ["header", "child_frame_id", "transform"]
 
-    __typenames__ = ["common_msgs.SampleHeader", "string", "Transform"]
+    __typenames__ = ["std_msgs.Header", "string", "Transform"]
 
     __dimensions__ = [None, None, None]
 
-    header: common_msgs.SampleHeader
+    header: std_msgs.Header
     child_frame_id: "string"
     transform: Transform
 
     def __init__(
-        self,
-        header=common_msgs.SampleHeader(),
-        child_frame_id="",
-        transform=Transform(),
+        self, header=std_msgs.Header(), child_frame_id="", transform=Transform()
     ):
-        # LCM Type: common_msgs.SampleHeader
+        # LCM Type: std_msgs.Header
         self.header = header
         # LCM Type: string
         self.child_frame_id = child_frame_id
@@ -47,7 +44,7 @@ class TransformStamped(object):
     def _encode_one(self, buf):
         assert (
             self.header._get_packed_fingerprint()
-            == common_msgs.SampleHeader._get_packed_fingerprint()
+            == std_msgs.Header._get_packed_fingerprint()
         )
         self.header._encode_one(buf)
         __child_frame_id_encoded = self.child_frame_id.encode("utf-8")
@@ -101,7 +98,7 @@ class TransformStamped(object):
         newparents = parents + [cls]
         tmphash = (
             0xF694F4A6D8779002
-            + common_msgs.SampleHeader._get_hash_recursive(newparents)
+            + std_msgs.Header._get_hash_recursive(newparents)
             + Transform._get_hash_recursive(newparents)
         ) & 0xFFFFFFFFFFFFFFFF
         tmphash = (

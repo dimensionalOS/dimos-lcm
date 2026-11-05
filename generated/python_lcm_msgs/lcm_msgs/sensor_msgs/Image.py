@@ -7,7 +7,7 @@ from io import BytesIO
 import struct
 import sys
 
-from lcm_msgs import common_msgs
+from lcm_msgs import std_msgs
 
 
 class Image(object):
@@ -26,7 +26,7 @@ class Image(object):
 
     __typenames__ = [
         "int32_t",
-        "common_msgs.SampleHeader",
+        "std_msgs.Header",
         "int32_t",
         "int32_t",
         "string",
@@ -38,7 +38,7 @@ class Image(object):
     __dimensions__ = [None, None, None, None, None, None, None, ["data_length"]]
 
     data_length: "int32_t"
-    header: common_msgs.SampleHeader
+    header: std_msgs.Header
     height: "int32_t"
     width: "int32_t"
     encoding: "string"
@@ -49,7 +49,7 @@ class Image(object):
     def __init__(
         self,
         data_length=0,
-        header=common_msgs.SampleHeader(),
+        header=std_msgs.Header(),
         height=0,
         width=0,
         encoding="",
@@ -59,7 +59,7 @@ class Image(object):
     ):
         # LCM Type: int32_t
         self.data_length = data_length
-        # LCM Type: common_msgs.SampleHeader
+        # LCM Type: std_msgs.Header
         self.header = header
         # LCM Type: int32_t
         self.height = height
@@ -84,7 +84,7 @@ class Image(object):
         buf.write(struct.pack(">i", self.data_length))
         assert (
             self.header._get_packed_fingerprint()
-            == common_msgs.SampleHeader._get_packed_fingerprint()
+            == std_msgs.Header._get_packed_fingerprint()
         )
         self.header._encode_one(buf)
         buf.write(struct.pack(">ii", self.height, self.width))
@@ -136,8 +136,7 @@ class Image(object):
             return 0
         newparents = parents + [cls]
         tmphash = (
-            0x79D36C21D3C16094
-            + common_msgs.SampleHeader._get_hash_recursive(newparents)
+            0x79D36C21D3C16094 + std_msgs.Header._get_hash_recursive(newparents)
         ) & 0xFFFFFFFFFFFFFFFF
         tmphash = (
             ((tmphash << 1) & 0xFFFFFFFFFFFFFFFF) + (tmphash >> 63)

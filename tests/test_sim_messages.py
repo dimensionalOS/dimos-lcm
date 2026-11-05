@@ -23,7 +23,8 @@ class SimMessagesTest(unittest.TestCase):
         self.assertEqual([alpha.x, alpha.y, alpha.z], [4, 5, 6])
         self.assertEqual([v.x, v.y, v.z], [.1, .2, .3])
         self.assertEqual([w.x, w.y, w.z], [1, 2, 3])
-        self.assertEqual(message.joint_truth.header.lcm_encode(), message.header.lcm_encode())
+        self.assertEqual(message.joint_truth.header.stamp.sec * 10**9 +
+                         message.joint_truth.header.stamp.nsec, message.header.time_ns)
         self.assertEqual(list(message.joint_truth.position), [.25])
         self.assertEqual(list(message.joint_truth.effort), [])
         self.assertEqual(message.cbor_observations[0].key, "thermal")

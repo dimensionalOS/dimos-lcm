@@ -28,15 +28,17 @@ wire fingerprints relative to F; there is no mixed-codec compatibility.
 `common_msgs.SampleHeader` contains `clock_id`, `epoch`, `time_ns`, `source_id`,
 `sequence`, and `frame_id`. `time_ns` is acquisition time in the named clock,
 never publication or receipt time. Simulation has a unique clock ID per run,
-starts at zero, and increments epoch on reset/placement. Sequence is monotonic
-within a source/epoch; retransmission preserves it. Nested physical records share
-this acquisition. The nested `joint_truth.header` equals `WorldState.header`;
-ordinary sensor outputs carry their own acquisition header and source identity.
-JointState data fields are reused; its SampleHeader is a draft wire-format change
-from the std_msgs.Header on main, introduced earlier in this stack.
+starts at zero, and uses epoch zero for one blueprint run. A fresh episode uses
+`dimos restart`; in-place episode reset is not exposed by SimModule. Sequence is
+monotonic within a source; retransmission preserves it. Nested physical records
+share this acquisition. The nested `joint_truth.header` retains std_msgs.Header
+and encodes the same acquisition time as the outer header. Ordinary sensor and TF
+messages retain their upstream std_msgs.Header definitions and fingerprints.
+Their source is selected by blueprint stream wiring, rather than a new wire field.
 
-Compare times only within a clock and epoch. Old-epoch data cannot satisfy a
-post-reset control boundary. Generated codecs preserve int64 values, including
+Compare times only within one run clock. A restarted blueprint creates new
+module instances, sensor histories and controller bindings. Commands addressed
+to an old run clock are rejected. Generated codecs preserve int64 values, including
 values above JavaScript's safe integer range (TypeScript uses bigint).
 
 ## Optional properties
@@ -101,9 +103,8 @@ layout; bindings using that upstream layout must not be mixed with these codecs.
 
 Independent sensor modules read WorldState and produce `sensor_msgs.Imu`,
 `JointState`, `Image`/`CameraInfo`, and `PointCloud2`. Execution status is available
-through SimModule's `status()` RPC. Sensor/TF acquisition headers introduced by
-this draft require matching publisher/consumer codecs; this revision does not
-change those sensor message fingerprints again.
+through SimModule's `status()` RPC. This revision restores the existing sensor/TF
+wire contracts; SampleHeader remains specific to WorldState and ActionCommand.
 
 ## Verification
 

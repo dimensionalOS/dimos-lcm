@@ -6,7 +6,7 @@ use std::sync::OnceLock;
 
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct Image {
-    pub header: crate::common_msgs::SampleHeader,
+    pub header: crate::std_msgs::Header,
     pub height: i32,
     pub width: i32,
     pub encoding: std::string::String,
@@ -31,7 +31,7 @@ impl Image {
         }
         parents.push(self_hash);
         let mut tmphash = self_hash as u64;
-        tmphash = tmphash.wrapping_add(crate::common_msgs::SampleHeader::hash_recursive(parents));
+        tmphash = tmphash.wrapping_add(crate::std_msgs::Header::hash_recursive(parents));
         parents.pop();
         // rotate left by 1
         tmphash << 1 | tmphash >> 63
@@ -74,7 +74,7 @@ impl Image {
 
     pub fn decode_one<R: Read>(buf: &mut R) -> io::Result<Self> {
         let data_length = buf.read_i32::<BigEndian>()? as usize;
-        let header = crate::common_msgs::SampleHeader::decode_one(buf)?;
+        let header = crate::std_msgs::Header::decode_one(buf)?;
         let height = buf.read_i32::<BigEndian>()?;
         let width = buf.read_i32::<BigEndian>()?;
         let encoding = {

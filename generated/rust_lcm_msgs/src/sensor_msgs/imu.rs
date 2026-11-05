@@ -6,7 +6,7 @@ use std::sync::OnceLock;
 
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct Imu {
-    pub header: crate::common_msgs::SampleHeader,
+    pub header: crate::std_msgs::Header,
     pub orientation: crate::geometry_msgs::Quaternion,
     pub orientation_covariance: [f64; 9],
     pub angular_velocity: crate::geometry_msgs::Vector3,
@@ -31,7 +31,7 @@ impl Imu {
         }
         parents.push(self_hash);
         let mut tmphash = self_hash as u64;
-        tmphash = tmphash.wrapping_add(crate::common_msgs::SampleHeader::hash_recursive(parents));
+        tmphash = tmphash.wrapping_add(crate::std_msgs::Header::hash_recursive(parents));
         tmphash = tmphash.wrapping_add(crate::geometry_msgs::Quaternion::hash_recursive(parents));
         tmphash = tmphash.wrapping_add(crate::geometry_msgs::Vector3::hash_recursive(parents));
         tmphash = tmphash.wrapping_add(crate::geometry_msgs::Vector3::hash_recursive(parents));
@@ -76,7 +76,7 @@ impl Imu {
     }
 
     pub fn decode_one<R: Read>(buf: &mut R) -> io::Result<Self> {
-        let header = crate::common_msgs::SampleHeader::decode_one(buf)?;
+        let header = crate::std_msgs::Header::decode_one(buf)?;
         let orientation = crate::geometry_msgs::Quaternion::decode_one(buf)?;
         let orientation_covariance = {
             let mut _arr_0 = [0.0f64; 9];

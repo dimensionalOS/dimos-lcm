@@ -10,7 +10,7 @@
 #include <lcm/lcm_coretypes.h>
 
 #include <string>
-#include "common_msgs/SampleHeader.hpp"
+#include "std_msgs/Header.hpp"
 #include "geometry_msgs/Transform.hpp"
 
 namespace geometry_msgs
@@ -19,7 +19,7 @@ namespace geometry_msgs
 class TransformStamped
 {
     public:
-        common_msgs::SampleHeader header;
+        std_msgs::Header header;
 
         std::string child_frame_id;
 
@@ -175,7 +175,7 @@ uint64_t TransformStamped::_computeHash(const __lcm_hash_ptr *p)
     const __lcm_hash_ptr cp = { p, TransformStamped::getHash };
 
     uint64_t hash = 0xf694f4a6d8779002LL +
-         common_msgs::SampleHeader::_computeHash(&cp) +
+         std_msgs::Header::_computeHash(&cp) +
          geometry_msgs::Transform::_computeHash(&cp);
 
     return (hash<<1) + ((hash>>63)&1);
